@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TCustomTKDevice" Collapsed="true">
+    <Position X="2.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAEDASIAQAAACggBAQACAjACAAAAAgAQAAAIgAg=</HashCode>
+      <FileName>TestDevices.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.CustomTagTest" Collapsed="true">
+    <Position X="5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAAABAAAEAAAAAAAAAAAAAAQAAACEA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.Tools" Collapsed="true">
+    <Position X="14.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Tools.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7CustomGroup" Collapsed="true">
+    <Position X="6.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupCOMM" Collapsed="true">
+    <Position X="3" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AFAAAAAAAgQAAAAAAAAAAAAAAAAACAgAEAAAAAAAAgE=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupWIPStations" Collapsed="true">
+    <Position X="9.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.WIPStation" Collapsed="true">
+    <Position X="16.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQIwAAgYCAEAEABWAEBAAhACAABABAIQJgAgAIiAQgE=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupProperty" Collapsed="true">
+    <Position X="5.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupStagnation" Collapsed="true">
+    <Position X="12" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAE=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupEquipmentFail" Collapsed="true">
+    <Position X="0.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIEAAAAgAEAAAAAQACAAAAAAAAAAAACAAABAAgA=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupSafetyProblem" Collapsed="true">
+    <Position X="7.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.CustomLengthTagTest">
+    <Position X="4" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.BoolOfTag" Collapsed="true">
+    <Position X="9.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAAgAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.ArrayCharOfTag" Collapsed="true">
+    <Position X="2.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.ByteOfTag" Collapsed="true">
+    <Position X="5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.DWordOfTag" Collapsed="true">
+    <Position X="7.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.WordOfTag" Collapsed="true">
+    <Position X="0.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.HMETurnTable">
+    <Position X="0.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAACAAAAAACAAAAAAAAAAIAAAAIAAA=</HashCode>
+      <FileName>TestDevices.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.HMEFlash">
+    <Position X="2.75" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAABAAAAAAACAAAAAACAAAAAAAAAAIAAIAIACE=</HashCode>
+      <FileName>TestDevices.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.SiemensPLC_Test" Collapsed="true">
+    <Position X="16.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQTAAEhACAAAEkAAAAAAIQASQAAAcAAIAhAAAACAAA=</HashCode>
+      <FileName>SiemensPLC_Test.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.CustomDeviceTest" Collapsed="true">
+    <Position X="14.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAIAACAAACAAACAgAAAAQAQCBAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>CustomDevicesTest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.M0100">
+    <Position X="5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQIAAAAAAAAAAAACAAAAAACCAAAAAAAAAIAABCIAAE=</HashCode>
+      <FileName>TestDevices.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.TS7GroupWIPOntoLine">
+    <Position X="2" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAIAAABAgAAAACAAAAIEAIQAAAAEAAAA=</HashCode>
+      <FileName>TS7TagGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.PLCGateway.Siemens.Test.RealOfTag">
+    <Position X="10.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>TestTags.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="IRAP.BL.PLCGateway.Siemens.Test.SiemensRegisterType" Collapsed="true">
+    <Position X="16.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIgABA=</HashCode>
+      <FileName>PLCEnums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="IRAP.BL.PLCGateway.Siemens.Test.TagGroupType" Collapsed="true">
+    <Position X="14.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAAAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PLCEnums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="IRAP.BL.PLCGateway.Siemens.Test.PLCType" Collapsed="true">
+    <Position X="14.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PLCEnums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Delegate Name="IRAP.BL.PLCGateway.Siemens.Test.DBDataChangedHandler" Collapsed="true">
+    <Position X="14.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Delegates.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="IRAP.BL.PLCGateway.Siemens.Test.S7WriteBackHandler" Collapsed="true">
+    <Position X="16.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>Delegates.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

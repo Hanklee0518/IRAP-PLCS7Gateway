@@ -1,153 +1,322 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTag" Collapsed="true">
-    <Position X="6" Y="0.5" Width="1.5" />
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTagGroup">
+    <Position X="16" Y="9" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAgAAAAAAABAAAEAAAAAAAAAAAAAAQAAACEA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+      <NewMemberFileName>Entities\TagGroupsForSiemensPLC.cs</NewMemberFileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.ArrayCharOfTag" Collapsed="true">
-    <Position X="1.5" Y="3.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTagGroupCreator">
+    <Position X="53" Y="4" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomCreators.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.BoolOfTag" Collapsed="true">
-    <Position X="10.5" Y="1.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTagGroupCreator">
+    <Position X="53" Y="6" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAgAAAAAAAAAAAAAgAAAAAgAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensCreators.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.ByteOfTag" Collapsed="true">
-    <Position X="8.25" Y="3.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTagGroup">
+    <Position X="15.25" Y="6" Width="3.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAIQQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.DWordOfTag" Collapsed="true">
-    <Position X="3.75" Y="3.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomPLCCreator">
+    <Position X="50.25" Y="4" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomCreators.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.WordOfTag" Collapsed="true">
-    <Position X="6" Y="3.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensPLCCreator">
+    <Position X="49.75" Y="5.75" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensCreators.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.CustomLengthTag">
-    <Position X="5" Y="1.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.PLCContainer">
+    <Position X="46.75" Y="2.25" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Entities\Tags.cs</FileName>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAAAAIAAQAAAAAAAAQI=</HashCode>
+      <FileName>Entities\PLCContainer.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupCOMM" Collapsed="true">
-    <Position X="14.75" Y="0.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.IRAPBaseObject">
+    <Position X="31.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AFAAAAAAAgQAAAAAAAAAAAAAAAAACAgAEAAAAAAAAgE=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\IRAPBaseObject.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupWIPStations" Collapsed="true">
-    <Position X="13" Y="2.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomPLC" Collapsed="true">
+    <Position X="2" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensPLC">
+    <Position X="1.5" Y="5.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAQBAAAAAAAAAAgAAAAIQIAAAAAAAAAAAAAAAAACAwI=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomDevice">
+    <Position X="4.75" Y="4" Width="3" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAEAAAAAAAAAAAAAQIAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensDevice">
+    <Position X="4.5" Y="7" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAACAAAAAIBAQCAAAAAAAAAAgEAAAIAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomDeviceCreator">
+    <Position X="59.75" Y="4" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomCreators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensDeviceCreator">
+    <Position X="59.75" Y="6" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensCreators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTag">
+    <Position X="36" Y="4" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAIAAAAAAAAQQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomSubTagGroup">
+    <Position X="12.25" Y="6" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTagCreator">
+    <Position X="56.5" Y="4" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomCreators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTagCreator">
+    <Position X="56.5" Y="6" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensCreators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTagGroupCollection">
+    <Position X="23.75" Y="4" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAACAAAAIAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomCreator">
+    <Position X="55.25" Y="2.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <FileName>Entities\CustomCreators.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.WIPStation" Collapsed="true">
-    <Position X="14.75" Y="2.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomProduct">
+    <Position X="23" Y="2.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQIwAAgYCAEAEABWAEBAAhACAABABAIQJgAgAIiAQgE=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.SiemensPLC" Collapsed="true">
-    <Position X="13" Y="0.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomSubTagGroupCollection">
+    <Position X="19.25" Y="4" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AAQTAAEhACAAAAkAAAAAAIAASAAAAcAAIAhAAAACAAA=</HashCode>
-      <FileName>SiemensPLC.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAACAAAAIAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TCustomTKDevice" Collapsed="true">
-    <Position X="2.5" Y="5.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomTagCollection">
+    <Position X="8.5" Y="4" Width="3" />
     <TypeIdentifier>
-      <HashCode>EAAAAAEDASIAAAAACggBAQACAjACAAAAAAAQAAAIgAg=</HashCode>
-      <FileName>Entities\TTKDevices.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAQAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.HMETurnTable" Collapsed="true">
-    <Position X="3.5" Y="6.75" Width="1.5" />
-    <Members>
-      <Method Name="DealWithRequestForPokaYoke" Hidden="true" />
-    </Members>
+  <Class Name="IRAP.BL.S7Gateway.Entities.CustomGroup">
+    <Position X="14.25" Y="4" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAAAAAAAAAACAAAAAACAAAAAAAAAAIAAAAIAAA=</HashCode>
-      <FileName>Entities\TTKDevices.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.HMEFlash" Collapsed="true">
-    <Position X="1.25" Y="6.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTagGroupCollection">
+    <Position X="24.25" Y="7.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAAAABAAAAAAACAAAAAACAAAAAAAAAAIAAIAIACE=</HashCode>
-      <FileName>Entities\TTKDevices.cs</FileName>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupProperty" Collapsed="true">
-    <Position X="13" Y="1.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTagCollection">
+    <Position X="8.75" Y="6.75" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupStagnation" Collapsed="true">
-    <Position X="16.5" Y="1.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensTag">
+    <Position X="36.25" Y="7.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAE=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupEquipmentFail" Collapsed="true">
-    <Position X="16.5" Y="0.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensBoolOfTag">
+    <Position X="28" Y="9.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAIEAAAAgAEAAAAAQACAAAAAAAAAAAACAAABAAgA=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAgAAAAAABAAAAAAgAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.Entities.TS7GroupSafetyProblem" Collapsed="true">
-    <Position X="14.75" Y="1.5" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensLengthTag">
+    <Position X="37.5" Y="9.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Entities\TS7Groups.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Enum Name="IRAP.BL.S7Gateway.Enums.S7RegisterType" Collapsed="true">
-    <Position X="13" Y="3.75" Width="1.5" />
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensWordOfTag">
+    <Position X="41.5" Y="11.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIgABA=</HashCode>
-      <FileName>S7Enums.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensByteOfTag">
+    <Position X="44.25" Y="11.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensIntOfTag">
+    <Position X="39" Y="11.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensDWordOfTag">
+    <Position X="36.25" Y="11.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensRealOfTag">
+    <Position X="33.75" Y="11.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensArrayCharOfTag">
+    <Position X="30.75" Y="11.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensSubTagGroup">
+    <Position X="12.25" Y="8.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.SiemensSubTagGroupCollection">
+    <Position X="19.75" Y="7.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\SiemensProducts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.CS7TcpClient" Collapsed="true">
+    <Position X="63.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAQAAAUAAAhAAAAAQgJQgAQAAARAIcAkAAACgAAAAAA=</HashCode>
+      <FileName>Utils\CS7Tcp.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.Entities.PLCDBReadBlock" Collapsed="true">
+    <Position X="65" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAQAAABAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>Entities\PLCDBReadBlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="IRAP.BL.S7Gateway.Enums.PLCType" Collapsed="true">
+    <Position X="63.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Enums\PLCEnums.cs</FileName>
     </TypeIdentifier>
   </Enum>
-  <Delegate Name="IRAP.BL.S7Gateway.DBDataChangedHandler" Collapsed="true">
-    <Position X="13" Y="4.75" Width="1.5" />
+  <Enum Name="IRAP.BL.S7Gateway.Enums.SiemensCycleReadMode" Collapsed="true">
+    <Position X="65" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgEAAAAAAA=</HashCode>
+      <FileName>Enums\SiemensEnums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="IRAP.BL.S7Gateway.Enums.SiemensRegisterType" Collapsed="true">
+    <Position X="63.25" Y="2.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIgABA=</HashCode>
+      <FileName>Enums\SiemensEnums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Delegate Name="IRAP.BL.S7Gateway.SiemensDBDataChangedHandler" Collapsed="true">
+    <Position X="63.25" Y="3.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Delegates.cs</FileName>
+      <FileName>Delegates\SiemensDelegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
-  <Delegate Name="IRAP.BL.S7Gateway.S7WriteBackHandler" Collapsed="true">
-    <Position X="14.75" Y="4.75" Width="1.5" />
+  <Delegate Name="IRAP.BL.S7Gateway.SiemensWriteBackHandler" Collapsed="true">
+    <Position X="65" Y="3.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
-      <FileName>Delegates.cs</FileName>
+      <HashCode>AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>Delegates\SiemensDelegates.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="IRAP.BL.S7Gateway.TagRegisterHandler" Collapsed="true">
+    <Position X="63.25" Y="4.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Delegates\PLCDelegates.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Font Name="Microsoft YaHei UI" Size="9" />

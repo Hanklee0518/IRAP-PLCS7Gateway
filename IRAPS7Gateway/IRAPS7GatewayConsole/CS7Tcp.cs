@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IRAP.BL.S7Gateway
+namespace IRAPS7GatewayConsole
 {
     public class CS7TcpClient
     {

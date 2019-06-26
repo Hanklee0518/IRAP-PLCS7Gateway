@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace IRAP.BL.S7Gateway.Entities
+namespace IRAP.BL.PLCGateway.Siemens.Test
 {
-    public class TS7GroupCOMM
+    public class TS7CustomGroup
+    {
+    }
+
+    public class TS7GroupCOMM : TS7CustomGroup
     {
         public TS7GroupCOMM()
         {
             Equipment_Running_Mode = new BoolOfTag()
             {
-                TagName="Equipment_Running_Mode",
+                TagName = "Equipment_Running_Mode",
             };
             Domination_Status = new BoolOfTag()
             {
@@ -66,7 +70,7 @@ namespace IRAP.BL.S7Gateway.Entities
         public BoolOfTag MES_Heart_Beat { get; private set; }
     }
 
-    public class TS7GroupWIPStations
+    public class TS7GroupWIPStations : TS7CustomGroup
     {
 
     }
@@ -191,7 +195,7 @@ namespace IRAP.BL.S7Gateway.Entities
         public string Prefix { get; set; }
     }
 
-    public class TS7GroupProperty
+    public class TS7GroupProperty : TS7CustomGroup
     {
         public TS7GroupProperty()
         {
@@ -201,14 +205,14 @@ namespace IRAP.BL.S7Gateway.Entities
         public BoolOfTag Equipment_End_Definition { get; private set; }
     }
 
-    public class TS7GroupStagnation
+    public class TS7GroupStagnation : TS7CustomGroup
     {
         public DWordOfTag Time_In_Seconds { get; private set; } = new DWordOfTag();
 
         public WordOfTag Threshold { get; private set; } = new WordOfTag();
     }
 
-    public class TS7GroupEquipmentFail
+    public class TS7GroupEquipmentFail : TS7CustomGroup
     {
         public DWordOfTag Equipment_Failures_Group_1 { get; private set; } = new DWordOfTag();
 
@@ -229,8 +233,104 @@ namespace IRAP.BL.S7Gateway.Entities
         public ArrayCharOfTag Failure_Code { get; private set; } = new ArrayCharOfTag(10);
     }
 
-    public class TS7GroupSafetyProblem
+    public class TS7GroupSafetyProblem : TS7CustomGroup
     {
         public ByteOfTag Safety_Issue_Type { get; private set; } = new ByteOfTag();
+    }
+
+    public class TS7GroupWIPOntoLine : TS7CustomGroup
+    {
+        public ArrayCharOfTag WIP_Src_Code { get; private set; } = new ArrayCharOfTag(20);
+        public ArrayCharOfTag WIP_ID_Code { get; private set; } = new ArrayCharOfTag(80);
+        public ArrayCharOfTag Container_Number_pallet_code { get; private set; } = new ArrayCharOfTag(8);
+        public ByteOfTag Number_of_Sub_WIPs { get; private set; } = new ByteOfTag();
+        public ArrayCharOfTag WIP_Code_01 { get; private set; } = new ArrayCharOfTag(20);
+        public ArrayCharOfTag WIP_ID_Type_Code_01 { get; private set; } = new ArrayCharOfTag(2);
+        public ArrayCharOfTag WIP_ID_Code_01 { get; private set; } = new ArrayCharOfTag(80);
+        public ArrayCharOfTag PWO_Number_01 { get; private set; } = new ArrayCharOfTag(18);
+        public ArrayCharOfTag Product_number_01 { get; private set; } = new ArrayCharOfTag(40);
+        public ArrayCharOfTag Sub_Container_Number_01 { get; private set; } = new ArrayCharOfTag(8);
+        public DWordOfTag WIP_Quantity_01 { get; private set; } = new DWordOfTag();
+    }
+
+    public class TS7GroupFEEDING : TS7CustomGroup
+    {
+        public ArrayCharOfTag Material_Track_ID { get; private set; } = new ArrayCharOfTag(80);
+        public ArrayCharOfTag Slot_Number { get; private set; } = new ArrayCharOfTag(6);
+        public ByteOfTag Request_For_Poka_Yoke { get; private set; } = new ByteOfTag();
+        public DWordOfTag Poka_Yoke_Result { get; private set; } = new DWordOfTag();
+    }
+
+    public class TS7GroupUNFEEDING : TS7CustomGroup
+    {
+        public ArrayCharOfTag Material_Track_ID { get; private set; } = new ArrayCharOfTag(80);
+        public ArrayCharOfTag Slot_Number { get; private set; } = new ArrayCharOfTag(6);
+        public DWordOfTag Unfeeding_Quantity { get; private set; } = new DWordOfTag();
+        public ByteOfTag Unfeeding_End { get; private set; } = new ByteOfTag();
+    }
+
+    public class TS7GroupIDBinding : TS7CustomGroup
+    {
+        public ArrayCharOfTag Primary_WIP_Code { get; private set; } = new ArrayCharOfTag(20);
+        public ArrayCharOfTag Product_Number { get; private set; } = new ArrayCharOfTag(40);
+        public ArrayCharOfTag ID_Part_SN_Scanner_Code_01 { get; private set; } = new ArrayCharOfTag(80);
+        public IntOfTag Part_Number_Feedback_01 { get; private set; } = new IntOfTag();
+        public IntOfTag Sequence_Number_01 { get; private set; } = new IntOfTag();
+    }
+
+    public class TS7GroupPropertyM0100 : TS7CustomGroup
+    {
+        public IntOfTag Tighten1_Result { get; private set; } = new IntOfTag();
+        public IntOfTag Tighten1_PGNO { get; private set; } = new IntOfTag();
+        public RealOfTag Tighten1_MinTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten1_Torque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten1_MaxTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten1_MinAngle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten1_Angle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten1_MaxAngle { get; private set; } = new RealOfTag();
+        public IntOfTag Tighten2_Result { get; private set; } = new IntOfTag();
+        public IntOfTag Tighten2_PGNO { get; private set; } = new IntOfTag();
+        public RealOfTag Tighten2_MinTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten2_Torque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten2_MaxTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten2_MinAngle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten2_Angle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten2_MaxAngle { get; private set; } = new RealOfTag();
+        public IntOfTag Tighten3_Result { get; private set; } = new IntOfTag();
+        public IntOfTag Tighten3_PGNO { get; private set; } = new IntOfTag();
+        public RealOfTag Tighten3_MinTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten3_Torque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten3_MaxTorque { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten3_MinAngle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten3_Angle { get; private set; } = new RealOfTag();
+        public RealOfTag Tighten3_MaxAngle { get; private set; } = new RealOfTag();
+        public IntOfTag StationRecord_MachineCycle { get; private set; } = new IntOfTag();
+        public ArrayCharOfTag StationRecord_WorkerID { get; private set; } = new ArrayCharOfTag(10);
+        public ArrayCharOfTag StationRecord_TrayNum { get; private set; } = new ArrayCharOfTag(10);
+        public ArrayCharOfTag StationRecord_Time1 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time2 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time3 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time4 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time5 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time6 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time7 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time8 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time9 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time10 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time11 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time12 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time13 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time14 { get; private set; } = new ArrayCharOfTag(12);
+        public ArrayCharOfTag StationRecord_Time15 { get; private set; } = new ArrayCharOfTag(12);
+        public IntOfTag StationRecord_Check1 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check2 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check3 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check4 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check5 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check6 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check7 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check8 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check9 { get; private set; } = new IntOfTag();
+        public IntOfTag StationRecord_Check10 { get; private set; } = new IntOfTag();
     }
 }

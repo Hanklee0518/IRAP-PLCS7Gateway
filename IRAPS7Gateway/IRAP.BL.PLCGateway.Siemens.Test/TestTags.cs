@@ -1,13 +1,11 @@
-﻿using IRAP.BL.S7Gateway.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace IRAP.BL.S7Gateway.Entities
+namespace IRAP.BL.PLCGateway.Siemens.Test
 {
-    public class CustomTag
+    public abstract class CustomTagTest
     {
         private uint db_Offset = 0;
 
@@ -18,7 +16,7 @@ namespace IRAP.BL.S7Gateway.Entities
 
         public string TagName { get; set; } = "";
 
-        public S7RegisterType DB_Type { get; set; } = S7RegisterType.DB;
+        public SiemensRegisterType DB_Type { get; set; } = SiemensRegisterType.DB;
 
         /// <summary>
         /// 偏移量
@@ -47,7 +45,7 @@ namespace IRAP.BL.S7Gateway.Entities
         }
     }
 
-    public abstract class CustomLengthTag : CustomTag
+    public abstract class CustomLengthTagTest : CustomTagTest
     {
         /// <summary>
         /// 数据长度
@@ -55,25 +53,7 @@ namespace IRAP.BL.S7Gateway.Entities
         public abstract int Length { get; }
     }
 
-    public class ArrayCharOfTag : CustomLengthTag
-    {
-        private int length;
-
-        /// <param name="length">字符串长度</param>
-        public ArrayCharOfTag(int length)
-        {
-            this.length = length;
-        }
-
-        public override int Length => length;
-
-        /// <summary>
-        /// 值
-        /// </summary>
-        public string Value { get; set; }
-    }
-
-    public class BoolOfTag : CustomTag
+    public class BoolOfTag : CustomTagTest
     {
         /// <summary>
         /// 位置
@@ -92,7 +72,25 @@ namespace IRAP.BL.S7Gateway.Entities
         }
     }
 
-    public class ByteOfTag : CustomLengthTag
+    public class ArrayCharOfTag : CustomLengthTagTest
+    {
+        private int length;
+
+        /// <param name="length">字符串长度</param>
+        public ArrayCharOfTag(int length)
+        {
+            this.length = length;
+        }
+
+        public override int Length => length;
+
+        /// <summary>
+        /// 值
+        /// </summary>
+        public string Value { get; set; }
+    }
+
+    public class ByteOfTag : CustomLengthTagTest
     {
         public override int Length => 1;
 
@@ -102,7 +100,7 @@ namespace IRAP.BL.S7Gateway.Entities
         public byte Value { get; set; }
     }
 
-    public class DWordOfTag : CustomLengthTag
+    public class DWordOfTag : CustomLengthTagTest
     {
         public override int Length => 4;
 
@@ -112,7 +110,27 @@ namespace IRAP.BL.S7Gateway.Entities
         public long Value { get; set; }
     }
 
-    public class WordOfTag : CustomLengthTag
+    public class WordOfTag : CustomLengthTagTest
+    {
+        public override int Length => 2;
+
+        /// <summary>
+        /// 值
+        /// </summary>
+        public int Value { get; set; }
+    }
+
+    public class RealOfTag : CustomLengthTagTest
+    {
+        public override int Length => 4;
+
+        /// <summary>
+        /// 值
+        /// </summary>
+        public float Value { get; set; }
+    }
+
+    public class IntOfTag : CustomLengthTagTest
     {
         public override int Length => 2;
 

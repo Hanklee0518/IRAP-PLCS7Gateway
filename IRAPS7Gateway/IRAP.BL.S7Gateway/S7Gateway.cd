@@ -266,7 +266,7 @@
   <Class Name="IRAP.BL.S7Gateway.CS7TcpClient" Collapsed="true">
     <Position X="63.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>BAQAAAUAAAhAAAAAQgJQgAQAAARAIcAkAAACgAAAAAA=</HashCode>
+      <HashCode>BAQAAAUAAAhAAAAAQgJQgAQAAARAIcAgAAACgAAAAAA=</HashCode>
       <FileName>Utils\CS7Tcp.cs</FileName>
     </TypeIdentifier>
   </Class>

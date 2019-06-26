@@ -13,7 +13,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 起始偏移量
         /// </summary>
-        public uint Start_Offset { get; private set; }
+        public int Start_Offset { get; private set; }
 
         /// <summary>
         /// 长度
@@ -25,7 +25,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="offset">起始偏移量</param>
         /// <param name="length">长度</param>
-        public void Set(uint offset, int length)
+        public void Set(int offset, int length)
         {
             Start_Offset = offset;
             BufferLength = length;
@@ -36,7 +36,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="offset">偏移量</param>
         /// <param name="length">长度</param>
-        public void Add(uint offset, int length)
+        public void Add(int offset, int length)
         {
             if (BufferLength == 0)
             {

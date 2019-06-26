@@ -377,7 +377,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 数据块中的地址偏移量
         /// </summary>
-        public uint DB_Offset { get; protected set; } = 0;
+        public int DB_Offset { get; protected set; } = 0;
     }
 
     /// <summary>

@@ -340,7 +340,7 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 try
                 {
-                    DBNumber = uint.Parse(node.Attributes["DBNumber"].Value);
+                    DBNumber = int.Parse(node.Attributes["DBNumber"].Value);
                 }
                 catch
                 {
@@ -423,7 +423,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 数据块号
         /// </summary>
-        public uint DBNumber { get; private set; } = 0;
+        public int DBNumber { get; private set; } = 0;
 
         /// <summary>
         /// 数据轮询读取模式
@@ -682,11 +682,11 @@ namespace IRAP.BL.S7Gateway.Entities
                 throw new Exception($"{Name}节点中未找到[Offset]属性，请注意属性名的大小写");
             }
             string[] offsets = node.Attributes["Offset"].Value.Split('.');
-            uint.TryParse(offsets[0], out uint offset);
+            int.TryParse(offsets[0], out int offset);
             DB_Offset = offset;
             if (offsets.Length >= 2)
             {
-                uint.TryParse(offsets[1], out uint pos);
+                int.TryParse(offsets[1], out int pos);
                 Position = pos;
             }
             _log.Trace($"创建Tag[{Name}],Offset={DB_Offset},Position={Position}");
@@ -695,7 +695,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 位置
         /// </summary>
-        public uint Position { get; private set; } = 0;
+        public int Position { get; private set; } = 0;
 
         /// <summary>
         /// 值
@@ -712,7 +712,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="offset">数据块偏移量</param>
         /// <param name="position">取值的字节位</param>
-        public void SetPosition(uint offset, uint position)
+        public void SetPosition(int offset, int position)
         {
             DB_Offset = offset;
             Position = position;
@@ -737,7 +737,7 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 throw new Exception($"{Name}节点中未找到[Offset]属性，请注意属性名的大小写");
             }
-            uint.TryParse(node.Attributes["Offset"].Value, out uint offset);
+            int.TryParse(node.Attributes["Offset"].Value, out int offset);
             DB_Offset = offset;
         }
     }
@@ -796,7 +796,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值
         /// </summary>
-        public int Value { get; set; } = 0;
+        public ushort Value { get; set; } = 0;
     }
 
     /// <summary>
@@ -824,7 +824,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值
         /// </summary>
-        public int Value { get; set; } = 0;
+        public short Value { get; set; } = 0;
     }
 
     /// <summary>
@@ -852,7 +852,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值
         /// </summary>
-        public long Value { get; set; } = 0;
+        public uint Value { get; set; } = 0;
     }
 
     /// <summary>

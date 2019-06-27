@@ -207,40 +207,28 @@ namespace IRAP.BL.S7Gateway.Entities
                             {
                                 SiemensDevice siemensDevice = device as SiemensDevice;
 
+                                #region 根据轮询间隔时间读取PLC数据块内容
+                                TimeSpan timeSpan = now - siemensDevice.LastReadTime;
                                 int dbType = (int)siemensDevice.DBType;
-                               
-                                switch (siemensDevice.CycleReadMode)
+                                if (timeSpan.TotalMilliseconds >= siemensDevice.SplitterTime)
                                 {
-                                    case SiemensCycleReadMode.FullBlock:
-                                        buffer = new byte[siemensDevice.FullBlock.BufferLength];
-                                        int resNo =
-                                            CS7TcpClient.ReadBlockAsByte(
-                                                plcHandle,
-                                                dbType,
-                                                siemensDevice.DBNumber,
-                                                siemensDevice.FullBlock.Start_Offset,
-                                                siemensDevice.FullBlock.BufferLength,
-                                                buffer);
+                                    switch (siemensDevice.CycleReadMode)
+                                    {
+                                        case SiemensCycleReadMode.FullBlock:
+                                            FullBlockModeRead(dbType, siemensDevice);
+                                            break;
+                                        case SiemensCycleReadMode.ControlBlock:
+                                            ControlBlockModeRead(dbType, siemensDevice);
+                                            break;
+                                    }
 
-                                        if (resNo != 0)
-                                        {
-                                            _log.Error(
-                                                $"设备[{siemensDevice.Name}]" +
-                                                $"读取[{siemensDevice.DBType}]" +
-                                                $"[{siemensDevice.DBNumber}]失败，失败信息：" +
-                                                $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
-                                            isConnected = false;
-                                            continue;
-                                        }
-                                        else
-                                        {
-                                            siemensDevice.DoSomething(buffer);
-                                        }
-
-                                        break;
-                                    case SiemensCycleReadMode.ControlBlock:
-                                        break;
+                                    siemensDevice.LastReadTime = now;
                                 }
+                                #endregion
+
+                                #region 每隔2秒钟，向PLC发送当前设备的MESHeartBeat信号
+                                KeepMESHeartBeat(now, dbType, siemensDevice);
+                                #endregion
                             }
                         }
                     }
@@ -263,6 +251,112 @@ namespace IRAP.BL.S7Gateway.Entities
             Thread thread = new Thread(CycleReadBuffer);
             thread.Start();
         }
+
+        /// <summary>
+        /// 数据块全部内容模式读取
+        /// </summary>
+        /// <param name="dbType">数据块类别标识</param>
+        /// <param name="device">SiemensDevice对象</param>
+        private void FullBlockModeRead(
+            int dbType,
+            SiemensDevice device)
+        {
+            byte[] buffer = new byte[device.FullBlock.BufferLength];
+            int resNo =
+                CS7TcpClient.ReadBlockAsByte(
+                    plcHandle,
+                    dbType,
+                    device.DBNumber,
+                    device.FullBlock.Start_Offset,
+                    device.FullBlock.BufferLength,
+                    buffer);
+
+            if (resNo != 0)
+            {
+                _log.Error(
+                    $"设备[{device.Name}]" +
+                    $"读取[{device.DBType}]" +
+                    $"[{device.DBNumber}]失败，失败信息：" +
+                    $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
+                isConnected = false;
+                return;
+            }
+            else
+            {
+                device.DoSomething(buffer);
+            }
+        }
+
+        /// <summary>
+        /// 控制信号数据块模式读取
+        /// </summary>
+        /// <param name="dbType">数据块类别标识</param>
+        /// <param name="device">SiemensDevice对象</param>
+        private void ControlBlockModeRead(
+            int dbType,
+            SiemensDevice device)
+        {
+            byte[] buffer;
+            for (int i = 0; i < device.ControlBlock.Count; i++)
+            {
+                buffer = new byte[device.ControlBlock[i].BufferLength];
+                int resNo =
+                    CS7TcpClient.ReadBlockAsByte(
+                        plcHandle,
+                        dbType,
+                        device.DBNumber,
+                        device.ControlBlock[i].Start_Offset,
+                        device.ControlBlock[i].BufferLength,
+                        buffer);
+
+                if (resNo != 0)
+                {
+                    _log.Error(
+                        $"设备[{device.Name}]" +
+                        $"读取[{device.DBType}]" +
+                        $"[{device.DBNumber}]失败，失败信息：" +
+                        $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
+                    isConnected = false;
+                    return;
+                }
+                else
+                {
+                    device.DoSomething(device.ControlBlock.GetKey(i), buffer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 保持每两秒中发送一次MESHeartBeat信号
+        /// </summary>
+        /// <param name="now">线程本次执行的瞬时时间</param>
+        /// <param name="dbType">数据块类别标识</param>
+        /// <param name="device">SiemensDevice对象</param>
+        private void KeepMESHeartBeat(
+            DateTime now,
+            int dbType,
+            SiemensDevice device)
+        {
+            TimeSpan timeSpan = now - device.LastMESHearBeatTime;
+            if (timeSpan.TotalMilliseconds >= 2000)
+            {
+                CustomTag tag = device.FindTag("COMM", "MES_Heart_Beat");
+                if (tag != null && tag is SiemensBoolOfTag)
+                {
+                    SiemensBoolOfTag heartBeatTag = tag as SiemensBoolOfTag;
+                    heartBeatTag.Value = !heartBeatTag.Value;
+                    CS7TcpClient.WriteBool(
+                        plcHandle,
+                        dbType,
+                        device.DBNumber,
+                        heartBeatTag.DB_Offset,
+                        heartBeatTag.Position,
+                        heartBeatTag.Value);
+                }
+
+                device.LastMESHearBeatTime = now;
+            }
+        }
     }
 
     /// <summary>
@@ -277,7 +371,8 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 控制量数据块列表
         /// </summary>
-        public List<PLCDBReadBlock> ControlBlock { get; private set; } = new List<PLCDBReadBlock>();
+        public PLCDBReadBlockCollection ControlBlock { get; private set; } =
+            new PLCDBReadBlockCollection();
 
         /// <summary>
         /// 构造方法
@@ -374,6 +469,20 @@ namespace IRAP.BL.S7Gateway.Entities
                         $"{node.Name}.{Name}节点中[CycleReadMode]属性值错误，只支持[{enumValues}]");
                 }
             }
+
+            if (node.Attributes["SplitterTime"] != null)
+            {
+                try
+                {
+                    SplitterTime = short.Parse(node.Attributes["SplitterTime"].Value);
+                }
+                catch (Exception error)
+                {
+                    _log.Error(
+                        $"{node.Name}.{Name}节点中[SplitterTime]属性值错误，使用缺省10毫秒",
+                        error);
+                }
+            }
             #endregion
 
             _log.Trace(
@@ -442,8 +551,9 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag对象注册事件
         /// </summary>
+        /// <param name="group">TagGroup对象</param>
         /// <param name="tag">Tag对象</param>
-        public void OnTagRegister(CustomTag tag)
+        public void OnTagRegister(CustomGroup group, CustomTag tag)
         {
             _log.Trace($"Device[{Name}]:Tag[{tag.Name}],Offset[{tag.DB_Offset}]");
 
@@ -459,6 +569,27 @@ namespace IRAP.BL.S7Gateway.Entities
                     FullBlock.Add(siemensTag.DB_Offset, siemensTag.Length);
                     break;
                 case SiemensCycleReadMode.ControlBlock:
+                    if (siemensTag.Type == TagType.C)
+                    {
+                        string key = "";
+                        if (group is SiemensTagGroup)
+                        {
+                            key = (group as SiemensTagGroup).Name;
+                        }
+                        else if (group is SiemensSubTagGroup)
+                        {
+                            SiemensSubTagGroup subGroup = group as SiemensSubTagGroup;
+                            key = $"{subGroup.Parent.Name}.{subGroup.Prefix}";
+                        }
+
+                        PLCDBReadBlock block = ControlBlock[key];
+                        if (block == null)
+                        {
+                            block = new PLCDBReadBlock();
+                            ControlBlock.Add(key, block);
+                        }
+                        block.Add(siemensTag.DB_Offset, siemensTag.Length);
+                    }
                     break;
             }
         }
@@ -479,6 +610,33 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             _log.Debug("什么事情都不做");
         }
+
+        /// <summary>
+        /// 查找指定的Tag
+        /// </summary>
+        /// <param name="groupName">标记组名称</param>
+        /// <param name="tagName">标记名称</param>
+        /// <returns>查找到的CustomTag对象，若没有找到则返回null</returns>
+        public override CustomTag FindTag(string groupName, string tagName)
+        {
+            if (groupName == "" || tagName == "")
+            {
+                return null;
+            }
+
+            CustomTagGroup group = _groups[groupName];
+            if (group == null)
+            {
+                return null;
+            }
+
+            return ((SiemensTagGroup)group).Tags[tagName];
+        }
+
+        /// <summary>
+        /// 轮询读取数据块内容间隔时间（毫秒）
+        /// </summary>
+        public short SplitterTime { get; private set; } = 10;
     }
 
     /// <summary>
@@ -558,6 +716,22 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 return _parent as SiemensDevice;
             }
+        }
+
+        /// <summary>
+        /// 标记列表
+        /// </summary>
+        public SiemensTagCollection Tags
+        {
+            get { return _tags as SiemensTagCollection; }
+        }
+
+        /// <summary>
+        /// 子标记组列表
+        /// </summary>
+        public SiemensSubTagGroupCollection SubGroups
+        {
+            get { return _groups as SiemensSubTagGroupCollection; }
         }
     }
 
@@ -639,7 +813,8 @@ namespace IRAP.BL.S7Gateway.Entities
             }
 
             _tags.Add(tag.Name, tag);
-            OnTagRegister?.Invoke(tag as SiemensTag);
+
+            OnTagRegister?.Invoke(_parent, tag as SiemensTag);
         }
     }
 
@@ -700,7 +875,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 值
         /// </summary>
-        public bool Value { get; private set; } = false;
+        public bool Value { get; set; } = false;
 
         /// <summary>
         /// Tag值占用的字节长度

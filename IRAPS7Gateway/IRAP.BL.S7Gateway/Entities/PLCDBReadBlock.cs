@@ -6,7 +6,7 @@ using System.Text;
 namespace IRAP.BL.S7Gateway.Entities
 {
     /// <summary>
-    /// PLC数据块读取缓冲区
+    /// PLC数据块读取缓冲区定义
     /// </summary>
     public class PLCDBReadBlock
     {
@@ -58,6 +58,90 @@ namespace IRAP.BL.S7Gateway.Entities
                     BufferLength = (int)(new_offset_end - Start_Offset + 1);
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// PLC数据块读取缓冲区定义集合
+    /// </summary>
+    public class PLCDBReadBlockCollection
+    {
+        /// <summary>
+        /// 需读取的数据块定义集合
+        /// </summary>
+        private Dictionary<string, PLCDBReadBlock> _items = 
+            new Dictionary<string, PLCDBReadBlock>();
+
+        /// <summary>
+        /// 根据索引号获取集合中的PLCDBReadBlock对象
+        /// </summary>
+        /// <param name="index">索引号</param>
+        /// <returns>PLCDBReadBlock对象，若索引号超出范围则返回null</returns>
+        public PLCDBReadBlock this[int index]
+        {
+            get
+            {
+                if (index >= 0 && index < _items.Count)
+                {
+                    return _items.ElementAt(index).Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据关键字获取PLCDBReadBlock对象
+        /// </summary>
+        /// <param name="key">关键字</param>
+        /// <returns>PLCDBReadBlock对象，若未找到则返回null</returns>
+        public PLCDBReadBlock this[string key]
+        {
+            get
+            {
+                _items.TryGetValue(key, out PLCDBReadBlock rlt);
+                return rlt;
+            }
+        }
+
+        /// <summary>
+        /// 当前集合中的PLCDBReadBlock对象个数
+        /// </summary>
+        public int Count { get { return _items.Count; } }
+
+        /// <summary>
+        /// 在集合中新增一个PLCDBReadBlock对象
+        /// </summary>
+        /// <param name="key">关键字</param>
+        /// <param name="item">PLCDBReadBlock对象</param>
+        public void Add(string key, PLCDBReadBlock item)
+        {
+            if (key == "")
+            {
+                throw new Exception("关键字参数不能空白");
+            }
+            if (item == null)
+            {
+                throw new Exception("PLCDBReadBlock对象不能是null");
+            }
+
+            if (_items.ContainsKey(key))
+            {
+                throw new Exception($"集合中已经存在关键字[{key}]的PLCDBReadBlock对象");
+            }
+
+            _items.Add(key, item);
+        }
+
+        /// <summary>
+        /// 根据索引号获取关键字
+        /// </summary>
+        /// <param name="index">索引号</param>
+        public string GetKey(int index)
+        {
+            return _items.Keys.ElementAt(index);
         }
     }
 }

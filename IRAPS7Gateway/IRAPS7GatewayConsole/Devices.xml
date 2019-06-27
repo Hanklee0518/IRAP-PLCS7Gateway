@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
   <SiemensPLC IPAddress="192.168.0.3" Rack="0" Slot="0">
-    <Device Name="HME_MES_PLC_Interface_Flash" DBType="DB" DBNumber="29" CycleReadMode="FullBlock">
+    <Device Name="HME_MES_PLC_Interface_Flash" DBType="DB" DBNumber="29" CycleReadMode="ControlBlock" SplitterTime="100" >
       <TagGroup Name="COMM">
-        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" />
-        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" />
-        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" />
-        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" />
-        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" />
-        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" />
-        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" />
-        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" />
+        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" Type="C" />
+        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" Type="C" />
+        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" Type="C" />
+        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" Type="C" />
+        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" Type="C" />
+        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" Type="C" />
+        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" Type="C" />
+        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" Type="C" />
         <Tag Name="MES_Heart_Beat" Datatype="Bool" Offset="1.0" />
       </TagGroup>
       <TagGroup Name="WIPStations">
@@ -20,30 +20,30 @@
           <Tag Name="WIPI_Code" Datatype="ArrayChar" Offset="46" Length="20" />
           <Tag Name="WIP_ID_Type_Code" Datatype="ArrayChar" Offset="66" Length="2" />
           <Tag Name="WIP_ID_Code" Datatype="ArrayChar" Offset="68" Length="80" />
-          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="148.0" />
-          <Tag Name="Production_Start" Datatype="Bool" Offset="148.1" />
-          <Tag Name="Production_End" Datatype="Bool" Offset="148.2" />
-          <Tag Name="WIP_Move_Out" Datatype="Bool" Offset="148.3" />
-          <Tag Name="Change_Over_Start" Datatype="Bool" Offset="148.4" />
-          <Tag Name="Change_Over_End" Datatype="Bool" Offset="148.5" />
-          <Tag Name="Production_Pause" Datatype="Bool" Offset="148.6" />
-          <Tag Name="Production_Restart" Datatype="Bool" Offset="148.7" />
-          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="149.0" />
-          <Tag Name="Move_To_MRB_Operation" Datatype="Bool" Offset="149.1" />
-          <Tag Name="Request_For_Routing" Datatype="Bool" Offset="149.2" />
-          <Tag Name="Request_For_ID_Binding" Datatype="Bool" Offset="149.3" />
-          <Tag Name="Trigger_Equipment_Fail_Andon" Datatype="Bool" Offset="149.4" />
-          <Tag Name="Trigger_Quality_Problem_Andon" Datatype="Bool" Offset="149.5" />
-          <Tag Name="Stagnation_Warnning" Datatype="Bool" Offset="149.6" />
-          <Tag Name="Serial_Number_Request" Datatype="Bool" Offset="149.7" />
-          <Tag Name="Label_Elements_Request" Datatype="Bool" Offset="150.0" />
-          <Tag Name="Label_Print_Request" Datatype="Bool" Offset="150.1" />
-          <Tag Name="Label_Reprint_Request" Datatype="Bool" Offset="150.2" />
-          <Tag Name="Packing_Succeeded" Datatype="Bool" Offset="150.3" />
-          <Tag Name="Is_OK_WIP_Onto_Line_Station" Datatype="Bool" Offset="150.4" />
-          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="150.5" />
-          <Tag Name="Scheduled_Production_Down" Datatype="Bool" Offset="150.6" />
-          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="150.7" />
+          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="148.0" Type="C" />
+          <Tag Name="Production_Start" Datatype="Bool" Offset="148.1" Type="C" />
+          <Tag Name="Production_End" Datatype="Bool" Offset="148.2" Type="C" />
+          <Tag Name="WIP_Move_Out" Datatype="Bool" Offset="148.3" Type="C" />
+          <Tag Name="Change_Over_Start" Datatype="Bool" Offset="148.4" Type="C" />
+          <Tag Name="Change_Over_End" Datatype="Bool" Offset="148.5" Type="C" />
+          <Tag Name="Production_Pause" Datatype="Bool" Offset="148.6" Type="C" />
+          <Tag Name="Production_Restart" Datatype="Bool" Offset="148.7" Type="C" />
+          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="149.0" Type="C" />
+          <Tag Name="Move_To_MRB_Operation" Datatype="Bool" Offset="149.1" Type="C" />
+          <Tag Name="Request_For_Routing" Datatype="Bool" Offset="149.2" Type="C" />
+          <Tag Name="Request_For_ID_Binding" Datatype="Bool" Offset="149.3" Type="C" />
+          <Tag Name="Trigger_Equipment_Fail_Andon" Datatype="Bool" Offset="149.4" Type="C" />
+          <Tag Name="Trigger_Quality_Problem_Andon" Datatype="Bool" Offset="149.5" Type="C" />
+          <Tag Name="Stagnation_Warnning" Datatype="Bool" Offset="149.6" Type="C" />
+          <Tag Name="Serial_Number_Request" Datatype="Bool" Offset="149.7" Type="C" />
+          <Tag Name="Label_Elements_Request" Datatype="Bool" Offset="150.0" Type="C" />
+          <Tag Name="Label_Print_Request" Datatype="Bool" Offset="150.1" Type="C" />
+          <Tag Name="Label_Reprint_Request" Datatype="Bool" Offset="150.2" Type="C" />
+          <Tag Name="Packing_Succeeded" Datatype="Bool" Offset="150.3" Type="C" />
+          <Tag Name="Is_OK_WIP_Onto_Line_Station" Datatype="Bool" Offset="150.4" Type="C" />
+          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="150.5" Type="C" />
+          <Tag Name="Scheduled_Production_Down" Datatype="Bool" Offset="150.6" Type="C" />
+          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="150.7" Type="C" />
           <Tag Name="Reserved_Signal_28" Datatype="Bool" Offset="151.0" />
           <Tag Name="Reserved_Signal_29" Datatype="Bool" Offset="151.1" />
           <Tag Name="Reserved_Signal_30" Datatype="Bool" Offset="151.2" />
@@ -75,16 +75,16 @@
         <Tag Name="Safety_Issue_Type" Datatype="Byte" Offset="204" />
       </TagGroup>
     </Device>
-    <Device Name="HME_MES_PLC_Interface_TurnTable1" DBType="DB" DBNumber="30" CycleReadMode="FullBlock">
+    <Device Name="HME_MES_PLC_Interface_TurnTable1" DBType="DB" DBNumber="30" CycleReadMode="ControlBlock" SplitterTime="100" >
       <TagGroup Name="COMM">
-        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" />
-        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" />
-        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" />
-        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" />
-        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" />
-        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" />
-        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" />
-        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" />
+        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" Type="C" />
+        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" Type="C" />
+        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" Type="C" />
+        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" Type="C" />
+        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" Type="C" />
+        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" Type="C" />
+        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" Type="C" />
+        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" Type="C" />
         <Tag Name="MES_Heart_Beat" Datatype="Bool" Offset="1.0" />
       </TagGroup>
       <TagGroup Name="WIPStations">
@@ -93,25 +93,25 @@
           <Tag Name="WIPI_Code" Datatype="ArrayChar" Offset="6" Length="20" />
           <Tag Name="WIP_ID_Type_Code" Datatype="ArrayChar" Offset="26" Length="2" />
           <Tag Name="WIP_ID_Code" Datatype="ArrayChar" Offset="28" Length="80" />
-          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="108.0" />
-          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="108.1" />
-          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="108.2" />
-          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="108.3" />
-          <Tag Name="Poka_Yoke_Result" Datatype="Byte" Offset="109" />
-          <Tag Name="Operation_Conclusion" Datatype="Byte" Offset="110" />
+          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="108.0" Type="C" />
+          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="108.1" Type="C" />
+          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="108.2" Type="C" />
+          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="108.3" Type="C" />
+          <Tag Name="Poka_Yoke_Result" Datatype="Byte" Offset="109" Type="C" />
+          <Tag Name="Operation_Conclusion" Datatype="Byte" Offset="110" Type="C" />
         </SubTagGroup>
       </TagGroup>
     </Device>
-    <Device Name="M0100" DBType="DB" DBNumber="31" CycleReadMode="FullBlock">
+    <Device Name="M0100" DBType="DB" DBNumber="31" CycleReadMode="ControlBlock" SplitterTime="100" >
       <TagGroup Name="COMM">
-        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" />
-        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" />
-        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" />
-        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" />
-        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" />
-        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" />
-        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" />
-        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" />
+        <Tag Name="Equipment_Running_Mode" Datatype="Bool" Offset="0.0" Type="C" />
+        <Tag Name="Domination_Status" Datatype="Bool" Offset="0.1" Type="C" />
+        <Tag Name="PLC_Heart_Beat" Datatype="Bool" Offset="0.2" Type="C" />
+        <Tag Name="Equipment_Power_On" Datatype="Bool" Offset="0.3" Type="C" />
+        <Tag Name="Equipment_Fail" Datatype="Bool" Offset="0.4" Type="C" />
+        <Tag Name="Tool_Fail" Datatype="Bool" Offset="0.5" Type="C" />
+        <Tag Name="Cycle_Started" Datatype="Bool" Offset="0.6" Type="C" />
+        <Tag Name="Equipment_Starvation" Datatype="Bool" Offset="0.7" Type="C" />
         <Tag Name="MES_Heart_Beat" Datatype="Bool" Offset="1.0" />
       </TagGroup>
       <TagGroup Name="WIPStations">
@@ -121,31 +121,31 @@
           <Tag Name="WIPI_Code" Datatype="ArrayChar" Offset="144" Length="20" />
           <Tag Name="WIP_ID_Type_Code" Datatype="ArrayChar" Offset="164" Length="2" />
           <Tag Name="WIP_ID_Code" Datatype="ArrayChar" Offset="166" Length="80" />
-          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="246.0" />
-          <Tag Name="Production_Start" Datatype="Bool" Offset="246.1" />
-          <Tag Name="Production_End" Datatype="Bool" Offset="246.2" />
-          <Tag Name="WIP_Move_Out" Datatype="Bool" Offset="246.3" />
-          <Tag Name="Change_Over_Start" Datatype="Bool" Offset="246.4" />
-          <Tag Name="Change_Over_End" Datatype="Bool" Offset="246.5" />
-          <Tag Name="Production_Pause" Datatype="Bool" Offset="246.6" />
-          <Tag Name="Production_Restart" Datatype="Bool" Offset="246.7" />
-          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="247.0" />
-          <Tag Name="Move_To_MRB_Operation" Datatype="Bool" Offset="247.1" />
-          <Tag Name="Request_For_Routing" Datatype="Bool" Offset="247.2" />
-          <Tag Name="Request_For_ID_Binding" Datatype="Bool" Offset="247.3" />
-          <Tag Name="Trigger_Equipment_Fail_Andon" Datatype="Bool" Offset="247.4" />
-          <Tag Name="Trigger_Quality_Problem_Andon" Datatype="Bool" Offset="247.5" />
-          <Tag Name="Stagnation_Warnning" Datatype="Bool" Offset="247.6" />
-          <Tag Name="Serial_Number_Request" Datatype="Bool" Offset="247.7" />
-          <Tag Name="Label_Elements_Request" Datatype="Bool" Offset="248.0" />
-          <Tag Name="Label_Print_Request" Datatype="Bool" Offset="248.1" />
-          <Tag Name="Label_Reprint_Request" Datatype="Bool" Offset="248.2" />
-          <Tag Name="Packing_Succeeded" Datatype="Bool" Offset="248.3" />
-          <Tag Name="Is_OK_WIP_Onto_Line_Station" Datatype="Bool" Offset="248.4" />
-          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="248.5" />
-          <Tag Name="Scheduled_Production_Down" Datatype="Bool" Offset="248.6" />
-          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="248.7" />
-          <Tag Name="Container_Number_Binding" Datatype="Bool" Offset="249.0" />
+          <Tag Name="WIP_Move_In" Datatype="Bool" Offset="246.0" Type="C" />
+          <Tag Name="Production_Start" Datatype="Bool" Offset="246.1" Type="C" />
+          <Tag Name="Production_End" Datatype="Bool" Offset="246.2" Type="C" />
+          <Tag Name="WIP_Move_Out" Datatype="Bool" Offset="246.3" Type="C" />
+          <Tag Name="Change_Over_Start" Datatype="Bool" Offset="246.4" Type="C" />
+          <Tag Name="Change_Over_End" Datatype="Bool" Offset="246.5" Type="C" />
+          <Tag Name="Production_Pause" Datatype="Bool" Offset="246.6" Type="C" />
+          <Tag Name="Production_Restart" Datatype="Bool" Offset="246.7" Type="C" />
+          <Tag Name="Request_For_Poka_Yoke" Datatype="Bool" Offset="247.0" Type="C" />
+          <Tag Name="Move_To_MRB_Operation" Datatype="Bool" Offset="247.1" Type="C" />
+          <Tag Name="Request_For_Routing" Datatype="Bool" Offset="247.2" Type="C" />
+          <Tag Name="Request_For_ID_Binding" Datatype="Bool" Offset="247.3" Type="C" />
+          <Tag Name="Trigger_Equipment_Fail_Andon" Datatype="Bool" Offset="247.4" Type="C" />
+          <Tag Name="Trigger_Quality_Problem_Andon" Datatype="Bool" Offset="247.5" Type="C" />
+          <Tag Name="Stagnation_Warnning" Datatype="Bool" Offset="247.6" Type="C" />
+          <Tag Name="Serial_Number_Request" Datatype="Bool" Offset="247.7" Type="C" />
+          <Tag Name="Label_Elements_Request" Datatype="Bool" Offset="248.0" Type="C" />
+          <Tag Name="Label_Print_Request" Datatype="Bool" Offset="248.1" Type="C" />
+          <Tag Name="Label_Reprint_Request" Datatype="Bool" Offset="248.2" Type="C" />
+          <Tag Name="Packing_Succeeded" Datatype="Bool" Offset="248.3" Type="C" />
+          <Tag Name="Is_OK_WIP_Onto_Line_Station" Datatype="Bool" Offset="248.4" Type="C" />
+          <Tag Name="Is_NG_WIP_Onto_Line_Station" Datatype="Bool" Offset="248.5" Type="C" />
+          <Tag Name="Scheduled_Production_Down" Datatype="Bool" Offset="248.6" Type="C" />
+          <Tag Name="Error_Proofing_Detection" Datatype="Bool" Offset="248.7" Type="C" />
+          <Tag Name="Container_Number_Binding" Datatype="Bool" Offset="249.0" Type="C" />
           <Tag Name="Reserved_Signal_29" Datatype="Bool" Offset="249.1" />
           <Tag Name="Reserved_Signal_30" Datatype="Bool" Offset="249.2" />
           <Tag Name="Reserved_Signal_31" Datatype="Bool" Offset="249.3" />
@@ -173,7 +173,7 @@
       <TagGroup Name="FEEDING">
         <Tag Name="Material_Track_ID" Datatype="ArrayChar" Offset="600" Length="80" />
         <Tag Name="Slot_Number" Datatype="ArrayChar" Offset="680" Length="6" />
-        <Tag Name="Request_For_Poka_Yoke" Datatype="Byte" Offset="686" />
+        <Tag Name="Request_For_Poka_Yoke" Datatype="Byte" Offset="686" Type="C" />
         <Tag Name="Poka_Yoke_Result" Datatype="Byte" Offset="688" />
       </TagGroup>
       <TagGroup Name="UNFEEDING">

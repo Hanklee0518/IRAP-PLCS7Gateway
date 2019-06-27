@@ -48,9 +48,10 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         protected CustomTagGroupCollection _groups = null;
         /// <summary>
-        /// 最近一次收到的数据块内容的哈希值
+        /// 最近一次收到的数据块内容的哈希值集合
         /// </summary>
-        private byte[] hashBytes;
+        private Dictionary<string, byte[]> hashBytes =
+            new Dictionary<string, byte[]>();
 
         /// <summary>
         /// 构造方法
@@ -73,6 +74,16 @@ namespace IRAP.BL.S7Gateway.Entities
         public CustomPLC Parent { get; protected set; } = null;
 
         /// <summary>
+        /// 最后一次读取PLC数据块时间
+        /// </summary>
+        public DateTime LastReadTime { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// 最后一次发送MES心跳信号时间
+        /// </summary>
+        public DateTime LastMESHearBeatTime { get; set; } = DateTime.Now;
+
+        /// <summary>
         /// 初始化字段
         /// </summary>
         /// <remarks>延迟到派生类中进行初始化</remarks>
@@ -84,15 +95,18 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="buffer">数据</param>
         public void DoSomething(byte[] buffer)
         {
-            byte[] newHashBytes = Tools.CalculateHash(buffer);
-            if (Tools.ByteEquals(hashBytes, newHashBytes))
-            {
-                ;
-            }
-            else
-            {
-                hashBytes = newHashBytes;
+            DoSomething("Device.FullBlock", buffer);
+        }
 
+        /// <summary>
+        /// 收到数据块数据的后续处理
+        /// </summary>
+        /// <param name="key">数据块关键字</param>
+        /// <param name="buffer">数据</param>
+        public void DoSomething(string key, byte[] buffer)
+        {
+            if (IsBufferData(key, buffer))
+            {
                 _log.Trace($"Buffer Size={buffer.Length}");
                 string tmp = "";
                 for (int i = 0; i < buffer.Length; i++)
@@ -110,6 +124,39 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="buffer">数据块内容</param>
         public abstract void DBDataChanged(byte[] buffer);
+
+        /// <summary>
+        /// 查找指定的Tag
+        /// </summary>
+        /// <param name="groupName">标记组名称</param>
+        /// <param name="tagName">标记名称</param>
+        public abstract CustomTag FindTag(string groupName, string tagName);
+
+        /// <summary>
+        /// 指定数据块内容签字是否被改变
+        /// </summary>
+        /// <param name="key">数据块关键字</param>
+        /// <param name="newBuffer">数据块内容</param>
+        /// <returns>True: 数据块内容发生改变；False: 数据块内容未改变</returns>
+        private bool IsBufferData(string key, byte[] newBuffer)
+        {
+            byte[] newHash = Tools.CalculateHash(newBuffer);
+            byte[] oldHash = hashBytes.ContainsKey(key) ? hashBytes[key] : null;
+            if (oldHash == null)
+            {
+                hashBytes.Add(key, newHash);
+                return true;
+            }
+            else if (Tools.ByteEquals(oldHash, newHash))
+            {
+                return false;
+            }
+            else
+            {
+                hashBytes[key] = newHash;
+                return true;
+            }
+        }
     }
 
     /// <summary>
@@ -146,10 +193,14 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             if (node.Name.ToUpper() != "TAGGROUP")
             {
-                throw new Exception($"传入的Xml节点不是[TagGroup]，当前收到的Xml节点是:[{node.Name}]");
+                throw new Exception(
+                    $"传入的Xml节点不是[TagGroup]，当前收到的Xml节点是:[{node.Name}]");
             }
 
-            _parent = parent ?? throw new Exception("传入的Device对象是null，TagGroup必须依赖于Device对象");
+            _parent = 
+                parent ?? 
+                throw new Exception(
+                    "传入的Device对象是null，TagGroup必须依赖于Device对象");
 
             if (node.Attributes["Name"] == null)
             {
@@ -185,7 +236,10 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="parent">TagGroup集合隶属的CustomDevice对象</param>
         public CustomTagGroupCollection(CustomDevice parent)
         {
-            _parent = parent ?? throw new Exception("传入的parent对象是null，TagGroupCollection必须依赖于Device对象");
+            _parent = 
+                parent ?? 
+                throw new Exception(
+                    "传入的parent对象是null，TagGroupCollection必须依赖于Device对象");
         }
 
         /// <summary>
@@ -243,7 +297,10 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="node">SubTagGroup属性的Xml节点</param>
         public CustomSubTagGroup(CustomTagGroup parent, XmlNode node)
         {
-            _parent = parent ?? throw new Exception("传入的parent对象是null，SubTagGroup必须依赖于TagGroup对象");
+            _parent = 
+                parent ?? 
+                throw new Exception(
+                    "传入的parent对象是null，SubTagGroup必须依赖于TagGroup对象");
 
             if (node == null)
             {
@@ -251,7 +308,8 @@ namespace IRAP.BL.S7Gateway.Entities
             }
             if (node.Name.ToUpper() != "SUBTAGGROUP")
             {
-                throw new Exception($"传入的Xml节点不是[SubTagGroup]，当前收到的Xml节点是:[{node.Name}]");
+                throw new Exception(
+                    $"传入的Xml节点不是[SubTagGroup]，当前收到的Xml节点是:[{node.Name}]");
             }
             if (node.Attributes["Prefix"] == null)
             {
@@ -316,8 +374,8 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             get
             {
-                _groups.TryGetValue(name, out CustomSubTagGroup rlt);
-                return rlt;
+                return
+                    _groups.ContainsKey(name) ? _groups[name] : null;
             }
         }
 
@@ -362,6 +420,22 @@ namespace IRAP.BL.S7Gateway.Entities
                 throw new Exception($"{node.Name}节点中未找到[Name]属性，请注意属性名的大小写");
             }
             Name = node.Attributes["Name"].Value;
+
+            if (node.Attributes["Type"] == null)
+            {
+                Type = TagType.A;
+            }
+            else
+            {
+                try
+                {
+                    Type = (TagType)Enum.Parse(typeof(TagType), node.Attributes["Type"].Value);
+                }
+                catch
+                {
+                    throw new Exception($"不支持Type={node.Attributes["Type"].Value}的类型");
+                }
+            }
         }
 
         /// <summary>
@@ -378,6 +452,11 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 数据块中的地址偏移量
         /// </summary>
         public int DB_Offset { get; protected set; } = 0;
+
+        /// <summary>
+        /// Tag类型（C-控制类；A-信息类）
+        /// </summary>
+        public TagType Type { get; protected set; } = TagType.A;
     }
 
     /// <summary>
@@ -401,6 +480,49 @@ namespace IRAP.BL.S7Gateway.Entities
         public CustomTagCollection(CustomGroup parent)
         {
             _parent = parent;
+        }
+
+        /// <summary>
+        /// 根据索引序号获取集合中的CustomTag对象
+        /// </summary>
+        /// <param name="index">索引序号</param>
+        public CustomTag this[int index]
+        {
+            get
+            {
+                if (_tags == null)
+                {
+                    return null;
+                }
+                else if (index >= 0 && index < _tags.Count)
+                {
+                    return _tags.ElementAt(index).Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据Tag名称获取集合中的CustomTag对象
+        /// </summary>
+        /// <param name="name">Tag名称</param>
+        /// <returns></returns>
+        public CustomTag this[string name]
+        {
+            get
+            {
+                if (_tags == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return _tags.ContainsKey(name) ? _tags[name] : null;
+                }
+            }
         }
 
         /// <summary>

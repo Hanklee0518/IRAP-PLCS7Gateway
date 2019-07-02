@@ -2,10 +2,12 @@
 using IRAP.BL.S7Gateway.Utils;
 using Logrila.Logging;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace IRAP.BL.S7Gateway.Entities
@@ -44,14 +46,15 @@ namespace IRAP.BL.S7Gateway.Entities
     public abstract class CustomDevice : CustomProduct
     {
         /// <summary>
-        /// 当前设备的TagGroup集合，该集合对象延迟到派生类中生成
-        /// </summary>
-        protected CustomTagGroupCollection _groups = null;
-        /// <summary>
         /// 最近一次收到的数据块内容的哈希值集合
         /// </summary>
         private Dictionary<string, byte[]> hashBytes =
             new Dictionary<string, byte[]>();
+
+        /// <summary>
+        /// 当前设备的TagGroup集合，该集合对象延迟到派生类中生成
+        /// </summary>
+        protected CustomTagGroupCollection _groups = null;
 
         /// <summary>
         /// 构造方法
@@ -64,6 +67,12 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 throw new Exception("没有设备所属的PLC对象，不能创建设备");
             }
+
+            if (node.Attributes["Name"] == null)
+            {
+                throw new Exception("传入的Xml节点没有[Name]属性，请注意大小写");
+            }
+            Name = node.Attributes["Name"].Value;
 
             InitComponents();
         }
@@ -84,53 +93,9 @@ namespace IRAP.BL.S7Gateway.Entities
         public DateTime LastMESHearBeatTime { get; set; } = DateTime.Now;
 
         /// <summary>
-        /// 初始化字段
+        /// 设备名称
         /// </summary>
-        /// <remarks>延迟到派生类中进行初始化</remarks>
-        public abstract void InitComponents();
-
-        /// <summary>
-        /// 收到数据块数据的后续处理
-        /// </summary>
-        /// <param name="buffer">数据</param>
-        public void DoSomething(byte[] buffer)
-        {
-            DoSomething("Device.FullBlock", buffer);
-        }
-
-        /// <summary>
-        /// 收到数据块数据的后续处理
-        /// </summary>
-        /// <param name="key">数据块关键字</param>
-        /// <param name="buffer">数据</param>
-        public void DoSomething(string key, byte[] buffer)
-        {
-            if (IsBufferData(key, buffer))
-            {
-                _log.Trace($"Buffer Size={buffer.Length}");
-                string tmp = "";
-                for (int i = 0; i < buffer.Length; i++)
-                {
-                    tmp += $"{string.Format("{0:x2}", buffer[i])} ";
-                }
-                _log.Trace(tmp);
-
-                DBDataChanged(buffer);
-            }
-        }
-
-        /// <summary>
-        /// 数据块内容发生变化的后续处理
-        /// </summary>
-        /// <param name="buffer">数据块内容</param>
-        public abstract void DBDataChanged(byte[] buffer);
-
-        /// <summary>
-        /// 查找指定的Tag
-        /// </summary>
-        /// <param name="groupName">标记组名称</param>
-        /// <param name="tagName">标记名称</param>
-        public abstract CustomTag FindTag(string groupName, string tagName);
+        public string Name { get; set; } = "";
 
         /// <summary>
         /// 指定数据块内容签字是否被改变
@@ -138,7 +103,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="key">数据块关键字</param>
         /// <param name="newBuffer">数据块内容</param>
         /// <returns>True: 数据块内容发生改变；False: 数据块内容未改变</returns>
-        private bool IsBufferData(string key, byte[] newBuffer)
+        protected bool IsBufferDataChanged(string key, byte[] newBuffer)
         {
             byte[] newHash = Tools.CalculateHash(newBuffer);
             byte[] oldHash = hashBytes.ContainsKey(key) ? hashBytes[key] : null;
@@ -157,10 +122,52 @@ namespace IRAP.BL.S7Gateway.Entities
                 return true;
             }
         }
+
+        /// <summary>
+        /// 初始化字段
+        /// </summary>
+        /// <remarks>延迟到派生类中进行初始化</remarks>
+        protected abstract void InitComponents();
+
+        /// <summary>
+        /// 数据块内容发生变化的后续处理
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="buffer">数据块内容</param>
+        protected abstract void DBDataChanged(string key, byte[] buffer);
+
+        /// <summary>
+        /// 收到数据块数据的后续处理
+        /// </summary>
+        /// <param name="buffer">数据</param>
+        public void DoSomething(byte[] buffer)
+        {
+            DoSomething("Device.FullBlock", buffer);
+        }
+
+        /// <summary>
+        /// 收到数据块数据的后续处理
+        /// </summary>
+        /// <param name="key">数据块关键字</param>
+        /// <param name="buffer">数据</param>
+        public void DoSomething(string key, byte[] buffer)
+        {
+            if (IsBufferDataChanged(key, buffer))
+            {
+                DBDataChanged(key, buffer);
+            }
+        }
+
+        /// <summary>
+        /// 查找指定的Tag
+        /// </summary>
+        /// <param name="groupName">标记组名称</param>
+        /// <param name="tagName">标记名称</param>
+        public abstract CustomTag FindTag(string groupName, string tagName);
     }
 
     /// <summary>
-    /// TagGroup父类，其子类有CustomTagGroup，CustomSubTagGroup
+    /// TagGroup父类
     /// </summary>
     public abstract class CustomGroup : CustomProduct
     {
@@ -171,7 +178,7 @@ namespace IRAP.BL.S7Gateway.Entities
     }
 
     /// <summary>
-    /// 设备 PLC 的 TagGroup 父类
+    /// 设备PLC的TagGroup父类
     /// </summary>
     public abstract class CustomTagGroup : CustomGroup
     {
@@ -197,8 +204,8 @@ namespace IRAP.BL.S7Gateway.Entities
                     $"传入的Xml节点不是[TagGroup]，当前收到的Xml节点是:[{node.Name}]");
             }
 
-            _parent = 
-                parent ?? 
+            _parent =
+                parent ??
                 throw new Exception(
                     "传入的Device对象是null，TagGroup必须依赖于Device对象");
 
@@ -218,7 +225,8 @@ namespace IRAP.BL.S7Gateway.Entities
     /// <summary>
     /// TagGroup集合父类
     /// </summary>
-    public abstract class CustomTagGroupCollection : CustomProduct
+    public abstract class CustomTagGroupCollection :
+        CustomProduct, IEnumerable
     {
         /// <summary>
         /// CustomTagGroup集合
@@ -236,8 +244,8 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="parent">TagGroup集合隶属的CustomDevice对象</param>
         public CustomTagGroupCollection(CustomDevice parent)
         {
-            _parent = 
-                parent ?? 
+            _parent =
+                parent ??
                 throw new Exception(
                     "传入的parent对象是null，TagGroupCollection必须依赖于Device对象");
         }
@@ -278,6 +286,18 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="group">TagGroup对象</param>
         public abstract void Add(CustomTagGroup group);
+
+        /// <summary>
+        /// 返回循环访问集合的枚举数
+        /// </summary>
+        /// <returns>可用于循环访问集合的IEnumerator对象</returns>
+        public IEnumerator GetEnumerator()
+        {
+            foreach (CustomTagGroup group in _groups.Values)
+            {
+                yield return group;
+            }
+        }
     }
 
     /// <summary>
@@ -297,8 +317,8 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="node">SubTagGroup属性的Xml节点</param>
         public CustomSubTagGroup(CustomTagGroup parent, XmlNode node)
         {
-            _parent = 
-                parent ?? 
+            _parent =
+                parent ??
                 throw new Exception(
                     "传入的parent对象是null，SubTagGroup必须依赖于TagGroup对象");
 
@@ -327,7 +347,7 @@ namespace IRAP.BL.S7Gateway.Entities
     /// <summary>
     /// SubTagGroup对象集合类
     /// </summary>
-    public abstract class CustomSubTagGroupCollection : CustomProduct
+    public abstract class CustomSubTagGroupCollection : CustomProduct, IEnumerable
     {
         /// <summary>
         /// 所属的TagGroup对象
@@ -384,6 +404,18 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="group">SubTagGroup对象</param>
         public abstract void Add(CustomSubTagGroup group);
+
+        /// <summary>
+        /// 返回循环访问集合的枚举数
+        /// </summary>
+        /// <returns>可用于循环访问集合的IEnumerator对象</returns>
+        public IEnumerator GetEnumerator()
+        {
+            foreach (CustomSubTagGroup group in _groups.Values)
+            {
+                yield return group;
+            }
+        }
     }
 
     /// <summary>
@@ -457,12 +489,17 @@ namespace IRAP.BL.S7Gateway.Entities
         /// Tag类型（C-控制类；A-信息类）
         /// </summary>
         public TagType Type { get; protected set; } = TagType.A;
+
+        /// <summary>
+        /// Tag对象
+        /// </summary>
+        public CustomGroup Parent { get { return _parent; } }
     }
 
     /// <summary>
     /// Tag对象集合类
     /// </summary>
-    public abstract class CustomTagCollection : CustomProduct
+    public abstract class CustomTagCollection : CustomProduct, IEnumerable
     {
         /// <summary>
         /// CustomTag集合
@@ -530,5 +567,17 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="tag">Tag对象</param>
         public abstract void Add(CustomTag tag);
+
+        /// <summary>
+        /// 返回循环访问集合的枚举数
+        /// </summary>
+        /// <returns>可用于循环访问集合的IEnumerator对象</returns>
+        public IEnumerator GetEnumerator()
+        {
+            foreach (CustomTag tag in _tags.Values)
+            {
+                yield return tag;
+            }
+        }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using IRAP.BL.S7Gateway.Enums;
+using IRAP.BL.S7Gateway.Utils;
 using Logrila.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace IRAP.BL.S7Gateway.Entities
@@ -199,7 +201,6 @@ namespace IRAP.BL.S7Gateway.Entities
 
                     if (isConnected)
                     {
-                        byte[] buffer;
                         DateTime now = DateTime.Now;
                         foreach (CustomDevice device in _devices.Values)
                         {
@@ -244,12 +245,11 @@ namespace IRAP.BL.S7Gateway.Entities
         }
 
         /// <summary>
-        /// 开启循环读取模式
+        /// 每个Device对象单独一个S7连接
         /// </summary>
-        public void Run()
+        private void CycleReadBufferPerDevice()
         {
-            Thread thread = new Thread(CycleReadBuffer);
-            thread.Start();
+
         }
 
         /// <summary>
@@ -285,6 +285,45 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 device.DoSomething(buffer);
             }
+        }
+
+        /// <summary>
+        /// 数据块全部数据模式读取(异步方法)
+        /// </summary>
+        /// <param name="dbType">数据块列别标识</param>
+        /// <param name="device">SiemensDevice对象</param>
+        /// <returns></returns>
+        private async Task FullBlockModeReadAsync(int dbType, SiemensDevice device)
+        {
+            var task = Task.Run(() =>
+            {
+                byte[] buffer = new byte[device.FullBlock.BufferLength];
+                int resNo =
+                    CS7TcpClient.ReadBlockAsByte(
+                        plcHandle,
+                        dbType,
+                        device.DBNumber,
+                        device.FullBlock.Start_Offset,
+                        device.FullBlock.BufferLength,
+                        buffer);
+
+                if (resNo != 0)
+                {
+                    _log.Error(
+                        $"设备[{device.Name}]" +
+                        $"读取[{device.DBType}]" +
+                        $"[{device.DBNumber}]失败，失败信息：" +
+                        $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
+                    isConnected = false;
+                    return;
+                }
+                else
+                {
+                    device.DoSomething(buffer);
+                }
+            });
+
+            await task;
         }
 
         /// <summary>
@@ -357,6 +396,158 @@ namespace IRAP.BL.S7Gateway.Entities
                 device.LastMESHearBeatTime = now;
             }
         }
+
+        /// <summary>
+        /// 将值回写到PLC中
+        /// </summary>
+        /// <param name="device">西门子Device对象</param>
+        /// <param name="tag">西门子Tag对象</param>
+        private void WriteToPLC(SiemensDevice device, SiemensTag tag)
+        {
+            int rlt = 0;
+            try
+            {
+                if (tag is SiemensBoolOfTag)
+                {
+                    SiemensBoolOfTag ltag = tag as SiemensBoolOfTag;
+                    rlt = CS7TcpClient.WriteBool(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Position,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensByteOfTag)
+                {
+                    SiemensByteOfTag ltag = tag as SiemensByteOfTag;
+                    rlt = CS7TcpClient.WriteByte(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensWordOfTag)
+                {
+                    SiemensWordOfTag ltag = tag as SiemensWordOfTag;
+                    rlt = CS7TcpClient.WriteWord(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensIntOfTag)
+                {
+                    SiemensIntOfTag ltag = tag as SiemensIntOfTag;
+                    rlt = CS7TcpClient.WriteInt(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensDWordOfTag)
+                {
+                    SiemensDWordOfTag ltag = tag as SiemensDWordOfTag;
+                    rlt = CS7TcpClient.WriteDWord(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensRealOfTag)
+                {
+                    SiemensRealOfTag ltag = tag as SiemensRealOfTag;
+                    rlt = CS7TcpClient.WriteFloat(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Value);
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+                else if (tag is SiemensArrayCharOfTag)
+                {
+                    SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
+                    rlt = CS7TcpClient.WriteString(
+                        plcHandle,
+                        (int)device.DBType,
+                        device.DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Length,
+                        Encoding.ASCII.GetBytes(ltag.Value));
+                    _log.Debug(
+                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
+                }
+            }
+            catch (Exception error)
+            {
+                throw new Exception(
+                    $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                    $"Offset:[{tag.DB_Offset}]写入时发生错误，{error.Message}");
+            }
+
+            if (rlt != 0)
+            {
+                throw new Exception(
+                    $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
+                    $"Offset:[{tag.DB_Offset}]写入失败，错误提示:[{rlt}]" +
+                    $"[{GetErrorMessage(rlt)}]");
+            }
+        }
+
+        /// <summary>
+        /// 开启循环读线程
+        /// </summary>
+        public void Start()
+        {
+            // 由于当前的读取模式是对于本PLC中的所有设备进行轮询读取，因此处理速度会滞后，该方法暂时不用
+            //Thread thread = new Thread(CycleReadBuffer);
+            //thread.Start();
+
+            foreach (CustomDevice device in _devices.Values)
+            {
+                if (device is SiemensDevice)
+                {
+                    ((SiemensDevice)device).Start(IPAddress, Rack, Slot);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 终止循环读取线程
+        /// </summary>
+        public void Stop()
+        {
+            foreach (CustomDevice device in _devices.Values)
+            {
+                if (device is SiemensDevice)
+                {
+                    ((SiemensDevice)device).Stop();
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -365,14 +556,13 @@ namespace IRAP.BL.S7Gateway.Entities
     public class SiemensDevice : CustomDevice
     {
         /// <summary>
-        /// 整块数据块
+        /// 西门子PLC连接对象
         /// </summary>
-        public PLCDBReadBlock FullBlock { get; private set; } = new PLCDBReadBlock();
+        private SiemensPLCConnection connection;
         /// <summary>
-        /// 控制量数据块列表
+        /// 是否终止循环读取数据线程
         /// </summary>
-        public PLCDBReadBlockCollection ControlBlock { get; private set; } =
-            new PLCDBReadBlockCollection();
+        private bool threadTerminated = false;
 
         /// <summary>
         /// 构造方法
@@ -394,15 +584,6 @@ namespace IRAP.BL.S7Gateway.Entities
             if (node.Name.ToUpper() != "DEVICE")
             {
                 throw new Exception($"Xml节点[{node.Name}]不是\"Device\"");
-            }
-
-            if (node.Attributes["Name"] != null)
-            {
-                Name = node.Attributes["Name"].Value;
-            }
-            else
-            {
-                throw new Exception($"{node.Name}.{Name}节点中未找到[Name]属性，请注意属性名的大小写");
             }
 
             if (node.Attributes["DBType"] != null)
@@ -486,7 +667,7 @@ namespace IRAP.BL.S7Gateway.Entities
             #endregion
 
             _log.Trace(
-                $"创建设备[{Name}][DBType={DBType}|DBNumber={DBNumber}|"+
+                $"创建设备[{Name}][DBType={DBType}|DBNumber={DBNumber}|" +
                 $"CycleReadMode={CycleReadMode}]");
 
             #region 创建 Tag 组
@@ -500,9 +681,9 @@ namespace IRAP.BL.S7Gateway.Entities
                     {
                         try
                         {
-                            CustomTagGroup group = 
+                            CustomTagGroup group =
                                 creator.CreateProuct(
-                                    this, 
+                                    this,
                                     tagGroupNode,
                                     OnTagRegister);
                             _groups.Add(group);
@@ -520,9 +701,15 @@ namespace IRAP.BL.S7Gateway.Entities
         }
 
         /// <summary>
-        /// 设备名称
+        /// 整块数据块
         /// </summary>
-        public string Name { get; private set; } = "";
+        public PLCDBBlock FullBlock { get; private set; } = new PLCDBBlock();
+
+        /// <summary>
+        /// 控制量数据块列表
+        /// </summary>
+        public PLCDBBlockCollection ControlBlock { get; private set; } =
+            new PLCDBBlockCollection();
 
         /// <summary>
         /// PLC寄存器类别
@@ -537,23 +724,20 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 数据轮询读取模式
         /// </summary>
-        public SiemensCycleReadMode CycleReadMode { get; private set; } 
+        public SiemensCycleReadMode CycleReadMode { get; private set; }
             = SiemensCycleReadMode.FullBlock;
 
         /// <summary>
-        /// 初始化父类中的字段和属性
+        /// 轮询读取数据块内容间隔时间（毫秒）
         /// </summary>
-        public override void InitComponents()
-        {
-            _groups = new SiemensTagGroupCollection(this);
-        }
+        public short SplitterTime { get; private set; } = 10;
 
         /// <summary>
         /// Tag对象注册事件
         /// </summary>
         /// <param name="group">TagGroup对象</param>
         /// <param name="tag">Tag对象</param>
-        public void OnTagRegister(CustomGroup group, CustomTag tag)
+        private void OnTagRegister(CustomGroup group, CustomTag tag)
         {
             _log.Trace($"Device[{Name}]:Tag[{tag.Name}],Offset[{tag.DB_Offset}]");
 
@@ -582,10 +766,10 @@ namespace IRAP.BL.S7Gateway.Entities
                             key = $"{subGroup.Parent.Name}.{subGroup.Prefix}";
                         }
 
-                        PLCDBReadBlock block = ControlBlock[key];
+                        PLCDBBlock block = ControlBlock[key];
                         if (block == null)
                         {
-                            block = new PLCDBReadBlock();
+                            block = new PLCDBBlock();
                             ControlBlock.Add(key, block);
                         }
                         block.Add(siemensTag.DB_Offset, siemensTag.Length);
@@ -595,48 +779,463 @@ namespace IRAP.BL.S7Gateway.Entities
         }
 
         /// <summary>
-        /// 根据设置的间隔时间以及读取模式读取西门子PLC数据块中的数据内容
+        /// FullBlock模式读取数据块
         /// </summary>
-        private void CycleReadBuffer()
+        private void FullBlockModeRead()
         {
-            throw new System.NotImplementedException();
+            byte[] buffer = new byte[FullBlock.BufferLength];
+            int resNo =
+                connection.ReadBlock(
+                    DBType,
+                    DBNumber,
+                    FullBlock.Start_Offset,
+                    FullBlock.BufferLength,
+                    ref buffer,
+                    out string errText);
+
+            if (resNo != 0)
+            {
+                _log.Error(
+                    $"设备[{Name}]读取[{DBType}][{DBNumber}]失败，失败信息" +
+                    $"[Code:{resNo},Message:{errText}]");
+            }
+            else
+            {
+                DoSomething(buffer);
+            }
+        }
+
+        /// <summary>
+        /// ControlBlock模式读取数据块
+        /// </summary>
+        private void ControlBlockModeRead()
+        {
+            byte[] buffer;
+            for (int i = 0; i < ControlBlock.Count; i++)
+            {
+                PLCDBBlock block = ControlBlock[i];
+                buffer = new byte[block.BufferLength];
+                int resNo =
+                    connection.ReadBlock(
+                        DBType,
+                        DBNumber,
+                        block.Start_Offset,
+                        block.BufferLength,
+                        ref buffer,
+                        out string errText);
+
+                if (resNo != 0)
+                {
+                    _log.Error(
+                        $"设备[{Name}]读取[{DBType}][{DBNumber}]" +
+                        $"Offset[{block.Start_Offset}]Length[{block.BufferLength}]" +
+                        $"失败，失败信息：[Code:{resNo},Message:{errText}]");
+                }
+                else
+                {
+                    DoSomething(ControlBlock.GetKey(i), buffer);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 根据关键字处理指定TagGroup所对应的数据块数据
+        /// </summary>
+        private void DealPartBlockBuffer(string key, byte[] buffer)
+        {
+            PLCDBBlock block = ControlBlock[key];
+            if (block!= null)
+            {
+                _log.Debug(
+                    $"[{key}.Offset={block.Start_Offset}, " +
+                    $"{key}.Length={block.BufferLength}]");
+            }
+            _log.Debug($"[{key}]|[Data:{Tools.BytesToBCD(buffer)}]");
+
+            // 根据key解析出TagGroup和SubTagGroup
+            string[] keys = key.Split('.');
+            string keyTagGroup = keys[0];
+            string keySubTagGroup = "";
+            if (keys.Length >= 2)
+            {
+                keySubTagGroup = keys[1];
+            }
+
+            SiemensTagGroup group = _groups[keyTagGroup] as SiemensTagGroup;
+            if (group == null)
+            {
+                _log.Error($"设备[{Name}]未找到[{keyTagGroup}]Tag组");
+                return;
+            }
+            if (keySubTagGroup == "")
+            {
+                SetControlTagValueInGroup(group, buffer, block.Start_Offset);
+            }
+            else
+            {
+                SiemensSubTagGroup subGroup = 
+                    group.SubGroups[keySubTagGroup] as SiemensSubTagGroup;
+                if (subGroup == null)
+                {
+                    _log.Error($"设备[{Name}]未找到[{keyTagGroup}.{keySubTagGroup}]Tag组");
+                    return;
+                }
+                else
+                {
+                    SetControlTagValueInGroup(subGroup, buffer, block.Start_Offset);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置控制Tag值
+        /// </summary>
+        /// <param name="group">TagGroup对象</param>
+        /// <param name="buffer">数据块内容</param>
+        /// <param name="offset">当前数据块内容在整个数据块的起始偏移量</param>
+        private void SetControlTagValueInGroup(
+            SiemensTagGroup group, 
+            byte[] buffer,
+            int offset)
+        {
+            foreach (CustomTag tag in group.Tags)
+            {
+                if (tag.Type== TagType.C)
+                {
+                    SetTagValue(buffer, tag, offset);
+                    ControlTagValueChanged(tag);
+                }
+            }
+        }
+        /// <summary>
+        /// 设置控制Tag值
+        /// </summary>
+        /// <param name="group">SubTagGroup对象</param>
+        /// <param name="buffer">数据块内容</param>
+        /// <param name="offset">当前数据块内容在整个数据块的起始偏移量</param>
+        private void SetControlTagValueInGroup(
+            SiemensSubTagGroup group,
+            byte[] buffer,
+            int offset)
+        {
+            foreach (CustomTag tag in group.Tags)
+            {
+                if (tag.Type == TagType.C)
+                {
+                    SetTagValue(buffer, tag, offset);
+                    ControlTagValueChanged(tag);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 控制Tag值变化后的操作
+        /// </summary>
+        /// <param name="tag">控制Tag对象</param>
+        private void ControlTagValueChanged(CustomTag tag)
+        {
+            IIRAPDCSTrade trade = IRAPDCSTraderCreator.CreateInstance(tag.Name.Replace("_", ""));
+            if (trade != null)
+            {
+                List<SiemensTag> writeTags = trade.Do(this, tag as SiemensTag);
+                foreach (SiemensTag writeTag in writeTags)
+                {
+                    connection.WriteToPLC(DBType, DBNumber, writeTag);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置Tag对象的值
+        /// </summary>
+        /// <param name="buffer">从PLC读取数据块中的内容</param>
+        /// <param name="tag">Tag对象</param>
+        /// <param name="beginOffset">数据块开始偏移量</param>
+        private void SetTagValue(byte[] buffer, CustomTag tag, int beginOffset)
+        {
+            int offset = tag.DB_Offset - beginOffset;
+
+            if (tag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag ltag = tag as SiemensBoolOfTag;
+                ltag.Value = Tools.GetBitValue(buffer[offset], ltag.Position);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensByteOfTag)
+            {
+                SiemensByteOfTag ltag = tag as SiemensByteOfTag;
+                ltag.Value = buffer[offset];
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensWordOfTag)
+            {
+                SiemensWordOfTag ltag = tag as SiemensWordOfTag;
+                ltag.Value = Tools.GetWordValue(buffer, offset);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensIntOfTag)
+            {
+                SiemensIntOfTag ltag = tag as SiemensIntOfTag;
+                ltag.Value = Tools.GetIntValue(buffer, offset);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensDWordOfTag)
+            {
+                SiemensDWordOfTag ltag = tag as SiemensDWordOfTag;
+                ltag.Value = Tools.GetDWordValue(buffer, offset);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensRealOfTag)
+            {
+                SiemensRealOfTag ltag = tag as SiemensRealOfTag;
+                ltag.Value = Tools.GetRealValue(buffer, offset);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else if (tag is SiemensArrayCharOfTag)
+            {
+                SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
+                ltag.Value = Tools.GetStringValue(buffer, offset, ltag.Length);
+                _log.Trace($"[{ltag.Name}={ltag.Value}]");
+            }
+            else
+            {
+                _log.Trace("现在的代码只写到 bool, byte, word, int, dword, real, arrachar");
+            }
+        }
+
+        /// <summary>
+        /// 处理 FullBlock 模式下获取到的数据块数据
+        /// </summary>
+        /// <param name="buffer">数据块数据</param>
+        private void DealFullBlockModeBuffer(byte[] buffer)
+        {
+            foreach (CustomTagGroup group in _groups)
+            {
+                SiemensTagGroup sGroup = group as SiemensTagGroup;
+                foreach (CustomTag tag in sGroup.Tags)
+                {
+                    SetTagValue(buffer, tag, 0);
+                }
+                foreach (SiemensSubTagGroup subGroup in sGroup.SubGroups)
+                {
+                    foreach (CustomTag tag in subGroup.Tags)
+                    {
+                        SetTagValue(buffer, tag, 0);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 循环读取西门子PLC数据块内容的线程执行体
+        /// </summary>
+        private void CycleReadDBThread()
+        {
+            if (connection == null)
+            {
+                throw new Exception("未创建西门子PLC连接对象");
+            }
+
+            while (!threadTerminated)
+            {
+                DateTime now = DateTime.Now;
+                TimeSpan timeSpan = now - LastReadTime;
+                if (timeSpan.TotalMilliseconds >= SplitterTime)
+                {
+                    switch (CycleReadMode)
+                    {
+                        case SiemensCycleReadMode.FullBlock:
+                            FullBlockModeRead();
+                            break;
+                        case SiemensCycleReadMode.ControlBlock:
+                            ControlBlockModeRead();
+                            break;
+                    }
+                }
+
+                Thread.Sleep(10);
+            }
+        }
+
+        /// <summary>
+        /// 定时发送MES心跳信号线程，目前固定每隔2秒钟发送一次，间隔时间不能修改
+        /// </summary>
+        private void MESHeartBeat()
+        {
+            while (!threadTerminated)
+            {
+                DateTime now = DateTime.Now;
+                if (connection != null)
+                {
+                    TimeSpan timeSpan = now - LastMESHearBeatTime;
+                    if (timeSpan.TotalMilliseconds >= 2000)
+                    {
+                        CustomTag tag = FindTag("COMM", "MES_Heart_Beat");
+                        if (tag != null && tag is SiemensBoolOfTag)
+                        {
+                            SiemensBoolOfTag heartBeatTag = tag as SiemensBoolOfTag;
+                            heartBeatTag.Value = !heartBeatTag.Value;
+                            try
+                            {
+                                connection.WriteToPLC(
+                                    DBType,
+                                    DBNumber,
+                                    heartBeatTag);
+                            }
+                            catch (Exception error)
+                            {
+                                _log.Error(error.Message, error);
+                            }
+                        }
+
+                        LastMESHearBeatTime = now;
+                    }
+                }
+
+                Thread.Sleep(500);
+            }
+        }
+
+        /// <summary>
+        /// 初始化父类中的字段和属性
+        /// </summary>
+        protected override void InitComponents()
+        {
+            _groups = new SiemensTagGroupCollection(this);
         }
 
         /// <summary>
         /// 数据块内容发生变化的后续处理
         /// </summary>
+        /// <param name="key">数据块关键字</param>
         /// <param name="buffer">数据块内容</param>
-        public override void DBDataChanged(byte[] buffer)
+        protected override void DBDataChanged(string key, byte[] buffer)
         {
-            _log.Debug("什么事情都不做");
+            //string tmp = "";
+            //for (int i = 0; i < buffer.Length; i++)
+            //{
+            //    tmp += $"{string.Format("{0:x2}", buffer[i])} ";
+            //}
+            //_log.Debug($"[{Name}.{key}]Buffer Size={buffer.Length}|[{tmp}]");
+
+            switch (CycleReadMode)
+            {
+                case SiemensCycleReadMode.FullBlock:
+                    DealFullBlockModeBuffer(buffer);
+                    break;
+                case SiemensCycleReadMode.ControlBlock:
+                    DealPartBlockBuffer(key, buffer);
+                    break;
+            }
         }
 
         /// <summary>
         /// 查找指定的Tag
         /// </summary>
-        /// <param name="groupName">标记组名称</param>
+        /// <param name="name">标记组名称</param>
         /// <param name="tagName">标记名称</param>
         /// <returns>查找到的CustomTag对象，若没有找到则返回null</returns>
-        public override CustomTag FindTag(string groupName, string tagName)
+        public override CustomTag FindTag(string name, string tagName)
         {
-            if (groupName == "" || tagName == "")
+            if (name == "" || tagName == "")
             {
                 return null;
             }
+
+            string[] names = name.Split('.');
+            string groupName = names[0];
+            string subGroupName = names.Length >= 2 ? names[1] : "";
 
             CustomTagGroup group = _groups[groupName];
             if (group == null)
             {
                 return null;
             }
+            else
+            {
+                if (subGroupName == "")
+                {
+                    return ((SiemensTagGroup)group).Tags[tagName];
+                }
+                else
+                {
+                    CustomSubTagGroup subGroup = ((SiemensTagGroup)group).SubGroups[subGroupName];
+                    if (subGroup == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return ((SiemensSubTagGroup)subGroup).Tags[tagName];
+                    }
+                }
+            }
 
-            return ((SiemensTagGroup)group).Tags[tagName];
         }
 
         /// <summary>
-        /// 轮询读取数据块内容间隔时间（毫秒）
+        /// 读取西门子PLC中该Tag的值
         /// </summary>
-        public short SplitterTime { get; private set; } = 10;
+        /// <param name="tag"></param>
+        /// <returns></returns>
+        public SiemensTag ReadTagValue(SiemensTag tag)
+        {
+            if (tag is SiemensBoolOfTag)
+            {
+                byte[] buffer = new byte[1];
+                int resNo =
+                    connection.ReadBlock(
+                        DBType,
+                        DBNumber,
+                        tag.DB_Offset,
+                        1,
+                        ref buffer,
+                        out string errText);
+                SetTagValue(buffer, tag, tag.DB_Offset);
+            }
+            else if (tag is SiemensLengthTag)
+            {
+                SiemensLengthTag ltag = tag as SiemensLengthTag;
+                byte[] buffer = new byte[ltag.Length];
+                int resNo =
+                    connection.ReadBlock(
+                        DBType,
+                        DBNumber,
+                        ltag.DB_Offset,
+                        ltag.Length,
+                        ref buffer,
+                        out string errText);
+                SetTagValue(buffer, tag, tag.DB_Offset);
+            }
+
+            return tag;
+        }
+
+        /// <summary>
+        /// 开始当前设备对象循环读取PLC数据块，并处理PLC的请求
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="rack"></param>
+        /// <param name="slot"></param>
+        public void Start(string ipAddress, int rack, int slot)
+        {
+            connection = new SiemensPLCConnection(ipAddress, rack, slot);
+
+            threadTerminated = false;
+            Thread threadHeartBeat = new Thread(MESHeartBeat);
+            Thread threadCycleReader = new Thread(CycleReadDBThread);
+
+            threadHeartBeat.Start();
+            threadCycleReader.Start();
+        }
+
+        /// <summary>
+        /// 终止当前设备对象读取PLC数据块线程和心跳信号线程
+        /// </summary>
+        public void Stop()
+        {
+            threadTerminated = true;
+        }
     }
 
     /// <summary>
@@ -645,14 +1244,19 @@ namespace IRAP.BL.S7Gateway.Entities
     public class SiemensTagGroup : CustomTagGroup
     {
         /// <summary>
+        /// 父容器中的Tag对象注册事件
+        /// </summary>
+        private event TagRegisterHandler _tagRegisterInParentHandler = null;
+
+        /// <summary>
         /// 构造方法
         /// </summary>
         /// <param name="parent">TagGroup对象所依赖的Device对象</param>
         /// <param name="node">TagGroup对象属性的Xml节点</param>
         /// <param name="eventTagRegister">西门子Tag注册委托</param>
         public SiemensTagGroup(
-            CustomDevice parent, 
-            XmlNode node, 
+            CustomDevice parent,
+            XmlNode node,
             TagRegisterHandler eventTagRegister) : base(parent, node)
         {
             if (!(parent is SiemensDevice))
@@ -665,8 +1269,10 @@ namespace IRAP.BL.S7Gateway.Entities
                 throw new Exception($"Xml节点[{node.Name}]不是\"TagGroup\"");
             }
 
+            _tagRegisterInParentHandler = eventTagRegister;
+
             _log = Logger.Get<SiemensTagGroup>();
-            _tags = new SiemensTagCollection(this, eventTagRegister);
+            _tags = new SiemensTagCollection(this, OnTagInGroupRegister);
             _groups = new SiemensSubTagGroupCollection(this);
 
             _log.Trace($"创建TagGroup[{Name}]");
@@ -689,11 +1295,11 @@ namespace IRAP.BL.S7Gateway.Entities
                             }
                             break;
                         case "SUBTAGGROUP":
-                            SiemensSubTagGroup subTagGroup = 
+                            SiemensSubTagGroup subTagGroup =
                                 new SiemensSubTagGroup(
-                                    this, 
+                                    this,
                                     childNode,
-                                    eventTagRegister);
+                                    OnTagInGroupRegister);
                             if (subTagGroup != null)
                             {
                                 _groups.Add(subTagGroup);
@@ -712,10 +1318,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         public SiemensDevice Parent
         {
-            get
-            {
-                return _parent as SiemensDevice;
-            }
+            get { return _parent as SiemensDevice; }
         }
 
         /// <summary>
@@ -732,6 +1335,24 @@ namespace IRAP.BL.S7Gateway.Entities
         public SiemensSubTagGroupCollection SubGroups
         {
             get { return _groups as SiemensSubTagGroupCollection; }
+        }
+
+        /// <summary>
+        /// TagGroup对象对应PLC数据块的DBBlock定义
+        /// </summary>
+        public PLCDBBlock Block { get; } = new PLCDBBlock();
+
+        /// <summary>
+        /// Tag对象注册事件
+        /// </summary>
+        /// <param name="group">TagGroup对象</param>
+        /// <param name="tag">Tag对象</param>
+        private void OnTagInGroupRegister(CustomGroup group, CustomTag tag)
+        {
+            _tagRegisterInParentHandler?.Invoke(group, tag);
+
+            SiemensTag siemensTag = tag as SiemensTag;
+            Block.Add(siemensTag.DB_Offset, siemensTag.Length);
         }
     }
 
@@ -794,7 +1415,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="parent">所属的TagGroup对象</param>
         /// <param name="registerEvent">Tag对象在SiemensDevice对象中进行注册的委托</param>
-        public SiemensTagCollection(CustomGroup parent, TagRegisterHandler registerEvent) : 
+        public SiemensTagCollection(CustomGroup parent, TagRegisterHandler registerEvent) :
             base(parent)
         {
             OnTagRegister = registerEvent;
@@ -835,7 +1456,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public abstract int Length { get; }
+        public abstract short Length { get; }
     }
 
     /// <summary>
@@ -880,7 +1501,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 1;
+        public override short Length => 1;
 
         /// <summary>
         /// 设置PLC中对应的存储区域
@@ -938,7 +1559,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 1;
+        public override short Length => 1;
 
         /// <summary>
         /// Tag值
@@ -966,7 +1587,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 2;
+        public override short Length => 2;
 
         /// <summary>
         /// Tag值
@@ -994,7 +1615,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 2;
+        public override short Length => 2;
 
         /// <summary>
         /// Tag值
@@ -1022,7 +1643,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 4;
+        public override short Length => 4;
 
         /// <summary>
         /// Tag值
@@ -1050,7 +1671,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => 2;
+        public override short Length => 2;
 
         /// <summary>
         /// Tag值
@@ -1066,7 +1687,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        private int length;
+        private short length;
 
         /// <summary>
         /// 构造方法
@@ -1081,7 +1702,7 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 throw new Exception("传入的Xml节点没有[Length]属性，请注意大小写");
             }
-            int.TryParse(node.Attributes["Length"].Value, out length);
+            short.TryParse(node.Attributes["Length"].Value, out length);
 
             _log.Trace($"创建Tag{Name},Offset={DB_Offset},Length={length}");
         }
@@ -1089,12 +1710,21 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override int Length => length;
+        public override short Length => length;
 
         /// <summary>
         /// 值
         /// </summary>
         public string Value { get; set; }
+
+        /// <summary>
+        /// 设置Tag值占用的字节长度
+        /// </summary>
+        /// <param name="length">长度</param>
+        public void SetLength(short length)
+        {
+            this.length = length;
+        }
     }
 
     /// <summary>
@@ -1103,18 +1733,24 @@ namespace IRAP.BL.S7Gateway.Entities
     public class SiemensSubTagGroup : CustomSubTagGroup
     {
         /// <summary>
+        /// 父容器中的Tag对象注册事件
+        /// </summary>
+        private TagRegisterHandler _tagRegisterInParentHandler = null;
+
+        /// <summary>
         /// 构造方法
         /// </summary>
         /// <param name="parent">TagGroup对象</param>
         /// <param name="node">SubTagGroup属性的Xml节点</param>
         /// <param name="eventTagRegister">西门子Tag注册委托</param>
         public SiemensSubTagGroup(
-            CustomTagGroup parent, 
+            CustomTagGroup parent,
             XmlNode node,
             TagRegisterHandler eventTagRegister) : base(parent, node)
         {
+            _tagRegisterInParentHandler = eventTagRegister;
             _log = Logger.Get<SiemensSubTagGroup>();
-            _tags = new SiemensTagCollection(this, eventTagRegister);
+            _tags = new SiemensTagCollection(this, OnTagInGroupRegister);
 
             if (!(parent is SiemensTagGroup))
             {
@@ -1143,6 +1779,32 @@ namespace IRAP.BL.S7Gateway.Entities
         public CustomTagGroup Parent
         {
             get { return _parent; }
+        }
+
+        /// <summary>
+        /// 标记列表
+        /// </summary>
+        public SiemensTagCollection Tags
+        {
+            get { return _tags as SiemensTagCollection; }
+        }
+
+        /// <summary>
+        /// SubTagGroup对象对应PLC数据块的DBBlock定义
+        /// </summary>
+        public PLCDBBlock Block { get; } = new PLCDBBlock();
+
+        /// <summary>
+        /// Tag对象注册事件
+        /// </summary>
+        /// <param name="group">TagGroup对象</param>
+        /// <param name="tag">Tag对象</param>
+        private void OnTagInGroupRegister(CustomGroup group, CustomTag tag)
+        {
+            _tagRegisterInParentHandler?.Invoke(group, tag);
+
+            SiemensTag siemensTag = tag as SiemensTag;
+            Block.Add(siemensTag.DB_Offset, siemensTag.Length);
         }
     }
 

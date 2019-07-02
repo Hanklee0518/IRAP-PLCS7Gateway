@@ -107,7 +107,7 @@ namespace IRAP.BL.S7Gateway
             {
                 if (plc is SiemensPLC)
                 {
-                    ((SiemensPLC)plc).Run();
+                    ((SiemensPLC)plc).Start();
                 }
             }
         }

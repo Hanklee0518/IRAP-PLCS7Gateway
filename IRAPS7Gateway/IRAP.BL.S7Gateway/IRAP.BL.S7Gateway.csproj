@@ -89,6 +89,8 @@
     <Compile Include="Enums\SiemensEnums.cs" />
     <Compile Include="Entities\SiemensProducts.cs" />
     <Compile Include="Entities\PLCDBReadBlock.cs" />
+    <Compile Include="BL\IRAPDCSTrades.cs" />
+    <Compile Include="SiemensPLCConnection.cs" />
     <Compile Include="Utils\CS7Tcp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\PLCEnums.cs" />

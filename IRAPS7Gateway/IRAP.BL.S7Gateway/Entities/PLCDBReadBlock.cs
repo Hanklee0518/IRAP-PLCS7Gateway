@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace IRAP.BL.S7Gateway.Entities
     /// <summary>
     /// PLC数据块读取缓冲区定义
     /// </summary>
-    public class PLCDBReadBlock
+    public class PLCDBBlock
     {
         /// <summary>
         /// 起始偏移量
@@ -64,20 +65,20 @@ namespace IRAP.BL.S7Gateway.Entities
     /// <summary>
     /// PLC数据块读取缓冲区定义集合
     /// </summary>
-    public class PLCDBReadBlockCollection
+    public class PLCDBBlockCollection : IEnumerable
     {
         /// <summary>
         /// 需读取的数据块定义集合
         /// </summary>
-        private Dictionary<string, PLCDBReadBlock> _items = 
-            new Dictionary<string, PLCDBReadBlock>();
+        private Dictionary<string, PLCDBBlock> _items =
+            new Dictionary<string, PLCDBBlock>();
 
         /// <summary>
         /// 根据索引号获取集合中的PLCDBReadBlock对象
         /// </summary>
         /// <param name="index">索引号</param>
         /// <returns>PLCDBReadBlock对象，若索引号超出范围则返回null</returns>
-        public PLCDBReadBlock this[int index]
+        public PLCDBBlock this[int index]
         {
             get
             {
@@ -97,11 +98,11 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="key">关键字</param>
         /// <returns>PLCDBReadBlock对象，若未找到则返回null</returns>
-        public PLCDBReadBlock this[string key]
+        public PLCDBBlock this[string key]
         {
             get
             {
-                _items.TryGetValue(key, out PLCDBReadBlock rlt);
+                _items.TryGetValue(key, out PLCDBBlock rlt);
                 return rlt;
             }
         }
@@ -116,7 +117,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         /// <param name="key">关键字</param>
         /// <param name="item">PLCDBReadBlock对象</param>
-        public void Add(string key, PLCDBReadBlock item)
+        public void Add(string key, PLCDBBlock item)
         {
             if (key == "")
             {
@@ -133,6 +134,18 @@ namespace IRAP.BL.S7Gateway.Entities
             }
 
             _items.Add(key, item);
+        }
+
+        /// <summary>
+        /// 返回循环访问集合的枚举数
+        /// </summary>
+        /// <returns>可用于循环访问集合的IEnumerator对象</returns>
+        public IEnumerator GetEnumerator()
+        {
+            foreach (PLCDBBlock item in _items.Values)
+            {
+                yield return item;
+            }
         }
 
         /// <summary>

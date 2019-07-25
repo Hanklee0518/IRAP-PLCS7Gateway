@@ -74,6 +74,34 @@ namespace IRAP.BL.S7Gateway.Entities
             }
             Name = node.Attributes["Name"].Value;
 
+            if (node.Attributes["T133LeafID"] == null)
+            {
+                throw new Exception("传入的Xml节点没有[T133LeafID]属性");
+            }
+            else
+            {
+                if (int.TryParse(
+                    node.Attributes["T133LeafID"].Value,
+                    out int rlt))
+                {
+                    T133LeafID = rlt;
+                }
+            }
+
+            if (node.Attributes["T216LeafID"] == null)
+            {
+                throw new Exception("传入的Xml节点没有[T133LeafID]属性");
+            }
+            else
+            {
+                if (int.TryParse(
+                    node.Attributes["T216LeafID"].Value,
+                    out int rlt))
+                {
+                    T216LeafID = rlt;
+                }
+            }
+
             InitComponents();
         }
 
@@ -96,6 +124,15 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 设备名称
         /// </summary>
         public string Name { get; set; } = "";
+
+        /// <summary>
+        /// IRAP中定义的设备叶标识
+        /// </summary>
+        public int T133LeafID { get; set; } = 0;
+        /// <summary>
+        /// IRAP中定义的工序叶标识
+        /// </summary>
+        public int T216LeafID { get; set; } = 0;
 
         /// <summary>
         /// 指定数据块内容签字是否被改变
@@ -427,6 +464,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 所属的TagGroup对象
         /// </summary>
         protected CustomGroup _parent;
+        protected object value;
 
         /// <summary>
         /// 构造方法

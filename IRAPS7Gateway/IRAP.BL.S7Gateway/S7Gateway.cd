@@ -56,7 +56,7 @@
   <Class Name="IRAP.BL.S7Gateway.IRAPBaseObject" Collapsed="true">
     <Position X="28.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
       <FileName>Entities\IRAPBaseObject.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -76,18 +76,15 @@
   </Class>
   <Class Name="IRAP.BL.S7Gateway.Entities.CustomDevice" Collapsed="true">
     <Position X="6.75" Y="3.25" Width="1.5" />
-    <Members>
-      <Method Name="FindTag" Hidden="true" />
-    </Members>
     <TypeIdentifier>
-      <HashCode>EAAAAAEBAAAAAAAAAAAAQIQAAAAAAAFAAAACAAAIAAA=</HashCode>
+      <HashCode>EAAAAAEBAAAAAAAAAAAAQIQAACAAAAFAAAACAAAIAAA=</HashCode>
       <FileName>Entities\CustomProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="IRAP.BL.S7Gateway.Entities.SiemensDevice" Collapsed="true">
     <Position X="6.75" Y="4.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAYAAAQRACIAAyAAAAABBBACAAAAAAIAYIgEAAAIIBA=</HashCode>
+      <HashCode>AIYAAEQRACIAAyAAAAAABBACAAAAAAIAYIgEAAIIIBA=</HashCode>
       <FileName>Entities\SiemensProducts.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -298,7 +295,7 @@
       <FileName>Utils\Tools.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="IRAP.BL.S7Gateway.SiemensPLCConnection">
+  <Class Name="IRAP.BL.S7Gateway.BS7SiemensPLCConnection">
     <Position X="1.5" Y="1.75" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAQBAAAAAAAAAIgAAAAAQIAAAAAAAAAAAAAQAAACA4A=</HashCode>
@@ -308,7 +305,7 @@
   <Class Name="IRAP.BL.S7Gateway.IRAPDCSTrade">
     <Position X="43.25" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAEAAAAAAgAABAAAAAAgAAAAAAAAAACAAAAAAAAAA=</HashCode>
       <FileName>BL\IRAPDCSTrades.cs</FileName>
     </TypeIdentifier>
   </Class>

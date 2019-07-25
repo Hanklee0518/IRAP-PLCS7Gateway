@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTraderCreator" Collapsed="true">
+    <Position X="32.5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTrade" Collapsed="true">
+    <Position X="16.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAgAABAAAAAAgAAAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeGetOPCStatus" Collapsed="true">
+    <Position X="17.75" Y="3.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeEquipmentRunningMode" Collapsed="true">
+    <Position X="9.5" Y="4.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeEquipmentPowerOn" Collapsed="true">
+    <Position X="16.25" Y="4.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeEquipmentFail" Collapsed="true">
+    <Position X="23.25" Y="4.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeToolFail" Collapsed="true">
+    <Position X="26.25" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeCycleStarted" Collapsed="true">
+    <Position X="13.25" Y="4.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeEquipmentStarvation" Collapsed="true">
+    <Position X="19.75" Y="4.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeRequestForIDBinding" Collapsed="true">
+    <Position X="6" Y="3.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeSerialNumberRequest" Collapsed="true">
+    <Position X="29" Y="3.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeWIPMoveIn" Collapsed="true">
+    <Position X="3" Y="3.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPBaseObject" Collapsed="true">
+    <Position X="18" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>Entities\IRAPBaseObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IRAP.BL.S7Gateway.IRAPDCSTradeProductionEnd">
+    <Position X="34" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="IRAP.BL.S7Gateway.IIRAPDCSTrade" Collapsed="true">
+    <Position X="35.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BL\IRAPDCSTrades.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

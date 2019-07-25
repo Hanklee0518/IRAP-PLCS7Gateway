@@ -29,8 +29,8 @@
     <DocumentationSources>
       <DocumentationSource sourceFile="..\..\IRAP.BL.S7Gateway\IRAP.BL.S7Gateway.csproj" xmlns="" />
     </DocumentationSources>
-    <HelpFileFormat>HtmlHelp1</HelpFileFormat>
-    <SyntaxFilters>Standard</SyntaxFilters>
+    <HelpFileFormat>Website</HelpFileFormat>
+    <SyntaxFilters>C#, Visual Basic, Managed C++</SyntaxFilters>
     <PresentationStyle>VS2013</PresentationStyle>
     <CleanIntermediates>True</CleanIntermediates>
     <KeepLogFile>True</KeepLogFile>
@@ -47,6 +47,8 @@
     <MaximumGroupParts>2</MaximumGroupParts>
     <Preliminary>False</Preliminary>
     <SdkLinkTarget>Blank</SdkLinkTarget>
+    <FooterText>Copyright &amp;#169%3b 2019 Jiangsu Softland Science Technology Co.,Ltd.All rights reserved</FooterText>
+    <FeedbackEMailAddress>zhiying.li%40chinairap.com</FeedbackEMailAddress>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->

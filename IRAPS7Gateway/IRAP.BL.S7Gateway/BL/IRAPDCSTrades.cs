@@ -781,4 +781,91 @@ namespace IRAP.BL.S7Gateway
             return rlt;
         }
     }
+
+    /// <summary>
+    /// 工件离站交易
+    /// </summary>
+    public class IRAPDCSTradeWIPMoveout : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("工件离站交易处理");
+
+                    OperationCycleEnd operationCycleEnd = null;
+                    SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
+                    if (subTagGroup != null)
+                    {
+                        operationCycleEnd =
+                            new OperationCycleEnd(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new OperationCycleEndRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (operationCycleEnd == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (operationCycleEnd.Do())
+                        {
+                            if (operationCycleEnd.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                    $"{operationCycleEnd.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                    $"{operationCycleEnd.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                $"{operationCycleEnd.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("工件离站处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
 }

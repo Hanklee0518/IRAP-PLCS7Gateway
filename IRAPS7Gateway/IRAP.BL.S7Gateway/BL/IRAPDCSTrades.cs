@@ -1738,11 +1738,11 @@ namespace IRAP.BL.S7Gateway
                                 }
                             };
 
-                        DateTime start = DateTime.Now;
-                        TimeSpan timeSpan = start - start;
+                        //DateTime start = DateTime.Now;
+                        //TimeSpan timeSpan = start - start;
                         byte fazitStatus = 0xff;
-                        do
-                        {
+                        //do
+                        //{
                             if (fazitStatusCheck.Do())
                             {
                                 _log.Debug(
@@ -1752,10 +1752,10 @@ namespace IRAP.BL.S7Gateway
                                 switch (fazitStatusCheck.Response.Output.DMC_Fazit_Status)
                                 {
                                     case 0:
-                                        fazitStatus = fazitStatusCheck.Response.Output.DMC_Fazit_Status;
+                                        fazitStatus = 1;
                                         break;
                                     case 1:
-                                        fazitStatus = fazitStatusCheck.Response.Output.DMC_Fazit_Status;
+                                        fazitStatus = 20;
                                         break;
                                     default:
                                         fazitStatus = 0xff;
@@ -1769,9 +1769,9 @@ namespace IRAP.BL.S7Gateway
                                     $"{fazitStatusCheck.Error.ErrText}");
                             }
 
-                            Thread.Sleep(5000);
-                            timeSpan = DateTime.Now - start;
-                        } while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
+                        //    Thread.Sleep(5000);
+                        //    timeSpan = DateTime.Now - start;
+                        //} while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
 
                         if (fazitStatus == 0xff)
                         {

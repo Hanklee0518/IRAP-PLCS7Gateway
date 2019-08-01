@@ -13,6 +13,8 @@ Project("{7CF6DF6D-3B04-46F8-A40B-537D21BCA0B4}") = "DeveloperDocument", "Docume
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAP.BL.PLCGateway.Siemens.Test", "IRAP.BL.PLCGateway.Siemens.Test\IRAP.BL.PLCGateway.Siemens.Test.csproj", "{D7BFF1B6-A744-4725-8676-2E730BC5F573}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAPS7GatewayService", "IRAPS7GatewayService\IRAPS7GatewayService.csproj", "{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,14 @@ Global
 		{D7BFF1B6-A744-4725-8676-2E730BC5F573}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D7BFF1B6-A744-4725-8676-2E730BC5F573}.Release|x64.ActiveCfg = Release|Any CPU
 		{D7BFF1B6-A744-4725-8676-2E730BC5F573}.Release|x64.Build.0 = Release|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Debug|x64.Build.0 = Debug|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Release|x64.ActiveCfg = Release|Any CPU
+		{EBD43071-D7AB-4F8B-924F-3FCB2A2A8D7C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

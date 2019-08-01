@@ -1,22 +1,21 @@
-﻿using HslCommunication;
-using HslCommunication.Profinet.Siemens;
-using IRAP.BL.S7Gateway.Entities;
-using IRAP.BL.S7Gateway.Enums;
-using Logrila.Logging;
+﻿using Logrila.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace IRAP.BL.S7Gateway
 {
     /// <summary>
-    /// 使用HslCommunication控件来读写西门子PLC 
+    /// 西门子PLC连接类，用于读写西门子PLC的数据块
     /// </summary>
-    public class SiemensPLCConnection : IRAPBaseObject
+    public class BS7SiemensPLCConnection : IRAPBaseObject
     {
-        private SiemensS7Net siemensTcpNet = null;
-        private SiemensPLCS siemensPLCS = SiemensPLCS.S1200;
+        /// <summary>
+        /// PLC对象识别码，读写时使用
+        /// </summary>
+        private long plcHandle;
         /// <summary>
         /// 是否连接到PLC
         /// </summary>
@@ -32,24 +31,24 @@ namespace IRAP.BL.S7Gateway
         /// <param name="ipAddress">PLC的IP地址</param>
         /// <param name="rack">PLC的机架号</param>
         /// <param name="slot">PLC的插槽号</param>
-        public SiemensPLCConnection(string ipAddress, int rack, int slot)
+        public BS7SiemensPLCConnection(string ipAddress, int rack, int slot)
         {
-            _log = Logger.Get<SiemensPLCConnection>();
-            siemensTcpNet = new SiemensS7Net(siemensPLCS);
+            _log = Logger.Get<BS7SiemensPLCConnection>();
 
             IPAddress = ipAddress;
             Rack = rack;
             Slot = slot;
 
+            plcHandle = CS7TcpClient.CreatePlc();
             isConnected = Connect();
         }
 
         /// <summary>
-        /// 析构方法，释放西门子S7的连接
+        /// 析构方法
         /// </summary>
-        ~SiemensPLCConnection()
+        ~BS7SiemensPLCConnection()
         {
-            siemensTcpNet.ConnectClose();
+            CS7TcpClient.DestoryPlc(ref plcHandle);
         }
 
         /// <summary>
@@ -68,36 +67,38 @@ namespace IRAP.BL.S7Gateway
         /// <summary>
         /// 连接到PLC
         /// </summary>
-        /// <returns>true-连接成功；false-连接失败</returns>
+        /// <returns></returns>
         private bool Connect()
         {
+            int iConnected = 0;
             try
             {
-                siemensTcpNet.IpAddress = IPAddress;
-                siemensTcpNet.Port = 102;
-                siemensTcpNet.Rack = (byte)Rack;
-                siemensTcpNet.Slot = (byte)Slot;
+                lock (_lockObjet)
+                {
+                    iConnected =
+                        CS7TcpClient.ConnectPlc(
+                            plcHandle,
+                            Encoding.Default.GetBytes(IPAddress),
+                            Rack,
+                            Slot,
+                            false,
+                            0,
+                            0);
+                }
 
-                OperateResult connect = siemensTcpNet.ConnectServer();
-                if (connect.IsSuccess)
+                if (iConnected == 0)
                 {
                     return true;
                 }
                 else
                 {
-                    _log.Error(
-                        $"连接到[{IPAddress}:{siemensTcpNet.Port}][" +
-                        $"Rack={Rack}|Slot={Slot}失败，原因：[({connect.ErrorCode})" +
-                        $"{connect.Message}0");
+                    _log.Error($"ErrCode={iConnected}|ErrText={GetErrorMessage(iConnected)}");
                     return false;
                 }
             }
             catch (Exception error)
             {
-                _log.Error(
-                    $"连接到[{IPAddress}:{siemensTcpNet.Port}][" +
-                    $"Rack={Rack}|Slot={Slot}失败，原因：{error.Message}",
-                    error);
+                _log.Error(error.Message, error);
                 return false;
             }
         }
@@ -109,20 +110,33 @@ namespace IRAP.BL.S7Gateway
         {
             try
             {
-                OperateResult rlt = siemensTcpNet.ConnectClose();
-                if (!rlt.IsSuccess)
+                int resNo = CS7TcpClient.DisconnectPlc(plcHandle);
+                if (resNo != 0)
                 {
-                    _log.Error($"ErrCode={rlt.ErrorCode}|ErrText={rlt.Message}");
+                    _log.Error($"ErrCode={resNo}|ErrText={GetErrorMessage(resNo)}");
                 }
             }
             catch (Exception error)
             {
                 _log.Error(error.Message, error);
             }
-            finally
-            {
-                isConnected = false;
+        }
 
+        /// <summary>
+        /// 根据错误代码获取错误提示文本
+        /// </summary>
+        /// <param name="errCode">错误代码</param>
+        private string GetErrorMessage(int errCode)
+        {
+            byte[] errText = new byte[1024];
+            int resNo = CS7TcpClient.GetErrorMsg(errCode, errText, errText.Length);
+            if (resNo == 0)
+            {
+                return Encoding.Default.GetString(errText);
+            }
+            else
+            {
+                return $"ResNo={resNo}";
             }
         }
 
@@ -149,75 +163,33 @@ namespace IRAP.BL.S7Gateway
             }
 
             buffer = new byte[bufferLength];
-            OperateResult<byte[]> resNo;
+            int resNo = 0;
             lock (_lockObjet)
             {
-                string addr = $"{dbType.ToString()}{dbNumber}.{dbOffset}";
                 resNo =
-                    siemensTcpNet.Read(
-                        addr,
-                        (ushort)bufferLength);
+                    CS7TcpClient.ReadBlockAsByte(
+                        plcHandle,
+                        (int)dbType,
+                        dbNumber,
+                        dbOffset,
+                        bufferLength,
+                        buffer);
             }
 
-            if (!resNo.IsSuccess)
+            if (resNo != 0)
             {
-                errText = resNo.ToMessageShowString();
+                errText = GetErrorMessage(resNo);
                 _log.Error(
                     $"PLC:[{IPAddress}]读取[{dbType}]" +
                     $"[{dbNumber}]失败，失败信息：" +
-                    $"[Message:{errText}");
+                    $"[Code:{resNo},Message:{errText}");
             }
             else
             {
-                buffer = resNo.Content;
-                errText = "读取正常";
-            }
-            
-            return resNo.ErrorCode;
-        }
-
-        /// <summary>
-        /// 读取Float值
-        /// </summary>
-        /// <param name="dbType">数据块类别标识</param>
-        /// <param name="dbNumber">DB数据块编号</param>
-        /// <param name="dbOffset">读取的起始偏移量</param>
-        /// <param name="value">float类型的值</param>
-        /// <param name="errText">执行结果信息</param>
-        public int ReadFloat(
-            SiemensRegisterType dbType,
-            int dbNumber,
-            int dbOffset,
-            ref float value,
-            out string errText)
-        {
-            if (!isConnected)
-            {
-                isConnected = Connect();
-            }
-
-            OperateResult<float> resNo;
-            lock (_lockObjet)
-            {
-                string addr = $"{dbType.ToString()}{dbNumber}.{dbOffset}";
-                resNo = siemensTcpNet.ReadFloat(addr);
-            }
-
-            if (!resNo.IsSuccess)
-            {
-                errText = resNo.ToMessageShowString();
-                _log.Error(
-                    $"PLC:[{IPAddress}]读取[{dbType}]" +
-                    $"[{dbNumber}]失败，失败信息：" +
-                    $"[Message:{errText}");
-            }
-            else
-            {
-                value = resNo.Content;
                 errText = "读取正常";
             }
 
-            return resNo.ErrorCode;
+            return resNo;
         }
 
         /// <summary>
@@ -236,76 +208,106 @@ namespace IRAP.BL.S7Gateway
                 isConnected = Connect();
             }
 
-            OperateResult rlt = new OperateResult();
+            int rlt = 0;
             try
             {
                 lock (_lockObjet)
                 {
-                    string address =
-                        $"{dbType.ToString()}{dbNumber}.{tag.DB_Offset}";
                     if (tag is SiemensBoolOfTag)
                     {
                         SiemensBoolOfTag ltag = tag as SiemensBoolOfTag;
-
-                        address += $".{ltag.Position}";
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteBool(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Position,
+                            ltag.Value);
                         if (!ltag.Name.Contains("MES_Heart_Beat"))
                         {
                             _log.Debug(
                               $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                              $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                              $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                         }
                     }
                     else if (tag is SiemensByteOfTag)
                     {
                         SiemensByteOfTag ltag = tag as SiemensByteOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteByte(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                     else if (tag is SiemensWordOfTag)
                     {
                         SiemensWordOfTag ltag = tag as SiemensWordOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteWord(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                     else if (tag is SiemensIntOfTag)
                     {
                         SiemensIntOfTag ltag = tag as SiemensIntOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteInt(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                     else if (tag is SiemensDWordOfTag)
                     {
                         SiemensDWordOfTag ltag = tag as SiemensDWordOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteDWord(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                     else if (tag is SiemensRealOfTag)
                     {
                         SiemensRealOfTag ltag = tag as SiemensRealOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
+                        rlt = CS7TcpClient.WriteFloat(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                     else if (tag is SiemensArrayCharOfTag)
                     {
                         SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
-                        rlt =
-                            siemensTcpNet.Write(
-                                address,
-                                Encoding.ASCII.GetBytes(ltag.Value));
+                        rlt = CS7TcpClient.WriteString(
+                            plcHandle,
+                            (int)dbType,
+                            dbNumber,
+                            ltag.DB_Offset,
+                            ltag.Length,
+                            Encoding.ASCII.GetBytes(ltag.Value));
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
                     }
                 }
             }
@@ -316,12 +318,12 @@ namespace IRAP.BL.S7Gateway
                     $"Offset:[{tag.DB_Offset}]写入时发生错误，{error.Message}");
             }
 
-            if (rlt.ErrorCode != 0)
+            if (rlt != 0)
             {
                 throw new Exception(
                     $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                    $"Offset:[{tag.DB_Offset}]写入失败，错误提示:[{rlt.ErrorCode}]" +
-                    $"[{rlt.Message}]");
+                    $"Offset:[{tag.DB_Offset}]写入失败，错误提示:[{rlt}]" +
+                    $"[{GetErrorMessage(rlt)}]");
             }
         }
     }

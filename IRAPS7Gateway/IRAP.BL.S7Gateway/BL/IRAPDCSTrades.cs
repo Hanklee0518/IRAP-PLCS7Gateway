@@ -168,7 +168,7 @@ namespace IRAP.BL.S7Gateway
             {
                 var stringTag =
                     device.ReadTagValue(ltag) as SiemensArrayCharOfTag;
-                return stringTag.Value;
+                return stringTag.Value.Trim();
             }
             else
             {
@@ -199,6 +199,124 @@ namespace IRAP.BL.S7Gateway
             else
             {
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// 从标记组中查找指定标记名的标记，从PLC中实时读取并返回该标记的uint值
+        /// </summary>
+        /// <param name="device">西门子设备</param>
+        /// <param name="tags">标记组</param>
+        /// <param name="tagName">标记名称</param>
+        /// <returns>标记的uint值</returns>
+        protected uint ReadDWordValue(
+            SiemensDevice device,
+            SiemensTagCollection tags,
+            string tagName)
+        {
+            var tag = tags[tagName];
+            if (tag is SiemensDWordOfTag)
+            {
+                var intTag =
+                    device.ReadTagValue(
+                        tag as SiemensDWordOfTag) as SiemensDWordOfTag;
+                return intTag.Value;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 从标记组中查找指定标记名的标记，从PLC中实时读取并返回该标记的ushort值
+        /// </summary>
+        /// <param name="device">西门子设备</param>
+        /// <param name="tags">标记组</param>
+        /// <param name="tagName">标记名称</param>
+        /// <returns>标记的ushort值</returns>
+        protected ushort ReadWordValue(
+            SiemensDevice device,
+            SiemensTagCollection tags,
+            string tagName)
+        {
+            var tag = tags[tagName];
+            if (tag is SiemensWordOfTag)
+            {
+                var intTag =
+                    device.ReadTagValue(
+                        tag as SiemensWordOfTag) as SiemensWordOfTag;
+                return intTag.Value;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 查找指定名称的Tag，将Tag值写入找到的Tag中，并加入待回写PLC的Tag列表中
+        /// </summary>
+        /// <param name="tags">待回写PLC的Tag列表</param>
+        /// <param name="group">待查找Tag所在的容器</param>
+        /// <param name="tagName">待查找的Tag名称</param>
+        /// <param name="tagValue">Tag值</param>
+        protected void WriteTagValueBack(
+            List<SiemensTag> tags,
+            SiemensTagGroup group,
+            string tagName,
+            object tagValue)
+        {
+            if (tags == null || group == null)
+            {
+                return;
+            }
+
+            if (group.Tags[tagName] is SiemensTag writeTag)
+            {
+                writeTag.Value = tagValue;
+                tags.Add(writeTag);
+                if (writeTag is SiemensArrayCharOfTag)
+                {
+                    if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                    {
+                        lengthTag.Value = ((string)tagValue).Length;
+                        tags.Add(lengthTag);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 查找指定名称的Tag，将Tag值写入找到的Tag中，并加入待回写PLC的Tag列表中
+        /// </summary>
+        /// <param name="tags">待回写PLC的Tag列表</param>
+        /// <param name="group">待查找Tag所在的容器</param>
+        /// <param name="tagName">待查找的Tag名称</param>
+        /// <param name="tagValue">Tag值</param>
+        protected void WriteTagValueBack(
+            List<SiemensTag> tags,
+            SiemensSubTagGroup group,
+            string tagName,
+            object tagValue)
+        {
+            if (tags == null || group == null)
+            {
+                return;
+            }
+
+            if (group.Tags[tagName] is SiemensTag writeTag)
+            {
+                writeTag.Value = tagValue;
+                tags.Add(writeTag);
+                if (writeTag is SiemensArrayCharOfTag)
+                {
+                    if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                    {
+                        lengthTag.Value = ((string)tagValue).Length;
+                        tags.Add(lengthTag);
+                    }
+                }
             }
         }
     }
@@ -465,6 +583,7 @@ namespace IRAP.BL.S7Gateway
                                         CommunityID = GlobalParams.Instance.CommunityID,
                                         T133LeafID = device.T133LeafID,
                                         T216LeafID = device.T216LeafID,
+                                        T102LeafID = subTagGroup.T102LeafID,
                                         T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                         ParamXML = new SNRequestParamXML()
                                         {
@@ -568,6 +687,7 @@ namespace IRAP.BL.S7Gateway
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
+                                    T102LeafID = subTagGroup.T102LeafID,
                                     T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
@@ -655,6 +775,7 @@ namespace IRAP.BL.S7Gateway
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
+                                    T102LeafID = subTagGroup.T102LeafID,
                                     T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
@@ -667,6 +788,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             foreach (SiemensTag recipeTag in recipeGroup.Tags)
                             {
+                                device.ReadTagValue(recipeTag);
                                 productionEnd.Request.ParamXML.RECIPE.Add(
                                     new RecipeRow()
                                     {
@@ -682,6 +804,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             foreach (SiemensTag propertyTag in propertyGroup.Tags)
                             {
+                                device.ReadTagValue(propertyTag);
                                 productionEnd.Request.ParamXML.PROPERTY.Add(
                                     new PropertyRow()
                                     {
@@ -819,6 +942,7 @@ namespace IRAP.BL.S7Gateway
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
+                                    T102LeafID = subTagGroup.T102LeafID,
                                     T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
@@ -862,6 +986,991 @@ namespace IRAP.BL.S7Gateway
                     rlt.Add(tag);
 
                     _log.Info("工件离站处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 请求标签元素交易
+    /// </summary>
+    public class IRAPDCSTradeLabelElementsRequest : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("请求标签元素交易处理");
+
+                    LBLElement lblElement = null;
+                    SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
+                    if (subTagGroup != null)
+                    {
+                        lblElement =
+                            new LBLElement(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new LBLElementRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = subTagGroup.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (lblElement == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (lblElement.Do())
+                        {
+                            if (lblElement.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                    $"{lblElement.Error.ErrText}");
+
+                                if (device.Groups["LBLElement"] is SiemensTagGroup group)
+                                {
+                                    WriteTagValueBack(rlt, group, "Custom_Part_Number", lblElement.Response.Output.Customer_Part_Number);
+                                    WriteTagValueBack(rlt, group, "Product_Serial_Number", lblElement.Response.Output.Product_Serial_Number);
+                                    WriteTagValueBack(rlt, group, "Model_ID", lblElement.Response.Output.Model_ID);
+                                    WriteTagValueBack(rlt, group, "Vendor_Code_Of_Us", lblElement.Response.Output.Vendor_Code_Of_Us);
+                                    WriteTagValueBack(rlt, group, "Sales_Part_Number", lblElement.Response.Output.Sales_Part_Number);
+                                    WriteTagValueBack(rlt, group, "Hardware_Version", lblElement.Response.Output.Hardware_Version);
+                                    WriteTagValueBack(rlt, group, "Software_Version", lblElement.Response.Output.Software_Version);
+                                    WriteTagValueBack(rlt, group, "Lot_Number", lblElement.Response.Output.Lot_Number);
+                                    WriteTagValueBack(rlt, group, "MFG_Date", lblElement.Response.Output.MFG_Date);
+                                    WriteTagValueBack(rlt, group, "Shift_Number", lblElement.Response.Output.Shift_Number);
+                                    WriteTagValueBack(rlt, group, "Oven_Number", lblElement.Response.Output.Oven_Number);
+                                    WriteTagValueBack(rlt, group, "Customer_Duns_Code", lblElement.Response.Output.Customer_Duns_Code);
+                                    WriteTagValueBack(rlt, group, "OEM_Brand", lblElement.Response.Output.OEM_Brand);
+                                    WriteTagValueBack(rlt, group, "Fixed_String_1", lblElement.Response.Output.Fixed_String_1);
+                                    WriteTagValueBack(rlt, group, "Fixed_String_2", lblElement.Response.Output.Fixed_String_2);
+                                    WriteTagValueBack(rlt, group, "Derived_String_1", lblElement.Response.Output.Derived_String_1);
+                                    WriteTagValueBack(rlt, group, "Derived_String_2", lblElement.Response.Output.Derived_String_2);
+                                }
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                    $"{lblElement.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                $"{lblElement.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("请求标签元素处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 请求防错交易
+    /// </summary>
+    public class IRAPDCSTradeRequestForPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("请求防错交易处理");
+
+                    PokaYoke pokaYoke = null;
+                    SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
+                    if (subWIPStation != null)
+                    {
+                        pokaYoke =
+                            new PokaYoke(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new PokaYokeRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = subWIPStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, subWIPStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (pokaYoke == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (device.Groups["WIPOntoLine"] is SiemensTagGroup wipOntoLine)
+                    {
+                        string wipIDCode = ReadStringValue(device, wipOntoLine.Tags, "WIP_ID_Code");
+                        if (wipIDCode != "")
+                        {
+                            pokaYoke.Request.ParamXML =
+                                new PokaYokeParamXML()
+                                {
+                                    WIP_Src_Code = ReadStringValue(device, wipOntoLine.Tags, "WIP_Src_Code"),
+                                    WIP_ID_Code = wipIDCode,
+                                    Container_Number_pallet_code = ReadStringValue(device, wipOntoLine.Tags, "Container_Number_pallet_code"),
+                                };
+                        }
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (pokaYoke.Do())
+                        {
+                            if (pokaYoke.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                    $"{pokaYoke.Error.ErrText}");
+
+                                WriteTagValueBack(rlt, subWIPStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                                WriteTagValueBack(rlt, subWIPStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                                subWIPStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+
+                                if (pokaYoke.Response.Output.WIPOntoLine != null)
+                                {
+                                    if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
+                                    {
+                                        WriteTagValueBack(rlt, group, "Number_Of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
+                                        int j = 0;
+                                        for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
+                                        {
+                                            j = i;
+                                            PokaYokeOutputWIPOntoLineSubWIP subWIP = pokaYoke.Response.Output.WIPOntoLine.SubWIPs[i];
+                                            if (i < group.SubGroups.Count)
+                                            {
+                                                SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", subWIP.WIP_Code);
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", subWIP.WIP_ID_Type_Code);
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", subWIP.WIP_ID_Code);
+                                                WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", subWIP.PWO_Number);
+                                                WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", subWIP.Sub_Container_Number);
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", subWIP.WIP_Quantity);
+                                                break;
+                                            }
+                                        }
+
+                                        for (int i = j + 1; i < group.SubGroups.Count; i++)
+                                        {
+                                            SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
+                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", "");
+                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", "");
+                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", "");
+                                            WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", "");
+                                            WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", "");
+                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", 0);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                    $"{pokaYoke.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                $"{pokaYoke.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("请求防错处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 设备故障告警交易
+    /// </summary>
+    public class IRAPDCSTradeTriggerEquipmentFailAndon : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("设备故障告警交易处理");
+
+                    EquipFailAndonCall equipFailAndonCall = null;
+                    SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
+                    if (subWIPStation != null)
+                    {
+                        equipFailAndonCall =
+                            new EquipFailAndonCall(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new EquipFailAndonCallRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = subWIPStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, subWIPStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (equipFailAndonCall == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (device.Groups["EquipmentFail"] is SiemensTagGroup srcGroup)
+                    {
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_1 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_1");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_2 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_2");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_3 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_3");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_4 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_4");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_5 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_5");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_6 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_6");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_7 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_7");
+                        equipFailAndonCall.Request.ParamXML.Equipment_Failures_Group_8 = ReadDWordValue(device, srcGroup.Tags, "Equipment_Failures_Group_8");
+                        equipFailAndonCall.Request.ParamXML.Failure_Code = ReadStringValue(device, srcGroup.Tags, "Failure_Code");
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (equipFailAndonCall.Do())
+                        {
+                            if (equipFailAndonCall.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                    $"{equipFailAndonCall.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                    $"{equipFailAndonCall.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                $"{equipFailAndonCall.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("设备故障告警处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 料槽加料防错交易
+    /// </summary>
+    public class IRAPDCSTradeRequestForFeedingPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensByteOfTag)
+            {
+                SiemensByteOfTag tag = signalTag as SiemensByteOfTag;
+                if (tag.Value == 1)
+                {
+                    _log.Info("料槽加料防错交易处理");
+
+                    PokaYokeFeeding pokaYokeFeeding = null;
+                    SiemensTagGroup feeding = signalTag.Parent as SiemensTagGroup;
+                    if (feeding != null)
+                    {
+                        pokaYokeFeeding =
+                            new PokaYokeFeeding(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new PokaYokeFeedingRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    WIP_Code = ReadStringValue(device, feeding.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, feeding.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, feeding.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (pokaYokeFeeding == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在FEEDING的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    pokaYokeFeeding.Request.ParamXML.Material_Track_ID = ReadStringValue(device, feeding.Tags, "Material_Track_ID");
+                    pokaYokeFeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, feeding.Tags, "Slot_Number");
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (pokaYokeFeeding.Do())
+                        {
+                            if (pokaYokeFeeding.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                    $"{pokaYokeFeeding.Error.ErrText}");
+
+                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", pokaYokeFeeding.Response.Output.Poka_Yoke_Result);
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                    $"{pokaYokeFeeding.Error.ErrText}");
+                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                $"{pokaYokeFeeding.Error.ErrText}");
+                            WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                        }
+                    }
+
+                    tag.Value = 0;
+                    rlt.Add(tag);
+
+                    _log.Info("料槽加料防错处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 料槽卸料交易
+    /// </summary>
+    public class IRAPDCSTradeUnfeedingEnd : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensByteOfTag)
+            {
+                SiemensByteOfTag tag = signalTag as SiemensByteOfTag;
+                if (tag.Value == 1)
+                {
+                    _log.Info("料槽卸料交易处理");
+
+                    Unfeeding unfeeding = null;
+                    SiemensTagGroup unfeedingGroup = signalTag.Parent as SiemensTagGroup;
+                    if (unfeedingGroup != null)
+                    {
+                        unfeeding =
+                            new Unfeeding(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new UnfeedingRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    WIP_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (unfeeding == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在UNFEEDING的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    unfeeding.Request.ParamXML.Material_Track_ID = ReadStringValue(device, unfeedingGroup.Tags, "Material_Track_ID");
+                    unfeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, unfeedingGroup.Tags, "Slot_Number");
+                    unfeeding.Request.ParamXML.Unfeeding_Quantity = ReadDWordValue(device, unfeedingGroup.Tags, "Unfeeding_Quantity");
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (unfeeding.Do())
+                        {
+                            if (unfeeding.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                    $"{unfeeding.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                    $"{unfeeding.Error.ErrText}");
+                                WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                $"{unfeeding.Error.ErrText}");
+                            WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
+                        }
+                    }
+
+                    tag.Value = 0;
+                    rlt.Add(tag);
+
+                    _log.Info("料槽卸料处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 停滞告警交易
+    /// </summary>
+    public class IRAPDCSTradeStagnationWarnning : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("停滞告警交易处理");
+
+                    StagnationWarnning stagnationWarnning = null;
+                    SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
+                    if (wipStation != null)
+                    {
+                        stagnationWarnning =
+                            new StagnationWarnning(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new StagnationWarnningRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = wipStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (stagnationWarnning == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (device.Groups["Stagnation"] is SiemensTagGroup stagnation)
+                    {
+                        stagnationWarnning.Request.ParamXML.Time_In_Seconds = ReadDWordValue(device, stagnation.Tags, "Material_Track_ID");
+                        stagnationWarnning.Request.ParamXML.Threshold = ReadWordValue(device, stagnation.Tags, "Slot_Number");
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (stagnationWarnning.Do())
+                        {
+                            if (stagnationWarnning.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                    $"{stagnationWarnning.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                    $"{stagnationWarnning.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                $"{stagnationWarnning.Error.ErrText}");
+                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", (byte)2);
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("停滞告警处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// Fazit Response状态检测交易
+    /// </summary>
+    public class IRAPDCSTradeFazitStatusCheck : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("Fazit Response状态检测交易处理");
+
+                    if (!(signalTag.Parent is SiemensSubTagGroup wipStation))
+                    {
+                        return rlt;
+                    }
+
+                    if (!CallStartDCSInvoking(device, signalTag))
+                    {
+                        tag.Value = false;
+                        rlt.Add(tag);
+                        return rlt;
+                    }
+
+                    #region 首先需要进行 DMC 的校验
+                    {
+                        PokaYoke pokaYoke =
+                            new PokaYoke(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new PokaYokeRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = wipStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+
+                        if (pokaYoke.Do())
+                        {
+                            if (pokaYoke.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                    $"{pokaYoke.Error.ErrText}");
+
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                                WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                                wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                    $"{pokaYoke.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                $"{pokaYoke.Error.ErrText}");
+                        }
+
+                        // 如果未通过 PokaYoke 校验，直接返回
+                        if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
+                        {
+                            tag.Value = false;
+                            rlt.Add(tag);
+                            return rlt;
+                        }
+                    }
+                    #endregion
+
+                    #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查
+                    {
+                        FazitStatusCheck fazitStatusCheck =
+                            new FazitStatusCheck(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new FazitStatusCheckRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = wipStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                }
+                            };
+
+                        DateTime start = DateTime.Now;
+                        TimeSpan timeSpan = start - start;
+                        byte fazitStatus = 0xff;
+                        do
+                        {
+                            if (fazitStatusCheck.Do())
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({fazitStatusCheck.Error.ErrCode})" +
+                                    $"{fazitStatusCheck.Error.ErrText}");
+
+                                switch (fazitStatusCheck.Response.Output.DMC_Fazit_Status)
+                                {
+                                    case 0:
+                                        fazitStatus = fazitStatusCheck.Response.Output.DMC_Fazit_Status;
+                                        break;
+                                    case 1:
+                                        fazitStatus = fazitStatusCheck.Response.Output.DMC_Fazit_Status;
+                                        break;
+                                    default:
+                                        fazitStatus = 0xff;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({fazitStatusCheck.Error.ErrCode})" +
+                                    $"{fazitStatusCheck.Error.ErrText}");
+                            }
+
+                            Thread.Sleep(5000);
+                            timeSpan = DateTime.Now - start;
+                        } while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
+
+                        if (fazitStatus == 0xff)
+                        {
+                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", 20);
+                        }
+                        else
+                        { 
+                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", fazitStatus);
+                        }
+                    }
+                    #endregion
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("Fazit Response状态检测处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 料槽缺料检测请求交易
+    /// </summary>
+    public class IRAPDCSTradeShortageMaterialCheck:IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("料槽缺料检测交易处理");
+
+                    ShortageMaterialCheck shortageMaterialCheck = null;
+                    SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
+                    if (wipStation != null)
+                    {
+                        shortageMaterialCheck =
+                            new ShortageMaterialCheck(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new ShortageMaterialCheckRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = wipStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                    }
+
+                    if (shortageMaterialCheck == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (shortageMaterialCheck.Do())
+                        {
+                            if (shortageMaterialCheck.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                    $"{shortageMaterialCheck.Error.ErrText}");
+
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Feedback_Mark", shortageMaterialCheck.Response.Output.Poka_Yoke_Feedback_Mark);
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                    $"{shortageMaterialCheck.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                $"{shortageMaterialCheck.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("料槽缺料检测处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
+
+    /// <summary>
+    /// 容器绑定交易
+    /// </summary>
+    public class IRAPDCSTradeContainerNumberBinding : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("容器绑定交易处理");
+
+                    ContainerNumberBinding containerBinding = null;
+                    SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
+                    if (wipStation != null)
+                    {
+                        containerBinding =
+                            new ContainerNumberBinding(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID)
+                            {
+                                Request = new ContainerNumberBindingRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = wipStation.T102LeafID,
+                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                },
+                            };
+                        containerBinding.Request.ParamXML.Container_Number_pallet_code =
+                            ReadStringValue(
+                                device,
+                                wipStation.Tags,
+                                "Container_Number_pallet_code");
+                    }
+
+                    if (containerBinding == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    if (CallStartDCSInvoking(device, signalTag))
+                    {
+                        if (containerBinding.Do())
+                        {
+                            if (containerBinding.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                    $"{containerBinding.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                    $"{containerBinding.Error.ErrText}");
+                            }
+                        }
+                        else
+                        {
+                            _log.Error(
+                                $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                $"{containerBinding.Error.ErrText}");
+                        }
+                    }
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("容器绑定处理完成");
                 }
             }
 

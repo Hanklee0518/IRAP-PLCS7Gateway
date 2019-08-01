@@ -11,7 +11,7 @@
     <AssemblyName>IRAP.BL.S7Gateway</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,12 +21,12 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DocumentationFile>bin\Debug\IRAP.BL.S7Gateway.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -74,7 +74,7 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.6.4\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\packages\NLog.4.6.6\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="NLog.Mongo, Version=4.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.Mongo.4.6.0.68\lib\net45\NLog.Mongo.dll</HintPath>
@@ -114,7 +114,6 @@
     <Compile Include="Entities\PLCDBReadBlock.cs" />
     <Compile Include="BL\IRAPDCSTrades.cs" />
     <Compile Include="SiemensPLCConnection.cs" />
-    <Compile Include="Utils\CS7Tcp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Enums\PLCEnums.cs" />
     <Compile Include="Utils\GlobalParams.cs" />
@@ -125,18 +124,23 @@
     <Compile Include="WebAPIClient\Contents\CustomPLCContent.cs" />
     <Compile Include="WebAPIClient\CustomWebAPICall.cs" />
     <Compile Include="WebAPIClient\ErrorMessage.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\ContainerNumberBinding.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\EquipFailAndonCall.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\FazitStatusCheck.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\GetOPCStatus.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\IDBinding.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\LBLElement.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\OperationCycleEnd.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\PokaYoke.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\PokaYokeFeeding.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\ProductionEnd.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\ShortageMaterialCheck.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\SNRequest.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\StagnationWarnning.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\StartDCSInvoking.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\Unfeeding.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\WIPMoveIn.cs" />
     <Compile Include="WebAPIClient\WebAPIClientEnums.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="ButterflyS7.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="BL\DCSTrades.cd" />

@@ -88,19 +88,20 @@ namespace IRAP.BL.S7Gateway.Entities
                 }
             }
 
-            if (node.Attributes["T216LeafID"] == null)
-            {
-                throw new Exception("传入的Xml节点没有[T133LeafID]属性");
-            }
-            else
-            {
-                if (int.TryParse(
-                    node.Attributes["T216LeafID"].Value,
-                    out int rlt))
-                {
-                    T216LeafID = rlt;
-                }
-            }
+            T216LeafID = 0;
+            //if (node.Attributes["T216LeafID"] == null)
+            //{
+            //    throw new Exception("传入的Xml节点没有[T216LeafID]属性");
+            //}
+            //else
+            //{
+            //    if (int.TryParse(
+            //        node.Attributes["T216LeafID"].Value,
+            //        out int rlt))
+            //    {
+            //        T216LeafID = rlt;
+            //    }
+            //}
 
             InitComponents();
         }
@@ -437,6 +438,17 @@ namespace IRAP.BL.S7Gateway.Entities
         }
 
         /// <summary>
+        /// 集合中对象数数量
+        /// </summary>
+        public int Count
+        {
+            get => default(int);
+            set
+            {
+            }
+        }
+
+        /// <summary>
         /// 增加SubTagGroup对象
         /// </summary>
         /// <param name="group">SubTagGroup对象</param>
@@ -464,6 +476,9 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 所属的TagGroup对象
         /// </summary>
         protected CustomGroup _parent;
+        /// <summary>
+        /// 标签的值
+        /// </summary>
         protected object value;
 
         /// <summary>
@@ -532,6 +547,15 @@ namespace IRAP.BL.S7Gateway.Entities
         /// Tag对象
         /// </summary>
         public CustomGroup Parent { get { return _parent; } }
+
+        /// <summary>
+        /// 标签的值
+        /// </summary>
+        public object Value
+        {
+            get { return value; }
+            set { this.value = value; }
+        }
     }
 
     /// <summary>

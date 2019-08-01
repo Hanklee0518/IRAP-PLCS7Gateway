@@ -18,10 +18,6 @@ namespace IRAP.BL.S7Gateway.Entities
     public class SiemensPLC : CustomPLC
     {
         /// <summary>
-        /// PLC对象识别码，读写时使用
-        /// </summary>
-        private long plcHandle;
-        /// <summary>
         /// 是否已建立连接
         /// </summary>
         private bool isConnected = false;
@@ -36,7 +32,6 @@ namespace IRAP.BL.S7Gateway.Entities
         public SiemensPLC(XmlNode node) : base(node)
         {
             _log = Logger.Get<SiemensPLC>();
-            plcHandle = CS7TcpClient.CreatePlc();
 
             #region 从Xml节点属性中获取属性值
             if (node.Attributes["IPAddress"] != null)
@@ -89,14 +84,6 @@ namespace IRAP.BL.S7Gateway.Entities
         }
 
         /// <summary>
-        /// 析构方法
-        /// </summary>
-        ~SiemensPLC()
-        {
-            CS7TcpClient.DestoryPlc(ref plcHandle);
-        }
-
-        /// <summary>
         /// PLC的IP地址
         /// </summary>
         public string IPAddress { get; private set; } = "";
@@ -110,413 +97,6 @@ namespace IRAP.BL.S7Gateway.Entities
         /// PLC插槽号
         /// </summary>
         public int Slot { get; private set; } = 0;
-
-        /// <summary>
-        /// 连接到PLC
-        /// </summary>
-        private bool Connect()
-        {
-            int iConnected = 0;
-            try
-            {
-                iConnected =
-                    CS7TcpClient.ConnectPlc(
-                        plcHandle,
-                        Encoding.Default.GetBytes(IPAddress),
-                        Rack,
-                        Slot,
-                        false,
-                        0,
-                        0);
-
-                if (iConnected == 0)
-                {
-                    isConnected = true;
-                    return true;
-                }
-                else
-                {
-                    _log.Error($"ErrCode={iConnected}|ErrText={GetErrorMessage(iConnected)}");
-                    isConnected = false;
-                    return false;
-                }
-            }
-            catch (Exception error)
-            {
-                isConnected = false;
-                _log.Error(error.Message, error);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 断开连接
-        /// </summary>
-        private void Disconnect()
-        {
-            try
-            {
-                int resNo = CS7TcpClient.DisconnectPlc(plcHandle);
-                if (resNo != 0)
-                {
-                    _log.Error($"ErrCode={resNo}|ErrText={GetErrorMessage(resNo)}");
-                }
-            }
-            catch (Exception error)
-            {
-                _log.Error(error.Message, error);
-            }
-        }
-
-        /// <summary>
-        /// 根据错误代码获取错误提示文本
-        /// </summary>
-        /// <param name="errCode">错误代码</param>
-        private string GetErrorMessage(int errCode)
-        {
-            byte[] errText = new byte[1024];
-            int resNo = CS7TcpClient.GetErrorMsg(errCode, errText, errText.Length);
-            if (resNo == 0)
-            {
-                return Encoding.Default.GetString(errText);
-            }
-            else
-            {
-                return $"ResNo={resNo}";
-            }
-        }
-
-        /// <summary>
-        /// 循环读取PLC数据块中的数据
-        /// </summary>
-        private void CycleReadBuffer()
-        {
-            try
-            {
-                while (!cycleReadTerminated)
-                {
-                    if (!isConnected)
-                    {
-                        isConnected = Connect();
-                    }
-
-                    if (isConnected)
-                    {
-                        DateTime now = DateTime.Now;
-                        foreach (CustomDevice device in _devices.Values)
-                        {
-                            if (device is SiemensDevice)
-                            {
-                                SiemensDevice siemensDevice = device as SiemensDevice;
-
-                                #region 根据轮询间隔时间读取PLC数据块内容
-                                TimeSpan timeSpan = now - siemensDevice.LastReadTime;
-                                int dbType = (int)siemensDevice.DBType;
-                                if (timeSpan.TotalMilliseconds >= siemensDevice.SplitterTime)
-                                {
-                                    switch (siemensDevice.CycleReadMode)
-                                    {
-                                        case SiemensCycleReadMode.FullBlock:
-                                            FullBlockModeRead(dbType, siemensDevice);
-                                            break;
-                                        case SiemensCycleReadMode.ControlBlock:
-                                            ControlBlockModeRead(dbType, siemensDevice);
-                                            break;
-                                    }
-
-                                    siemensDevice.LastReadTime = now;
-                                }
-                                #endregion
-
-                                #region 每隔2秒钟，向PLC发送当前设备的MESHeartBeat信号
-                                KeepMESHeartBeat(now, dbType, siemensDevice);
-                                #endregion
-                            }
-                        }
-                    }
-
-                    Thread.Sleep(10);
-                }
-            }
-            finally
-            {
-                if (isConnected)
-                    Disconnect();
-            }
-        }
-
-        /// <summary>
-        /// 每个Device对象单独一个S7连接
-        /// </summary>
-        private void CycleReadBufferPerDevice()
-        {
-
-        }
-
-        /// <summary>
-        /// 数据块全部内容模式读取
-        /// </summary>
-        /// <param name="dbType">数据块类别标识</param>
-        /// <param name="device">SiemensDevice对象</param>
-        private void FullBlockModeRead(
-            int dbType,
-            SiemensDevice device)
-        {
-            byte[] buffer = new byte[device.FullBlock.BufferLength];
-            int resNo =
-                CS7TcpClient.ReadBlockAsByte(
-                    plcHandle,
-                    dbType,
-                    device.DBNumber,
-                    device.FullBlock.Start_Offset,
-                    device.FullBlock.BufferLength,
-                    buffer);
-
-            if (resNo != 0)
-            {
-                _log.Error(
-                    $"设备[{device.Name}]" +
-                    $"读取[{device.DBType}]" +
-                    $"[{device.DBNumber}]失败，失败信息：" +
-                    $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
-                isConnected = false;
-                return;
-            }
-            else
-            {
-                device.DoSomething(buffer);
-            }
-        }
-
-        /// <summary>
-        /// 数据块全部数据模式读取(异步方法)
-        /// </summary>
-        /// <param name="dbType">数据块列别标识</param>
-        /// <param name="device">SiemensDevice对象</param>
-        /// <returns></returns>
-        private async Task FullBlockModeReadAsync(int dbType, SiemensDevice device)
-        {
-            var task = Task.Run(() =>
-            {
-                byte[] buffer = new byte[device.FullBlock.BufferLength];
-                int resNo =
-                    CS7TcpClient.ReadBlockAsByte(
-                        plcHandle,
-                        dbType,
-                        device.DBNumber,
-                        device.FullBlock.Start_Offset,
-                        device.FullBlock.BufferLength,
-                        buffer);
-
-                if (resNo != 0)
-                {
-                    _log.Error(
-                        $"设备[{device.Name}]" +
-                        $"读取[{device.DBType}]" +
-                        $"[{device.DBNumber}]失败，失败信息：" +
-                        $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
-                    isConnected = false;
-                    return;
-                }
-                else
-                {
-                    device.DoSomething(buffer);
-                }
-            });
-
-            await task;
-        }
-
-        /// <summary>
-        /// 控制信号数据块模式读取
-        /// </summary>
-        /// <param name="dbType">数据块类别标识</param>
-        /// <param name="device">SiemensDevice对象</param>
-        private void ControlBlockModeRead(
-            int dbType,
-            SiemensDevice device)
-        {
-            byte[] buffer;
-            for (int i = 0; i < device.ControlBlock.Count; i++)
-            {
-                buffer = new byte[device.ControlBlock[i].BufferLength];
-                int resNo =
-                    CS7TcpClient.ReadBlockAsByte(
-                        plcHandle,
-                        dbType,
-                        device.DBNumber,
-                        device.ControlBlock[i].Start_Offset,
-                        device.ControlBlock[i].BufferLength,
-                        buffer);
-
-                if (resNo != 0)
-                {
-                    _log.Error(
-                        $"设备[{device.Name}]" +
-                        $"读取[{device.DBType}]" +
-                        $"[{device.DBNumber}]失败，失败信息：" +
-                        $"[Code:{resNo},Message:{GetErrorMessage(resNo)}");
-                    isConnected = false;
-                    return;
-                }
-                else
-                {
-                    device.DoSomething(device.ControlBlock.GetKey(i), buffer);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 保持每两秒中发送一次MESHeartBeat信号
-        /// </summary>
-        /// <param name="now">线程本次执行的瞬时时间</param>
-        /// <param name="dbType">数据块类别标识</param>
-        /// <param name="device">SiemensDevice对象</param>
-        private void KeepMESHeartBeat(
-            DateTime now,
-            int dbType,
-            SiemensDevice device)
-        {
-            TimeSpan timeSpan = now - device.LastMESHearBeatTime;
-            if (timeSpan.TotalMilliseconds >= 2000)
-            {
-                CustomTag tag = device.FindTag("COMM", "MES_Heart_Beat");
-                if (tag != null && tag is SiemensBoolOfTag)
-                {
-                    SiemensBoolOfTag heartBeatTag = tag as SiemensBoolOfTag;
-                    heartBeatTag.Value = !heartBeatTag.Value;
-                    CS7TcpClient.WriteBool(
-                        plcHandle,
-                        dbType,
-                        device.DBNumber,
-                        heartBeatTag.DB_Offset,
-                        heartBeatTag.Position,
-                        heartBeatTag.Value);
-                }
-
-                device.LastMESHearBeatTime = now;
-            }
-        }
-
-        /// <summary>
-        /// 将值回写到PLC中
-        /// </summary>
-        /// <param name="device">西门子Device对象</param>
-        /// <param name="tag">西门子Tag对象</param>
-        private void WriteToPLC(SiemensDevice device, SiemensTag tag)
-        {
-            int rlt = 0;
-            try
-            {
-                if (tag is SiemensBoolOfTag)
-                {
-                    SiemensBoolOfTag ltag = tag as SiemensBoolOfTag;
-                    rlt = CS7TcpClient.WriteBool(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Position,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensByteOfTag)
-                {
-                    SiemensByteOfTag ltag = tag as SiemensByteOfTag;
-                    rlt = CS7TcpClient.WriteByte(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensWordOfTag)
-                {
-                    SiemensWordOfTag ltag = tag as SiemensWordOfTag;
-                    rlt = CS7TcpClient.WriteWord(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensIntOfTag)
-                {
-                    SiemensIntOfTag ltag = tag as SiemensIntOfTag;
-                    rlt = CS7TcpClient.WriteInt(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensDWordOfTag)
-                {
-                    SiemensDWordOfTag ltag = tag as SiemensDWordOfTag;
-                    rlt = CS7TcpClient.WriteDWord(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensRealOfTag)
-                {
-                    SiemensRealOfTag ltag = tag as SiemensRealOfTag;
-                    rlt = CS7TcpClient.WriteFloat(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Value);
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-                else if (tag is SiemensArrayCharOfTag)
-                {
-                    SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
-                    rlt = CS7TcpClient.WriteString(
-                        plcHandle,
-                        (int)device.DBType,
-                        device.DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Length,
-                        Encoding.ASCII.GetBytes(ltag.Value));
-                    _log.Debug(
-                        $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                        $"Offset:[{tag.DB_Offset}]，待写入:[{ltag.Value}]");
-                }
-            }
-            catch (Exception error)
-            {
-                throw new Exception(
-                    $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                    $"Offset:[{tag.DB_Offset}]写入时发生错误，{error.Message}");
-            }
-
-            if (rlt != 0)
-            {
-                throw new Exception(
-                    $"PLC:[{IPAddress}]:设备[{device.Name}]:Tag[{tag.Name}]:" +
-                    $"Offset:[{tag.DB_Offset}]写入失败，错误提示:[{rlt}]" +
-                    $"[{GetErrorMessage(rlt)}]");
-            }
-        }
 
         /// <summary>
         /// 开启循环读线程
@@ -1050,7 +630,7 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 SiemensRealOfTag ltag = tag as SiemensRealOfTag;
 
-                float newValue=Tools.GetRealValue(buffer, offset);
+                float newValue = Tools.GetRealValue(buffer, offset);
                 if (ltag.Value == newValue)
                 {
                     return false;
@@ -1064,7 +644,7 @@ namespace IRAP.BL.S7Gateway.Entities
             {
                 SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
 
-                string newValue=Tools.GetStringValue(buffer, offset, ltag.Length);
+                string newValue = Tools.GetStringValue(buffer, offset, ltag.Length);
                 if (ltag.Value == newValue)
                 {
                     return false;
@@ -1129,7 +709,7 @@ namespace IRAP.BL.S7Gateway.Entities
                             ControlBlockModeRead();
                             break;
                     }
-                        _log.Trace($"设备[{Name}]间隔上次读取[{timeSpan.TotalMilliseconds}]毫秒后再次读取 PLC 数据块");
+                    _log.Trace($"设备[{Name}]间隔上次读取[{timeSpan.TotalMilliseconds}]毫秒后再次读取 PLC 数据块");
                 }
 
                 Thread.Sleep(10);
@@ -1277,17 +857,33 @@ namespace IRAP.BL.S7Gateway.Entities
             }
             else if (tag is SiemensLengthTag)
             {
-                SiemensLengthTag ltag = tag as SiemensLengthTag;
-                byte[] buffer = new byte[ltag.Length];
-                int resNo =
-                    specialRWConnection.ReadBlock(
-                        DBType,
-                        DBNumber,
-                        ltag.DB_Offset,
-                        ltag.Length,
-                        ref buffer,
-                        out string errText);
-                SetTagValue(buffer, tag, tag.DB_Offset);
+                if (tag is SiemensRealOfTag)
+                {
+                    SiemensRealOfTag ltag = tag as SiemensRealOfTag;
+                    float value = 0;
+                    int resNo = 
+                        specialRWConnection.ReadFloat(
+                            DBType,
+                            DBNumber,
+                            ltag.DB_Offset,
+                            ref value,
+                            out string errText);
+                    ltag.Value = value;
+                }
+                else
+                {
+                    SiemensLengthTag ltag = tag as SiemensLengthTag;
+                    byte[] buffer = new byte[ltag.Length];
+                    int resNo =
+                        specialRWConnection.ReadBlock(
+                            DBType,
+                            DBNumber,
+                            ltag.DB_Offset,
+                            ltag.Length,
+                            ref buffer,
+                            out string errText);
+                    SetTagValue(buffer, tag, tag.DB_Offset);
+                }
             }
 
             sw.Stop();
@@ -1543,18 +1139,6 @@ namespace IRAP.BL.S7Gateway.Entities
         /// Tag值占用的字节长度
         /// </summary>
         public abstract short Length { get; }
-
-        /// <summary>
-        /// Tag值
-        /// </summary>
-        public object Value
-        {
-            get => value;
-            set
-            {
-                base.value = value;
-            }
-        }
     }
 
     /// <summary>
@@ -1599,7 +1183,7 @@ namespace IRAP.BL.S7Gateway.Entities
         public new bool Value
         {
             get { return (bool)base.Value; }
-            set { base.Value = value; }
+            set { base.value = value; }
         }
 
         /// <summary>
@@ -1656,7 +1240,7 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             _log = Logger.Get<SiemensByteOfTag>();
 
-            value = 0;
+            value = (byte)0;
 
             _log.Trace($"创建Tag{Name},Offset={DB_Offset}");
 
@@ -1672,7 +1256,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         public new byte Value
         {
-            get { return (byte)value; }
+            get{ return (byte)value; }
             set { base.value = value; }
         }
     }
@@ -1691,7 +1275,7 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             _log = Logger.Get<SiemensWordOfTag>();
 
-            value = 0;
+            value = (ushort)0;
 
             _log.Trace($"创建Tag{Name},Offset={DB_Offset}");
         }
@@ -1725,7 +1309,7 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             _log = Logger.Get<SiemensIntOfTag>();
 
-            value = 0;
+            value = (short)0;
 
             _log.Trace($"创建Tag{Name},Offset={DB_Offset}");
         }
@@ -1759,7 +1343,7 @@ namespace IRAP.BL.S7Gateway.Entities
         {
             _log = Logger.Get<SiemensDWordOfTag>();
 
-            value = 0;
+            value = (uint)0;
 
             _log.Trace($"创建Tag{Name},Offset={DB_Offset}");
         }
@@ -1794,13 +1378,13 @@ namespace IRAP.BL.S7Gateway.Entities
             _log = Logger.Get<SiemensRealOfTag>();
             _log.Trace($"创建Tag{Name},Offset={DB_Offset}");
 
-            value = 0;
+            value = (float)0;
         }
 
         /// <summary>
         /// Tag值占用的字节长度
         /// </summary>
-        public override short Length => 2;
+        public override short Length => 4;
 
         /// <summary>
         /// Tag值
@@ -1931,6 +1515,17 @@ namespace IRAP.BL.S7Gateway.Entities
         /// SubTagGroup对象对应PLC数据块的DBBlock定义
         /// </summary>
         public PLCDBBlock Block { get; } = new PLCDBBlock();
+
+        /// <summary>
+        /// 在制品叶标识
+        /// </summary>
+        public int T102LeafID
+        {
+            get => default(int);
+            set
+            {
+            }
+        }
 
         /// <summary>
         /// Tag对象注册事件

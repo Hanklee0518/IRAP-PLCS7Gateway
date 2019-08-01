@@ -111,5 +111,19 @@ namespace IRAP.BL.S7Gateway
                 }
             }
         }
+
+        /// <summary>
+        /// 停止运行
+        /// </summary>
+        public void Stop()
+        {
+            foreach (CustomPLC plc in _plcs)
+            {
+                if (plc is SiemensPLC)
+                {
+                    ((SiemensPLC)plc).Stop();
+                }
+            }
+        }
     }
 }

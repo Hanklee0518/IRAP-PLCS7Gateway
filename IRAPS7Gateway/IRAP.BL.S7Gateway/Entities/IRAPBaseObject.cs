@@ -16,9 +16,9 @@ namespace IRAP.BL.S7Gateway
         /// </summary>
         protected ILog _log = null;
 
-        /// <summary>
-        /// 保存到 MongoDB 的日志记录对象
-        /// </summary>
+        ///// <summary>
+        ///// 保存到 MongoDB 的日志记录对象
+        ///// </summary>
         //protected LogUtil logUtil = null;
 
         /// <summary>

@@ -114,7 +114,8 @@ namespace IRAP.BL.S7Gateway.Utils
         public static float GetRealValue(byte[] buffer, int pos)
         {
             byte[] value = new byte[4];
-            Array.Copy(buffer, pos, value, 0, 4);
+            Array.Copy(buffer, pos + 2, value, 0, 2);
+            Array.Copy(buffer, pos, value, 2, 2);
 
             return BitConverter.ToSingle(value, 0);
         }

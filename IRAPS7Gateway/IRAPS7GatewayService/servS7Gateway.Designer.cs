@@ -31,7 +31,7 @@
             // 
             // servS7Gateway
             // 
-            this.ServiceName = "IRAP-MESGateway for Siemens S7 PLC";
+            this.ServiceName = "IRAP-DCSGateway for Siemens S7 PLC";
 
         }
 

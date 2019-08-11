@@ -437,13 +437,13 @@ namespace IRAP.BL.S7Gateway.Entities
         private void DealPartBlockBuffer(string key, byte[] buffer)
         {
             PLCDBBlock block = ControlBlock[key];
-            if (block != null)
+            if (block != null && key != "COMM")
             {
                 _log.Debug(
                     $"[{key}.Offset={block.Start_Offset}, " +
                     $"{key}.Length={block.BufferLength}]");
+                _log.Debug($"[{key}]|[Data:{Tools.BytesToBCD(buffer)}]");
             }
-            _log.Debug($"[{key}]|[Data:{Tools.BytesToBCD(buffer)}]");
 
             // 根据key解析出TagGroup和SubTagGroup
             string[] keys = key.Split('.');
@@ -861,7 +861,7 @@ namespace IRAP.BL.S7Gateway.Entities
                 {
                     SiemensRealOfTag ltag = tag as SiemensRealOfTag;
                     float value = 0;
-                    int resNo = 
+                    int resNo =
                         specialRWConnection.ReadFloat(
                             DBType,
                             DBNumber,
@@ -1256,7 +1256,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         public new byte Value
         {
-            get{ return (byte)value; }
+            get { return (byte)value; }
             set { base.value = value; }
         }
     }

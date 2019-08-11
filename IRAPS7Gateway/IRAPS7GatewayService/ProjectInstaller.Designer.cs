@@ -39,9 +39,9 @@
             // 
             // serviceInstaller
             // 
-            this.serviceInstaller.Description = "IRAP 西门子S7-PLC MES 网关服务";
-            this.serviceInstaller.DisplayName = "IRAP MESGateway for S7PLC";
-            this.serviceInstaller.ServiceName = "IRAP MESGateway for S7PLC - ";
+            this.serviceInstaller.Description = "IRAP 西门子S7-PLC DCS 网关服务";
+            this.serviceInstaller.DisplayName = "IRAP DCSGateway for S7PLC";
+            this.serviceInstaller.ServiceName = "IRAP DCSGateway for S7PLC - ";
             this.serviceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller

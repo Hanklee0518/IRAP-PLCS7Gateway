@@ -30,37 +30,46 @@
         {
             this.pcDevicePage = new DevExpress.XtraEditors.PanelControl();
             this.ucProperties = new IRAP.MESGateway.Tools.Controls.UCProperties();
+            this.splitterControl1 = new DevExpress.XtraEditors.SplitterControl();
             ((System.ComponentModel.ISupportInitialize)(this.pcDevicePage)).BeginInit();
-            this.pcDevicePage.SuspendLayout();
             this.SuspendLayout();
             // 
             // pcDevicePage
             // 
-            this.pcDevicePage.Controls.Add(this.ucProperties);
             this.pcDevicePage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pcDevicePage.Location = new System.Drawing.Point(0, 0);
+            this.pcDevicePage.Location = new System.Drawing.Point(5, 5);
             this.pcDevicePage.Name = "pcDevicePage";
-            this.pcDevicePage.Size = new System.Drawing.Size(1069, 681);
+            this.pcDevicePage.Size = new System.Drawing.Size(679, 671);
             this.pcDevicePage.TabIndex = 0;
             // 
             // ucProperties
             // 
             this.ucProperties.Dock = System.Windows.Forms.DockStyle.Right;
-            this.ucProperties.Location = new System.Drawing.Point(711, 2);
+            this.ucProperties.Location = new System.Drawing.Point(696, 5);
             this.ucProperties.Name = "ucProperties";
-            this.ucProperties.Size = new System.Drawing.Size(356, 677);
+            this.ucProperties.Size = new System.Drawing.Size(368, 671);
             this.ucProperties.TabIndex = 0;
-            this.ucProperties.Validated += new System.EventHandler(this.ucProperties_Validated);
+            // 
+            // splitterControl1
+            // 
+            this.splitterControl1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.splitterControl1.Location = new System.Drawing.Point(684, 5);
+            this.splitterControl1.Name = "splitterControl1";
+            this.splitterControl1.Size = new System.Drawing.Size(12, 671);
+            this.splitterControl1.TabIndex = 3;
+            this.splitterControl1.TabStop = false;
             // 
             // DeviceTags
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.pcDevicePage);
+            this.Controls.Add(this.splitterControl1);
+            this.Controls.Add(this.ucProperties);
             this.Name = "DeviceTags";
+            this.Padding = new System.Windows.Forms.Padding(5);
             this.Size = new System.Drawing.Size(1069, 681);
             ((System.ComponentModel.ISupportInitialize)(this.pcDevicePage)).EndInit();
-            this.pcDevicePage.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -69,5 +78,6 @@
 
         private DevExpress.XtraEditors.PanelControl pcDevicePage;
         private Controls.UCProperties ucProperties;
+        private DevExpress.XtraEditors.SplitterControl splitterControl1;
     }
 }

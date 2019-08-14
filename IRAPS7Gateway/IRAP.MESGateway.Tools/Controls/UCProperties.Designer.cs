@@ -39,6 +39,7 @@
             this.propertyGrid.Name = "propertyGrid";
             this.propertyGrid.Size = new System.Drawing.Size(270, 546);
             this.propertyGrid.TabIndex = 4;
+            this.propertyGrid.Enter += new System.EventHandler(this.propertyGrid_Enter);
             // 
             // UCProperties
             // 

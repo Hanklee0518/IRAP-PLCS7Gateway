@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraTreeList.Nodes;
+﻿using DevExpress.XtraEditors;
+using DevExpress.XtraTreeList.Nodes;
 using IRAP.MESGateway.Tools.Utils;
 using System;
 using System.Collections;
@@ -7,6 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 
 namespace IRAP.MESGateway.Tools.Entities
@@ -18,15 +20,21 @@ namespace IRAP.MESGateway.Tools.Entities
     {
         private event AddToWholeEntityQueueHandler addToWholeEntityQueueHandler;
 
-        public DeviceEntity(
-            XmlNode node, 
-            ProductionLineEntity parent,
-            AddToWholeEntityQueueHandler addToWholeEntityQueueHandler)
+        public DeviceEntity(ProductionLineEntity parent)
         {
             Parent =
                 parent ??
                 throw new Exception(
                     "设备对象不能单独存在，必须要依赖于ProductLineEntity对象");
+
+            name = $"KnownDevice[{Guid.NewGuid().ToString("N")}]";
+        }
+        public DeviceEntity(
+            XmlNode node,
+            ProductionLineEntity parent,
+            AddToWholeEntityQueueHandler addToWholeEntityQueueHandler) :
+            this(parent)
+        {
             this.addToWholeEntityQueueHandler = addToWholeEntityQueueHandler;
 
             #region 从Xml节点属性中获取属性值
@@ -73,14 +81,14 @@ namespace IRAP.MESGateway.Tools.Entities
                 try
                 {
                     CycleReadMode =
-                        (SiemensCycleReadMode)Enum.Parse(
-                            typeof(SiemensCycleReadMode),
+                        (CycleReadMode)Enum.Parse(
+                            typeof(CycleReadMode),
                             node.Attributes["CycleReadMode"].Value);
                 }
                 catch
                 {
                     string enumValues = "";
-                    foreach (var value in Enum.GetValues(typeof(SiemensCycleReadMode)))
+                    foreach (var value in Enum.GetValues(typeof(CycleReadMode)))
                     {
                         enumValues += $"[{value}]";
                     }
@@ -124,9 +132,24 @@ namespace IRAP.MESGateway.Tools.Entities
                 {
                     BelongPLC.LoadFromXmlNode(childNode);
                 }
-                else
+                else if (childNode.Name == "TagGroup")
                 {
-
+                    try
+                    {
+                        GroupEntity group =
+                            new GroupEntity(childNode, this);
+                        if (group != null)
+                        {
+                            Groups.Add(group);
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        XtraMessageBox.Show(
+                            error.Message,
+                            "出错啦",
+                            MessageBoxButtons.OK);
+                    }
                 }
 
                 childNode = childNode.NextSibling;
@@ -150,6 +173,7 @@ namespace IRAP.MESGateway.Tools.Entities
                 if (Node != null)
                 {
                     Node.SetValue(0, value);
+                    Node.TreeList.BestFitColumns();
                 }
             }
         }
@@ -164,13 +188,15 @@ namespace IRAP.MESGateway.Tools.Entities
         [Category("PLC配置数据"), Description("数据块标识号"), DisplayName("数据块标识号")]
         public int DBNumber { get; set; } = 1;
         [Category("Gateway配置数据"), Description("监控模式"), DisplayName("监控模式")]
-        public SiemensCycleReadMode CycleReadMode { get; set; } = SiemensCycleReadMode.ControlBlock;
+        public CycleReadMode CycleReadMode { get; set; } = CycleReadMode.ControlBlock;
         [Category("Gateway配置数据"), Description("循环读取间隔时间(毫秒)"), DisplayName("循环读取间隔时间")]
         public int SplitterTime { get; set; } = 100;
         [Category("PLC配置数据"), Description("PLC连接属性"), DisplayName("PLC连接属性")]
         [TypeConverter(typeof(ExpandableObjectConverter))]
         [EditorBrowsable(EditorBrowsableState.Always)]
         public PLCEntity BelongPLC { get; } = new PLCEntity();
+        [Browsable(false)]
+        public GroupEntityCollection Groups { get; } = new GroupEntityCollection();
         [Browsable(false)]
         public TreeListNode Node { get; set; } = null;
 
@@ -187,8 +213,20 @@ namespace IRAP.MESGateway.Tools.Entities
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "SplitterTime", SplitterTime.ToString()));
 
             node.AppendChild(xml.ImportNode(BelongPLC.GenerateXmlNode(), true));
+            foreach (GroupEntity group in Groups)
+            {
+                node.AppendChild(xml.ImportNode(group.GenerateXmlNode(), true));
+            }
 
             return node;
+        }
+
+        public void RemoveChildren()
+        {
+            for (int i = Groups.Count - 1; i >= 0; i--)
+            {
+                Groups.Remove(Groups[i]);
+            }
         }
     }
 
@@ -257,6 +295,17 @@ namespace IRAP.MESGateway.Tools.Entities
             }
 
             devices[device.ID] = device;
+        }
+
+        public void Remove(DeviceEntity device)
+        {
+            device.RemoveChildren();
+            devices.Remove(device.ID);
+        }
+
+        public List<DeviceEntity> ToList()
+        {
+            return devices.Values.ToList();
         }
     }
 }

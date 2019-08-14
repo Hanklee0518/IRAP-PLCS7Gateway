@@ -48,6 +48,7 @@
             this.bbiRemoveTagSubGroup = new DevExpress.XtraBars.BarButtonItem();
             this.bbiNewTag = new DevExpress.XtraBars.BarButtonItem();
             this.bbiRemoveTag = new DevExpress.XtraBars.BarButtonItem();
+            this.bbiImportDeviceConfigParams = new DevExpress.XtraBars.BarButtonItem();
             this.icLarge = new DevExpress.Utils.ImageCollection(this.components);
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.rgpPLine = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
@@ -68,7 +69,6 @@
             this.nbgServices = new DevExpress.XtraNavBar.NavBarGroup();
             this.splitterControl1 = new DevExpress.XtraEditors.SplitterControl();
             this.pcMain = new DevExpress.XtraEditors.PanelControl();
-            this.bbiImportDeviceConfigParams = new DevExpress.XtraBars.BarButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.icSmall)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.icLarge)).BeginInit();
@@ -248,7 +248,10 @@
             this.bbiNewTag.Id = 19;
             this.bbiNewTag.ImageOptions.ImageIndex = 4;
             this.bbiNewTag.ImageOptions.LargeImageIndex = 9;
+            this.bbiNewTag.ItemShortcut = new DevExpress.XtraBars.BarShortcut((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G));
             this.bbiNewTag.Name = "bbiNewTag";
+            this.bbiNewTag.ShortcutKeyDisplayString = "^G";
+            this.bbiNewTag.ShowItemShortcut = DevExpress.Utils.DefaultBoolean.True;
             // 
             // bbiRemoveTag
             // 
@@ -257,6 +260,14 @@
             this.bbiRemoveTag.ImageOptions.ImageIndex = 5;
             this.bbiRemoveTag.ImageOptions.LargeImageIndex = 10;
             this.bbiRemoveTag.Name = "bbiRemoveTag";
+            // 
+            // bbiImportDeviceConfigParams
+            // 
+            this.bbiImportDeviceConfigParams.Caption = "导入...";
+            this.bbiImportDeviceConfigParams.Id = 21;
+            this.bbiImportDeviceConfigParams.ImageOptions.ImageIndex = 10;
+            this.bbiImportDeviceConfigParams.ImageOptions.LargeImageIndex = 15;
+            this.bbiImportDeviceConfigParams.Name = "bbiImportDeviceConfigParams";
             // 
             // icLarge
             // 
@@ -455,14 +466,6 @@
             this.pcMain.Name = "pcMain";
             this.pcMain.Size = new System.Drawing.Size(666, 609);
             this.pcMain.TabIndex = 9;
-            // 
-            // bbiImportDeviceConfigParams
-            // 
-            this.bbiImportDeviceConfigParams.Caption = "导入...";
-            this.bbiImportDeviceConfigParams.Id = 21;
-            this.bbiImportDeviceConfigParams.ImageOptions.ImageIndex = 10;
-            this.bbiImportDeviceConfigParams.ImageOptions.LargeImageIndex = 15;
-            this.bbiImportDeviceConfigParams.Name = "bbiImportDeviceConfigParams";
             // 
             // MainForm
             // 

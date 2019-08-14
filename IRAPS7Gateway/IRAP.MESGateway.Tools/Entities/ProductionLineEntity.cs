@@ -41,9 +41,9 @@ namespace IRAP.MESGateway.Tools.Entities
                 {
                     try
                     {
-                        DeviceEntity device = 
+                        DeviceEntity device =
                             new DeviceEntity(
-                                deviceNode, 
+                                deviceNode,
                                 this,
                                 addToWholeEntityQueueHandler);
                         if (device != null)
@@ -79,6 +79,7 @@ namespace IRAP.MESGateway.Tools.Entities
                 if (Node != null)
                 {
                     Node.SetValue(0, value);
+                    Node.TreeList.BestFitColumns();
                 }
             }
         }
@@ -103,6 +104,14 @@ namespace IRAP.MESGateway.Tools.Entities
             }
 
             return node;
+        }
+
+        public void RemoveChildren()
+        {
+            for (int i = Devices.Count - 1; i >= Devices.Count; i--)
+            {
+                Devices.Remove(Devices[i]);
+            }
         }
     }
 
@@ -158,9 +167,11 @@ namespace IRAP.MESGateway.Tools.Entities
             }
         }
 
-        public void Remove(Guid id)
+        public void Remove(ProductionLineEntity line)
         {
-            lines.Remove(id);
+            line.RemoveChildren();
+            lines.Remove(line.ID);
+            DataHelper.Instance.AllEntities.Remove(line.ID);
         }
 
         public IEnumerator GetEnumerator()

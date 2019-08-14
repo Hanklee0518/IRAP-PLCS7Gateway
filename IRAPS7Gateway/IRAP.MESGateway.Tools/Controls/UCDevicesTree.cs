@@ -136,9 +136,9 @@ namespace IRAP.MESGateway.Tools.Controls
                         MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = false;
                         MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = true;
                         MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                        MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = true;
+                        MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
                         MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                        MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = true;
+                        MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
                         MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
                     }
                 }
@@ -203,6 +203,8 @@ namespace IRAP.MESGateway.Tools.Controls
                 newNode.SelectImageIndex = 1;
             }
 
+            tlTrees.FocusedNode = newNode;
+
             return newNode;
         }
 
@@ -214,6 +216,11 @@ namespace IRAP.MESGateway.Tools.Controls
         public TreeListNode CurrentNode()
         {
             return tlTrees.FocusedNode;
+        }
+
+        private void UCDevicesTree_Enter(object sender, EventArgs e)
+        {
+            RaiseDataSourceChanged(tlTrees.FocusedNode);
         }
     }
 }

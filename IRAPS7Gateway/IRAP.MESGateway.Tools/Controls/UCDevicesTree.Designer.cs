@@ -71,13 +71,14 @@
             this.imageCollection.Images.SetKeyName(0, "Line_flat_circle_24px_1113572_easyicon.net.png");
             this.imageCollection.Images.SetKeyName(1, "machine_24px_27273_easyicon.net.png");
             // 
-            // UCDevices
+            // UCDevicesTree
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tlTrees);
-            this.Name = "UCDevices";
+            this.Name = "UCDevicesTree";
             this.Size = new System.Drawing.Size(300, 507);
+            this.Enter += new System.EventHandler(this.UCDevicesTree_Enter);
             ((System.ComponentModel.ISupportInitialize)(this.tlTrees)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageCollection)).EndInit();
             this.ResumeLayout(false);

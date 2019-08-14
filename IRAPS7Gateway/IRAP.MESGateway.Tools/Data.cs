@@ -1,5 +1,6 @@
 ﻿using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
+using IRAP.MESGateway.Tools.Controls;
 using IRAP.MESGateway.Tools.Entities;
 using System;
 using System.Collections;

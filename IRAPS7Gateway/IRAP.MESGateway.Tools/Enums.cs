@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reflection;
 
 [Flags()]
 /// <summary>
@@ -61,7 +62,7 @@ public enum SiemensRegisterType
 /// <summary>
 /// 数据块循环读取模式
 /// </summary>
-public enum SiemensCycleReadMode
+public enum CycleReadMode
 {
     /// <summary>
     /// 整个数据块
@@ -73,4 +74,34 @@ public enum SiemensCycleReadMode
     /// </summary>
     [Description("控制数据块")]
     ControlBlock
+}
+
+/// <summary>
+/// 标记数据类型
+/// </summary>
+public enum TagDataType
+{
+    Bool = 1,
+    Byte,
+    Word,
+    Int,
+    DWord,
+    Real,
+    ArrayChar
+}
+
+public class EnumHelper
+{
+    public static string GetEnumDescription(Enum enumValue)
+    {
+        string str = enumValue.ToString();
+        FieldInfo field = enumValue.GetType().GetField(str);
+        object[] objs = field.GetCustomAttributes(typeof(DescriptionAttribute), false);
+        if (objs == null || objs.Length == 0)
+        {
+            return str;
+        }
+        DescriptionAttribute da = (DescriptionAttribute)objs[0];
+        return da.Description;
+    }
 }

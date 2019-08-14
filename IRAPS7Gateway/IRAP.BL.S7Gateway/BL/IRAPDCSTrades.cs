@@ -84,14 +84,24 @@ namespace IRAP.BL.S7Gateway
                     T133LeafID = device.T133LeafID,
                 };
 
-            if (startDCSInvoking.Do())
+            try
             {
-                if (startDCSInvoking.Error.ErrCode == 0)
+                if (startDCSInvoking.Do())
                 {
-                    _log.Debug(
-                        $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
-                        $"{startDCSInvoking.Error.ErrText}");
-                    return true;
+                    if (startDCSInvoking.Error.ErrCode == 0)
+                    {
+                        _log.Debug(
+                            $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
+                            $"{startDCSInvoking.Error.ErrText}");
+                        return true;
+                    }
+                    else
+                    {
+                        _log.Error(
+                            $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
+                            $"{startDCSInvoking.Error.ErrText}");
+                        return false;
+                    }
                 }
                 else
                 {
@@ -101,11 +111,9 @@ namespace IRAP.BL.S7Gateway
                     return false;
                 }
             }
-            else
+            catch (Exception error)
             {
-                _log.Error(
-                    $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
-                    $"{startDCSInvoking.Error.ErrText}");
+                _log.Error(error.Message, error);
                 return false;
             }
         }
@@ -370,13 +378,22 @@ namespace IRAP.BL.S7Gateway
                             },
                         };
 
-                    if (getOPCStatus.Do())
+                    try
                     {
-                        if (getOPCStatus.Error.ErrCode == 0)
+                        if (getOPCStatus.Do())
                         {
-                            _log.Debug(
-                                $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
-                                $"{getOPCStatus.Error.ErrText}");
+                            if (getOPCStatus.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
+                                    $"{getOPCStatus.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
+                                    $"{getOPCStatus.Error.ErrText}");
+                            }
                         }
                         else
                         {
@@ -385,11 +402,9 @@ namespace IRAP.BL.S7Gateway
                                 $"{getOPCStatus.Error.ErrText}");
                         }
                     }
-                    else
+                    catch (Exception error)
                     {
-                        _log.Error(
-                            $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
-                            $"{getOPCStatus.Error.ErrText}");
+                        _log.Error(error.Message, error);
                     }
                 }
                 else
@@ -487,21 +502,40 @@ namespace IRAP.BL.S7Gateway
                             return rlt;
                         }
 
-                        if (CallStartDCSInvoking(device, signalTag))
+                        try
                         {
-                            idBinding.Request.ParamXML.Product_Number = ReadStringValue(device, idbGroup.Tags, "Product_Number");
-                            idBinding.Request.ParamXML.ID_Part_Number = ReadStringValue(device, idbGroup.Tags, "ID_Part_Number");
-                            idBinding.Request.ParamXML.ID_Part_WIP_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_WIP_Code");
-                            idBinding.Request.ParamXML.ID_Part_SN_Scanner_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_SN_Scanner_Code");
-                            idBinding.Request.ParamXML.Sequence_Number = ReadIntValue(device, idbGroup.Tags, "Sequence_Number");
-
-                            if (idBinding.Do())
+                            if (CallStartDCSInvoking(device, signalTag))
                             {
-                                if (idBinding.Error.ErrCode == 0)
+                                idBinding.Request.ParamXML.Product_Number = ReadStringValue(device, idbGroup.Tags, "Product_Number");
+                                idBinding.Request.ParamXML.ID_Part_Number = ReadStringValue(device, idbGroup.Tags, "ID_Part_Number");
+                                idBinding.Request.ParamXML.ID_Part_WIP_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_WIP_Code");
+                                idBinding.Request.ParamXML.ID_Part_SN_Scanner_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_SN_Scanner_Code");
+                                idBinding.Request.ParamXML.Sequence_Number = ReadIntValue(device, idbGroup.Tags, "Sequence_Number");
+
+                                if (idBinding.Do())
                                 {
-                                    _log.Debug(
-                                        $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
-                                        $"{idBinding.Error.ErrText}");
+                                    if (idBinding.Error.ErrCode == 0)
+                                    {
+                                        _log.Debug(
+                                            $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
+                                            $"{idBinding.Error.ErrText}");
+                                    }
+                                    else
+                                    {
+                                        _log.Error(
+                                            $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
+                                            $"{idBinding.Error.ErrText}");
+                                    }
+
+                                    var fdTag = device.FindTag(key, "Part_Number_Feedback");
+                                    if (fdTag != null)
+                                    {
+                                        if (fdTag is SiemensIntOfTag rltTag)
+                                        {
+                                            rltTag.Value = (short)idBinding.Response.Output.Part_Number_Feedback;
+                                            rlt.Add(rltTag);
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -509,23 +543,11 @@ namespace IRAP.BL.S7Gateway
                                         $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
                                         $"{idBinding.Error.ErrText}");
                                 }
-
-                                var fdTag = device.FindTag(key, "Part_Number_Feedback");
-                                if (fdTag != null)
-                                {
-                                    if (fdTag is SiemensIntOfTag rltTag)
-                                    {
-                                        rltTag.Value = (short)idBinding.Response.Part_Number_Feedback;
-                                        rlt.Add(rltTag);
-                                    }
-                                }
                             }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
-                                    $"{idBinding.Error.ErrText}");
-                            }
+                        }
+                        catch (Exception error)
+                        {
+                            _log.Error(error.Message, error);
                         }
                     }
                     else
@@ -570,53 +592,62 @@ namespace IRAP.BL.S7Gateway
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
                     if (device.Groups[key] is SiemensTagGroup snrGroup)
                     {
-                        if (CallStartDCSInvoking(device, signalTag))
+                        try
                         {
-                            SNRequest snRequest =
-                                new SNRequest(
-                                    GlobalParams.Instance.WebAPI.URL,
-                                    GlobalParams.Instance.WebAPI.ContentType,
-                                    GlobalParams.Instance.WebAPI.ClientID)
-                                {
-                                    Request = new SNRequestRequest()
-                                    {
-                                        CommunityID = GlobalParams.Instance.CommunityID,
-                                        T133LeafID = device.T133LeafID,
-                                        T216LeafID = device.T216LeafID,
-                                        T102LeafID = subTagGroup.T102LeafID,
-                                        T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
-                                        ParamXML = new SNRequestParamXML()
-                                        {
-                                            Product_Number = ReadStringValue(device, snrGroup.Tags, "Product_Number"),
-                                        },
-                                    },
-                                };
-
-                            if (snRequest.Do())
+                            if (CallStartDCSInvoking(device, signalTag))
                             {
-                                if (snRequest.Error.ErrCode == 0)
-                                {
-                                    _log.Debug(
-                                        $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
-                                        $"{snRequest.Error.ErrText}");
-
-                                    var writeTag = device.FindTag(key, "Serial_Number");
-                                    if (writeTag != null)
+                                SNRequest snRequest =
+                                    new SNRequest(
+                                        GlobalParams.Instance.WebAPI.URL,
+                                        GlobalParams.Instance.WebAPI.ContentType,
+                                        GlobalParams.Instance.WebAPI.ClientID)
                                     {
-                                        if (writeTag is SiemensArrayCharOfTag rltTag)
+                                        Request = new SNRequestRequest()
                                         {
-                                            rltTag.Value = snRequest.Response.Output.Serial_Number;
-                                            rlt.Add(rltTag);
+                                            CommunityID = GlobalParams.Instance.CommunityID,
+                                            T133LeafID = device.T133LeafID,
+                                            T216LeafID = device.T216LeafID,
+                                            T102LeafID = subTagGroup.T102LeafID,
+                                            T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                            ParamXML = new SNRequestParamXML()
+                                            {
+                                                Product_Number = ReadStringValue(device, snrGroup.Tags, "Product_Number"),
+                                            },
+                                        },
+                                    };
+
+                                if (snRequest.Do())
+                                {
+                                    if (snRequest.Error.ErrCode == 0)
+                                    {
+                                        _log.Debug(
+                                            $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
+                                            $"{snRequest.Error.ErrText}");
+
+                                        var writeTag = device.FindTag(key, "Serial_Number");
+                                        if (writeTag != null)
+                                        {
+                                            if (writeTag is SiemensArrayCharOfTag rltTag)
+                                            {
+                                                rltTag.Value = snRequest.Response.Output.Serial_Number;
+                                                rlt.Add(rltTag);
+                                            }
+                                        }
+                                        writeTag = device.FindTag(key, "Length");
+                                        if (writeTag != null)
+                                        {
+                                            if (writeTag is SiemensIntOfTag rltTag)
+                                            {
+                                                rltTag.Value = (short)snRequest.Response.Output.Serial_Number.Length;
+                                                rlt.Add(rltTag);
+                                            }
                                         }
                                     }
-                                    writeTag = device.FindTag(key, "Length");
-                                    if (writeTag != null)
+                                    else
                                     {
-                                        if (writeTag is SiemensIntOfTag rltTag)
-                                        {
-                                            rltTag.Value = (short)snRequest.Response.Output.Serial_Number.Length;
-                                            rlt.Add(rltTag);
-                                        }
+                                        _log.Error(
+                                            $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
+                                            $"{snRequest.Error.ErrText}");
                                     }
                                 }
                                 else
@@ -626,12 +657,10 @@ namespace IRAP.BL.S7Gateway
                                         $"{snRequest.Error.ErrText}");
                                 }
                             }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
-                                    $"{snRequest.Error.ErrText}");
-                            }
+                        }
+                        catch (Exception error)
+                        {
+                            _log.Error(error.Message, error);
                         }
                     }
                     else
@@ -702,15 +731,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (wipMoveIn.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (wipMoveIn.Error.ErrCode == 0)
+                            if (wipMoveIn.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
-                                    $"{wipMoveIn.Error.ErrText}");
+                                if (wipMoveIn.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
+                                        $"{wipMoveIn.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
+                                        $"{wipMoveIn.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -719,12 +757,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{wipMoveIn.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
-                                $"{wipMoveIn.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -859,24 +895,33 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (productionEnd.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (productionEnd.Error.ErrCode == 0)
+                            if (productionEnd.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
-                                    $"{productionEnd.Error.ErrText}");
-
-                                var writeTag = subTagGroup.Tags["Poka_Yoke_Result"];
-                                if (writeTag != null)
+                                if (productionEnd.Error.ErrCode == 0)
                                 {
-                                    if (writeTag is SiemensByteOfTag rltTag)
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
+                                        $"{productionEnd.Error.ErrText}");
+
+                                    var writeTag = subTagGroup.Tags["Poka_Yoke_Result"];
+                                    if (writeTag != null)
                                     {
-                                        rltTag.Value = productionEnd.Response.Poka_Yoke_Result;
-                                        rlt.Add(rltTag);
+                                        if (writeTag is SiemensByteOfTag rltTag)
+                                        {
+                                            rltTag.Value = productionEnd.Response.Poka_Yoke_Result;
+                                            rlt.Add(rltTag);
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
+                                        $"{productionEnd.Error.ErrText}");
                                 }
                             }
                             else
@@ -886,12 +931,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{productionEnd.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
-                                $"{productionEnd.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -957,15 +1000,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (operationCycleEnd.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (operationCycleEnd.Error.ErrCode == 0)
+                            if (operationCycleEnd.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
-                                    $"{operationCycleEnd.Error.ErrText}");
+                                if (operationCycleEnd.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                        $"{operationCycleEnd.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                        $"{operationCycleEnd.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -974,12 +1026,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{operationCycleEnd.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
-                                $"{operationCycleEnd.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1045,35 +1095,44 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (lblElement.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (lblElement.Error.ErrCode == 0)
+                            if (lblElement.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
-                                    $"{lblElement.Error.ErrText}");
-
-                                if (device.Groups["LBLElement"] is SiemensTagGroup group)
+                                if (lblElement.Error.ErrCode == 0)
                                 {
-                                    WriteTagValueBack(rlt, group, "Custom_Part_Number", lblElement.Response.Output.Customer_Part_Number);
-                                    WriteTagValueBack(rlt, group, "Product_Serial_Number", lblElement.Response.Output.Product_Serial_Number);
-                                    WriteTagValueBack(rlt, group, "Model_ID", lblElement.Response.Output.Model_ID);
-                                    WriteTagValueBack(rlt, group, "Vendor_Code_Of_Us", lblElement.Response.Output.Vendor_Code_Of_Us);
-                                    WriteTagValueBack(rlt, group, "Sales_Part_Number", lblElement.Response.Output.Sales_Part_Number);
-                                    WriteTagValueBack(rlt, group, "Hardware_Version", lblElement.Response.Output.Hardware_Version);
-                                    WriteTagValueBack(rlt, group, "Software_Version", lblElement.Response.Output.Software_Version);
-                                    WriteTagValueBack(rlt, group, "Lot_Number", lblElement.Response.Output.Lot_Number);
-                                    WriteTagValueBack(rlt, group, "MFG_Date", lblElement.Response.Output.MFG_Date);
-                                    WriteTagValueBack(rlt, group, "Shift_Number", lblElement.Response.Output.Shift_Number);
-                                    WriteTagValueBack(rlt, group, "Oven_Number", lblElement.Response.Output.Oven_Number);
-                                    WriteTagValueBack(rlt, group, "Customer_Duns_Code", lblElement.Response.Output.Customer_Duns_Code);
-                                    WriteTagValueBack(rlt, group, "OEM_Brand", lblElement.Response.Output.OEM_Brand);
-                                    WriteTagValueBack(rlt, group, "Fixed_String_1", lblElement.Response.Output.Fixed_String_1);
-                                    WriteTagValueBack(rlt, group, "Fixed_String_2", lblElement.Response.Output.Fixed_String_2);
-                                    WriteTagValueBack(rlt, group, "Derived_String_1", lblElement.Response.Output.Derived_String_1);
-                                    WriteTagValueBack(rlt, group, "Derived_String_2", lblElement.Response.Output.Derived_String_2);
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                        $"{lblElement.Error.ErrText}");
+
+                                    if (device.Groups["LBLElement"] is SiemensTagGroup group)
+                                    {
+                                        WriteTagValueBack(rlt, group, "Custom_Part_Number", lblElement.Response.Output.Customer_Part_Number);
+                                        WriteTagValueBack(rlt, group, "Product_Serial_Number", lblElement.Response.Output.Product_Serial_Number);
+                                        WriteTagValueBack(rlt, group, "Model_ID", lblElement.Response.Output.Model_ID);
+                                        WriteTagValueBack(rlt, group, "Vendor_Code_Of_Us", lblElement.Response.Output.Vendor_Code_Of_Us);
+                                        WriteTagValueBack(rlt, group, "Sales_Part_Number", lblElement.Response.Output.Sales_Part_Number);
+                                        WriteTagValueBack(rlt, group, "Hardware_Version", lblElement.Response.Output.Hardware_Version);
+                                        WriteTagValueBack(rlt, group, "Software_Version", lblElement.Response.Output.Software_Version);
+                                        WriteTagValueBack(rlt, group, "Lot_Number", lblElement.Response.Output.Lot_Number);
+                                        WriteTagValueBack(rlt, group, "MFG_Date", lblElement.Response.Output.MFG_Date);
+                                        WriteTagValueBack(rlt, group, "Shift_Number", lblElement.Response.Output.Shift_Number);
+                                        WriteTagValueBack(rlt, group, "Oven_Number", lblElement.Response.Output.Oven_Number);
+                                        WriteTagValueBack(rlt, group, "Customer_Duns_Code", lblElement.Response.Output.Customer_Duns_Code);
+                                        WriteTagValueBack(rlt, group, "OEM_Brand", lblElement.Response.Output.OEM_Brand);
+                                        WriteTagValueBack(rlt, group, "Fixed_String_1", lblElement.Response.Output.Fixed_String_1);
+                                        WriteTagValueBack(rlt, group, "Fixed_String_2", lblElement.Response.Output.Fixed_String_2);
+                                        WriteTagValueBack(rlt, group, "Derived_String_1", lblElement.Response.Output.Derived_String_1);
+                                        WriteTagValueBack(rlt, group, "Derived_String_2", lblElement.Response.Output.Derived_String_2);
+                                    }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                        $"{lblElement.Error.ErrText}");
                                 }
                             }
                             else
@@ -1083,13 +1142,12 @@ namespace IRAP.BL.S7Gateway
                                     $"{lblElement.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
-                                $"{lblElement.Error.ErrText}");
-                        }
                     }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
+                    }
+
 
                     tag.Value = false;
                     rlt.Add(tag);
@@ -1169,54 +1227,63 @@ namespace IRAP.BL.S7Gateway
                         }
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (pokaYoke.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (pokaYoke.Error.ErrCode == 0)
+                            if (pokaYoke.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
-
-                                WriteTagValueBack(rlt, subWIPStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
-                                WriteTagValueBack(rlt, subWIPStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
-                                subWIPStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
-
-                                if (pokaYoke.Response.Output.WIPOntoLine != null)
+                                if (pokaYoke.Error.ErrCode == 0)
                                 {
-                                    if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
+
+                                    WriteTagValueBack(rlt, subWIPStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                                    WriteTagValueBack(rlt, subWIPStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                                    subWIPStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+
+                                    if (pokaYoke.Response.Output.WIPOntoLine != null)
                                     {
-                                        WriteTagValueBack(rlt, group, "Number_Of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
-                                        int j = 0;
-                                        for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
+                                        if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
                                         {
-                                            j = i;
-                                            PokaYokeOutputWIPOntoLineSubWIP subWIP = pokaYoke.Response.Output.WIPOntoLine.SubWIPs[i];
-                                            if (i < group.SubGroups.Count)
+                                            WriteTagValueBack(rlt, group, "Number_Of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
+                                            int j = 0;
+                                            for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
+                                            {
+                                                j = i;
+                                                PokaYokeOutputWIPOntoLineSubWIP subWIP = pokaYoke.Response.Output.WIPOntoLine.SubWIPs[i];
+                                                if (i < group.SubGroups.Count)
+                                                {
+                                                    SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", subWIP.WIP_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", subWIP.WIP_ID_Type_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", subWIP.WIP_ID_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", subWIP.PWO_Number);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", subWIP.Sub_Container_Number);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", subWIP.WIP_Quantity);
+                                                    break;
+                                                }
+                                            }
+
+                                            for (int i = j + 1; i < group.SubGroups.Count; i++)
                                             {
                                                 SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", subWIP.WIP_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", subWIP.WIP_ID_Type_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", subWIP.WIP_ID_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", subWIP.PWO_Number);
-                                                WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", subWIP.Sub_Container_Number);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", subWIP.WIP_Quantity);
-                                                break;
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", 0);
                                             }
                                         }
-
-                                        for (int i = j + 1; i < group.SubGroups.Count; i++)
-                                        {
-                                            SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", 0);
-                                        }
                                     }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
                                 }
                             }
                             else
@@ -1226,12 +1293,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{pokaYoke.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                $"{pokaYoke.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1310,15 +1375,24 @@ namespace IRAP.BL.S7Gateway
                         equipFailAndonCall.Request.ParamXML.Failure_Code = ReadStringValue(device, srcGroup.Tags, "Failure_Code");
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (equipFailAndonCall.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (equipFailAndonCall.Error.ErrCode == 0)
+                            if (equipFailAndonCall.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
-                                    $"{equipFailAndonCall.Error.ErrText}");
+                                if (equipFailAndonCall.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                        $"{equipFailAndonCall.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                        $"{equipFailAndonCall.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1327,12 +1401,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{equipFailAndonCall.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
-                                $"{equipFailAndonCall.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1399,17 +1471,27 @@ namespace IRAP.BL.S7Gateway
                     pokaYokeFeeding.Request.ParamXML.Material_Track_ID = ReadStringValue(device, feeding.Tags, "Material_Track_ID");
                     pokaYokeFeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, feeding.Tags, "Slot_Number");
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (pokaYokeFeeding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (pokaYokeFeeding.Error.ErrCode == 0)
+                            if (pokaYokeFeeding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
-                                    $"{pokaYokeFeeding.Error.ErrText}");
+                                if (pokaYokeFeeding.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                        $"{pokaYokeFeeding.Error.ErrText}");
 
-                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", pokaYokeFeeding.Response.Output.Poka_Yoke_Result);
+                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", pokaYokeFeeding.Response.Output.Poka_Yoke_Result);
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                        $"{pokaYokeFeeding.Error.ErrText}");
+                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                                }
                             }
                             else
                             {
@@ -1419,13 +1501,10 @@ namespace IRAP.BL.S7Gateway
                                 WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
-                                $"{pokaYokeFeeding.Error.ErrText}");
-                            WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = 0;
@@ -1493,15 +1572,25 @@ namespace IRAP.BL.S7Gateway
                     unfeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, unfeedingGroup.Tags, "Slot_Number");
                     unfeeding.Request.ParamXML.Unfeeding_Quantity = ReadDWordValue(device, unfeedingGroup.Tags, "Unfeeding_Quantity");
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (unfeeding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (unfeeding.Error.ErrCode == 0)
+                            if (unfeeding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
-                                    $"{unfeeding.Error.ErrText}");
+                                if (unfeeding.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                        $"{unfeeding.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                        $"{unfeeding.Error.ErrText}");
+                                    WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
+                                }
                             }
                             else
                             {
@@ -1511,13 +1600,10 @@ namespace IRAP.BL.S7Gateway
                                 WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
-                                $"{unfeeding.Error.ErrText}");
-                            WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = 0;
@@ -1589,30 +1675,37 @@ namespace IRAP.BL.S7Gateway
                         stagnationWarnning.Request.ParamXML.Threshold = ReadWordValue(device, stagnation.Tags, "Slot_Number");
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (stagnationWarnning.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (stagnationWarnning.Error.ErrCode == 0)
+                            if (stagnationWarnning.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
-                                    $"{stagnationWarnning.Error.ErrText}");
+                                if (stagnationWarnning.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                        $"{stagnationWarnning.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                        $"{stagnationWarnning.Error.ErrText}");
+                                }
                             }
                             else
                             {
                                 _log.Error(
                                     $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
                                     $"{stagnationWarnning.Error.ErrText}");
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", (byte)2);
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
-                                $"{stagnationWarnning.Error.ErrText}");
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1653,45 +1746,54 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (!CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        tag.Value = false;
-                        rlt.Add(tag);
-                        return rlt;
-                    }
-
-                    #region 首先需要进行 DMC 的校验
-                    {
-                        PokaYoke pokaYoke =
-                            new PokaYoke(
-                                GlobalParams.Instance.WebAPI.URL,
-                                GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
-                            {
-                                Request = new PokaYokeRequest()
-                                {
-                                    CommunityID = GlobalParams.Instance.CommunityID,
-                                    T133LeafID = device.T133LeafID,
-                                    T216LeafID = device.T216LeafID,
-                                    T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
-                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
-                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
-                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
-                                },
-                            };
-
-                        if (pokaYoke.Do())
+                        if (!CallStartDCSInvoking(device, signalTag))
                         {
-                            if (pokaYoke.Error.ErrCode == 0)
-                            {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
+                            tag.Value = false;
+                            rlt.Add(tag);
+                            return rlt;
+                        }
 
-                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
-                                WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
-                                wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+                        #region 首先需要进行 DMC 的校验
+                        {
+                            PokaYoke pokaYoke =
+                                new PokaYoke(
+                                    GlobalParams.Instance.WebAPI.URL,
+                                    GlobalParams.Instance.WebAPI.ContentType,
+                                    GlobalParams.Instance.WebAPI.ClientID)
+                                {
+                                    Request = new PokaYokeRequest()
+                                    {
+                                        CommunityID = GlobalParams.Instance.CommunityID,
+                                        T133LeafID = device.T133LeafID,
+                                        T216LeafID = device.T216LeafID,
+                                        T102LeafID = wipStation.T102LeafID,
+                                        T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                        WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                        WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                        WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                    },
+                                };
+
+                            if (pokaYoke.Do())
+                            {
+                                if (pokaYoke.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
+
+                                    WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                                    WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                                    wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1699,50 +1801,43 @@ namespace IRAP.BL.S7Gateway
                                     $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
                                     $"{pokaYoke.Error.ErrText}");
                             }
-                        }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                $"{pokaYoke.Error.ErrText}");
-                        }
 
-                        // 如果未通过 PokaYoke 校验，直接返回
-                        if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
-                        {
-                            tag.Value = false;
-                            rlt.Add(tag);
-                            return rlt;
-                        }
-                    }
-                    #endregion
-
-                    #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查
-                    {
-                        FazitStatusCheck fazitStatusCheck =
-                            new FazitStatusCheck(
-                                GlobalParams.Instance.WebAPI.URL,
-                                GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                            // 如果未通过 PokaYoke 校验，直接返回
+                            if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
                             {
-                                Request = new FazitStatusCheckRequest()
-                                {
-                                    CommunityID = GlobalParams.Instance.CommunityID,
-                                    T133LeafID = device.T133LeafID,
-                                    T216LeafID = device.T216LeafID,
-                                    T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
-                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
-                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
-                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
-                                }
-                            };
+                                tag.Value = false;
+                                rlt.Add(tag);
+                                return rlt;
+                            }
+                        }
+                        #endregion
 
-                        //DateTime start = DateTime.Now;
-                        //TimeSpan timeSpan = start - start;
-                        byte fazitStatus = 0xff;
-                        //do
-                        //{
+                        #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查
+                        {
+                            FazitStatusCheck fazitStatusCheck =
+                                new FazitStatusCheck(
+                                    GlobalParams.Instance.WebAPI.URL,
+                                    GlobalParams.Instance.WebAPI.ContentType,
+                                    GlobalParams.Instance.WebAPI.ClientID)
+                                {
+                                    Request = new FazitStatusCheckRequest()
+                                    {
+                                        CommunityID = GlobalParams.Instance.CommunityID,
+                                        T133LeafID = device.T133LeafID,
+                                        T216LeafID = device.T216LeafID,
+                                        T102LeafID = wipStation.T102LeafID,
+                                        T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                        WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                        WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                        WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                    }
+                                };
+
+                            //DateTime start = DateTime.Now;
+                            //TimeSpan timeSpan = start - start;
+                            byte fazitStatus = 0xff;
+                            //do
+                            //{
                             if (fazitStatusCheck.Do())
                             {
                                 _log.Debug(
@@ -1769,20 +1864,25 @@ namespace IRAP.BL.S7Gateway
                                     $"{fazitStatusCheck.Error.ErrText}");
                             }
 
-                        //    Thread.Sleep(5000);
-                        //    timeSpan = DateTime.Now - start;
-                        //} while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
+                            //    Thread.Sleep(5000);
+                            //    timeSpan = DateTime.Now - start;
+                            //} while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
 
-                        if (fazitStatus == 0xff)
-                        {
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", 20);
+                            if (fazitStatus == 0xff)
+                            {
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", 20);
+                            }
+                            else
+                            {
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", fazitStatus);
+                            }
                         }
-                        else
-                        { 
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", fazitStatus);
-                        }
+                        #endregion
                     }
-                    #endregion
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
+                    }
 
                     tag.Value = false;
                     rlt.Add(tag);
@@ -1798,7 +1898,7 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 料槽缺料检测请求交易
     /// </summary>
-    public class IRAPDCSTradeShortageMaterialCheck:IRAPDCSTrade, IIRAPDCSTrade
+    public class IRAPDCSTradeShortageMaterialCheck : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
         /// 交易执行
@@ -1847,17 +1947,26 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (shortageMaterialCheck.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (shortageMaterialCheck.Error.ErrCode == 0)
+                            if (shortageMaterialCheck.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
-                                    $"{shortageMaterialCheck.Error.ErrText}");
+                                if (shortageMaterialCheck.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                        $"{shortageMaterialCheck.Error.ErrText}");
 
-                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Feedback_Mark", shortageMaterialCheck.Response.Output.Poka_Yoke_Feedback_Mark);
+                                    WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Feedback_Mark", shortageMaterialCheck.Response.Output.Poka_Yoke_Feedback_Mark);
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                        $"{shortageMaterialCheck.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1866,12 +1975,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{shortageMaterialCheck.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
-                                $"{shortageMaterialCheck.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1942,15 +2049,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (containerBinding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (containerBinding.Error.ErrCode == 0)
+                            if (containerBinding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
-                                    $"{containerBinding.Error.ErrText}");
+                                if (containerBinding.Error.ErrCode == 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                        $"{containerBinding.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                        $"{containerBinding.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1959,12 +2075,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{containerBinding.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
-                                $"{containerBinding.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;

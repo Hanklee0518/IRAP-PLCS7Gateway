@@ -57,6 +57,18 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
     public class IDBindingResponse : CustomResponse
     {
         /// <summary>
+        /// 输出参数
+        /// </summary>
+        public IDBindingOutput Output { get; set; } =
+            new IDBindingOutput();
+    }
+
+    /// <summary>
+    /// 标识部件绑定响应报文输出参数
+    /// </summary>
+    public class IDBindingOutput
+    {
+        /// <summary>
         /// MES 返回的标识部件序号
         /// </summary>
         public int Part_Number_Feedback { get; set; }

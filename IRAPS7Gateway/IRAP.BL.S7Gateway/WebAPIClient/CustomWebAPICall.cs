@@ -2,6 +2,7 @@
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using Logrila.Logging;
 using Newtonsoft.Json;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -67,9 +68,9 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
         public CustomWebAPICall(
-            string webAPIUrl, 
-            ContentType contentType, 
-            string clientID): this()
+            string webAPIUrl,
+            ContentType contentType,
+            string clientID) : this()
         {
             this.webAPIUrl = webAPIUrl;
             this.contentType = contentType;
@@ -146,17 +147,17 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
                     throw error;
             }
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "POST";
-            request.ContentType = "application/stream;";
-            request.KeepAlive = false;
-            request.AllowAutoRedirect = true;
-            request.CookieContainer = new CookieContainer();
-            request.Timeout = 30000;        // 单位：毫秒
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            //request.Method = "POST";
+            //request.ContentType = "application/json";
+            //request.KeepAlive = false;
+            //request.AllowAutoRedirect = true;
+            //request.CookieContainer = new CookieContainer();
+            //request.Timeout = 30000;        // 单位：毫秒
 
             try
             {
-                Stream stream = request.GetRequestStream();
+                //Stream stream = request.GetRequestStream();
 
                 #region 根据传入的指定报文格式，生成交易请求对象的相应格式的报文文本
                 string content = "";
@@ -173,20 +174,44 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
 
                 _log.Info($"请求报文：[{content}]");
 
-                byte[] requestContext = Encoding.UTF8.GetBytes(content);
-                stream.Write(requestContext, 0, requestContext.Length);
-                stream.Flush();
-                stream.Close();
+                //byte[] requestContext = Encoding.UTF8.GetBytes(content);
+                //stream.Write(requestContext, 0, requestContext.Length);
+                //stream.Flush();
+                //stream.Close();
+                var client = new RestClient(url)
+                {
+                    ReadWriteTimeout = 60000,
+                };
+                var request = new RestRequest(Method.POST);
+                request.AddHeader("cache-control", "no-cache");
+                request.AddHeader("Connection", "keep-alive");
+                request.AddHeader("Content-Length", "63");
+                request.AddHeader("Accept-Encoding", "gzip, deflate");
+                request.AddHeader("Host", "192.168.100.134:5010");
+                request.AddHeader("Postman-Token", "ef26d571-72f9-4b60-be3d-5826334f2c6d,0fb0b7c2-e065-48d2-aefa-24001431fb5a");
+                request.AddHeader("Cache-Control", "no-cache");
+                request.AddHeader("Accept", "*/*");
+                request.AddHeader("User-Agent", "PostmanRuntime/7.15.2");
+                request.AddHeader("Content-Type", "application/json");
+                request.AddParameter("undefined", content, ParameterType.RequestBody);
+                //_log.Debug($"{JsonConvert.SerializeObject(request)}");
+                IRestResponse response = client.Execute(request);
                 Application.DoEvents();
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                string resJson = "";
-                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
-                {
-                    resJson = sr.ReadToEnd();
-                }
+                //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                string resJson = response.Content;
+                //using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                //{
+                //    resJson = sr.ReadToEnd();
+                //}
 
                 _log.Info($"响应报文：[{resJson}]");
+
+                //if (resJson == "")
+                //{
+                //    throw new Exception(
+                //        $"[ExCode={exCode}交易的响应报文无法反序列化成响应报文对象");
+                //}
 
                 T rtnObject = default(T);
                 switch (contentType)
@@ -195,6 +220,12 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
                         result = JsonConvert.DeserializeObject<ErrorMessage>(resJson);
                         rtnObject = JsonConvert.DeserializeObject<T>(resJson);
                         break;
+                }
+
+                if (result == null | rtnObject == null)
+                {
+                    throw new Exception(
+                        $"[ExCode={exCode}交易的响应报文无法反序列化成响应报文对象");
                 }
 
                 result.SourceREQContent = content;
@@ -206,7 +237,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
             {
                 error.Data["ErrCode"] = 999999;
                 error.Data["ErrText"] = error.Message;
-                throw error;
+                throw new Exception($"URL:[{url}]|ErrorMessage:[{error.Message}]");
             }
         }
 

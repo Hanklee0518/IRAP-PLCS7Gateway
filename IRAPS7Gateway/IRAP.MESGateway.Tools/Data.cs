@@ -5,6 +5,7 @@ using IRAP.MESGateway.Tools.Entities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,72 @@ namespace IRAP.MESGateway.Tools
         internal static string[] ApplicationArguments;
         internal static readonly string AppTitle =
             "IRAP DCSGateway for PLC 维护管理工具";
+
+        internal static string ProjectBasePath
+        {
+            get
+            {
+                return GetString("ProjectPath");
+            }
+            set
+            {
+                SaveParam("ProjectPath", value);
+            }
+        }
+
+        internal static int CommunityID
+        {
+            get { return GetInt("CommunityID", 57280); }
+            set { SaveParam("CommunityID", value.ToString()); }
+        }
+
+        private static void SaveParam(string key, string value)
+        {
+            Configuration config =
+                ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            if (config.AppSettings.Settings[key] == null)
+                config.AppSettings.Settings.Add(key, value);
+            else
+                config.AppSettings.Settings[key].Value = value;
+
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+
+        private static string GetString(string key)
+        {
+            string rlt = "";
+            if (ConfigurationManager.AppSettings[key] != null)
+            {
+                rlt = ConfigurationManager.AppSettings[key];
+            }
+            return rlt;
+        }
+
+        private static int GetInt(string key, int defaultValue)
+        {
+            int rlt = defaultValue;
+            if (ConfigurationManager.AppSettings[key] != null)
+            {
+                if (int.TryParse(ConfigurationManager.AppSettings[key], out int value))
+                {
+                    rlt = value;
+                }
+            }
+            return rlt;
+        }
+
+        private static bool GetBoolean(string key)
+        {
+            bool rlt = false;
+            if (ConfigurationManager.AppSettings[key] != null)
+            {
+                try { rlt = Convert.ToBoolean(ConfigurationManager.AppSettings[key]); }
+                catch { rlt = false; }
+            }
+            return rlt;
+        }
     }
 
     internal class DataHelper

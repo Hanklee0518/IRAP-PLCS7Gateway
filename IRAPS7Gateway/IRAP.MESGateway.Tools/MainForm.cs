@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using DevExpress.XtraBars;
 using IRAP.MESGateway.Tools.Forms;
 using IRAP.MESGateway.Tools.Entities;
+using System.IO;
 
 namespace IRAP.MESGateway.Tools
 {
@@ -26,13 +27,14 @@ namespace IRAP.MESGateway.Tools
             InitializeComponent();
 
             Text = ParamHelper.AppTitle;
+            lblAboutAppTitle.Text = $"{ParamHelper.AppTitle}\n\nVersion:1.0.0.0";
 
             InitNavBarGroups();
             RibbonButtonsInitialize();
 
             modulesNavigator = new ModulesNavigator(ribbon, pcMain);
             modulesNavigator.ChangeGroup(
-                navBarControl1.ActiveGroup, 
+                navBarControl1.ActiveGroup,
                 GetModuleData(
                     (NavBarGroupTagObject)navBarControl1.ActiveGroup.Tag));
         }
@@ -112,6 +114,23 @@ namespace IRAP.MESGateway.Tools
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             DataHelper.Instance.Save(dbPath);
+        }
+
+        private void bvbiQuit_ItemClick(object sender, DevExpress.XtraBars.Ribbon.BackstageViewItemEventArgs e)
+        {
+            Close();
+        }
+
+        private void bvControl_Showing(object sender, EventArgs e)
+        {
+            bvControl.SelectedTabIndex = 0;
+
+            ucOptions.InitOptionItems();
+        }
+
+        private void bvtiOptions_ItemPressed(object sender, DevExpress.XtraBars.Ribbon.BackstageViewItemEventArgs e)
+        {
+            ucOptions.InitOptionItems();
         }
     }
 }

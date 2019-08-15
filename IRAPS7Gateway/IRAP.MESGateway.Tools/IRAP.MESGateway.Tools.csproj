@@ -89,6 +89,7 @@
     </Reference>
     <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
@@ -114,6 +115,12 @@
     </Compile>
     <Compile Include="Controls\UCDevicesTree.Designer.cs">
       <DependentUpon>UCDevicesTree.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCOptions.Designer.cs">
+      <DependentUpon>UCOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\UCProductionLinePropertiesPage.cs">
       <SubType>UserControl</SubType>
@@ -182,6 +189,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\UCDevicesTree.resx">
       <DependentUpon>UCDevicesTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCOptions.resx">
+      <DependentUpon>UCOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\UCProductionLinePropertiesPage.resx">
       <DependentUpon>UCProductionLinePropertiesPage.cs</DependentUpon>

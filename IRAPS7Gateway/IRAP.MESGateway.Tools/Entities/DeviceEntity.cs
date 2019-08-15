@@ -49,6 +49,20 @@ namespace IRAP.MESGateway.Tools.Entities
                     T133LeafID = rlt;
                 }
             }
+            if (node.Attributes["T216LeafID"] != null)
+            {
+                if (int.TryParse(node.Attributes["T216LeafID"].Value, out int rlt))
+                {
+                    T216LeafID = rlt;
+                }
+            }
+            if (node.Attributes["T107LeafID"] != null)
+            {
+                if (int.TryParse(node.Attributes["T107LeafID"].Value, out int rlt))
+                {
+                    T107LeafID = rlt;
+                }
+            }
             if (node.Attributes["DBType"] != null)
             {
                 try
@@ -179,6 +193,8 @@ namespace IRAP.MESGateway.Tools.Entities
         }
         [Category("MES配置数据"), Description("设备叶标识"), DisplayName("设备叶标识")]
         public int T133LeafID { get; set; } = 0;
+        [Category("MES配置数据"), Description("工序叶标识"), DisplayName("工序叶标识")]
+        public int T216LeafID { get; set; } = 0;
         [Category("MES配置数据"), Description("工位叶标识"), DisplayName("工位叶标识")]
         public int T107LeafID { get; set; } = 0;
         [Category("PLC配置数据"), Description("PLC类型"), DisplayName("PLC类型")]
@@ -206,6 +222,8 @@ namespace IRAP.MESGateway.Tools.Entities
             XmlNode node = xml.CreateElement("Device");
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "Name", Name));
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "T133LeafID", T133LeafID.ToString()));
+            node.Attributes.Append(XMLHelper.CreateAttribute(xml, "T216LeafID", T216LeafID.ToString()));
+            node.Attributes.Append(XMLHelper.CreateAttribute(xml, "T107LeafID", T107LeafID.ToString()));
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "PLCType", PLCType.ToString()));
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "DBType", DBType.ToString()));
             node.Attributes.Append(XMLHelper.CreateAttribute(xml, "DBNumber", DBNumber.ToString()));
@@ -255,6 +273,8 @@ namespace IRAP.MESGateway.Tools.Entities
                         typeof(CycleReadMode),
                         XMLHelper.GetAttributeStringValue(node, "CycleReadBlock", "ControlBlock")),
                 T133LeafID = XMLHelper.GetAttributeIntValue(node, "T133LeafID", 0),
+                T216LeafID = XMLHelper.GetAttributeIntValue(node, "T216LeafID", 0),
+                T107LeafID = XMLHelper.GetAttributeIntValue(node, "T107LeafID", 0),
                 SplitterTime = XMLHelper.GetAttributeIntValue(node, "SplitterTime", 100),
             };
             rlt.BelongPLC.IPAddress = plcEntity.IPAddress;

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -112,6 +113,71 @@ namespace IRAP.MESGateway.Tools.Entities
             {
                 Devices.Remove(Devices[i]);
             }
+        }
+
+        public List<DeviceEntity> ImportDevice(string path)
+        {
+            List<DeviceEntity> rlt = new List<DeviceEntity>();
+
+            if (path == "")
+            {
+                return rlt;
+            }
+
+            XmlDocument xml = new XmlDocument();
+            try
+            {
+                xml.Load(path);
+            }
+            catch (Exception error)
+            {
+                throw new Exception(
+                    $"解析[{Path.GetFileName(path)}]时出错：[{error.Message}]");
+            }
+
+            XmlNode root = xml.SelectSingleNode("root");
+            if (root == null)
+            {
+                throw new Exception("配置文件中没有 root 根节点");
+            }
+
+            PLCType plcType = PLCType.SIEMENS;
+            XmlNode plcNode = root.FirstChild;
+            while (plcNode != null)
+            {
+                if (plcNode.Name.ToUpper() == "SIEMENSPLC")
+                {
+                    plcType = PLCType.SIEMENS;
+                    PLCEntity plcEntity = new PLCEntity()
+                    {
+                        IPAddress = XMLHelper.GetAttributeStringValue(plcNode, "IPAddress", "127.0.0.1"),
+                        Rack = XMLHelper.GetAttributeIntValue(plcNode, "Rack", 0),
+                        Slot = XMLHelper.GetAttributeIntValue(plcNode, "Slot", 0),
+                    };
+
+                    XmlNode deviceNode = plcNode.FirstChild;
+                    while (deviceNode != null)
+                    {
+                        DeviceEntity device =
+                            DeviceEntity.ImportFromXmlNode(
+                                this,
+                                deviceNode,
+                                plcType,
+                                plcEntity);
+                        if (device != null)
+                        {
+                            Devices.Add(device, _addToWholeEntityQueueHandler);
+                            rlt.Add(device);
+                        }
+
+                        deviceNode = deviceNode.NextSibling;
+                    }
+                }
+
+                plcNode = plcNode.NextSibling;
+            }
+
+            return rlt;
         }
     }
 

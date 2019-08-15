@@ -91,6 +91,33 @@ namespace IRAP.MESGateway.Tools.Entities
                 Tags.Remove(Tags[i]);
             }
         }
+
+        public static SubGroupEntity ImportFromXmlNode(GroupEntity parent, XmlNode node)
+        {
+            if (node.Name.ToUpper() != "SUBTAGGROUP")
+            {
+                return null;
+            }
+
+            SubGroupEntity sgroup = new SubGroupEntity(parent)
+            {
+                Prefix = XMLHelper.GetAttributeStringValue(node, "Prefix", "00"),
+            };
+
+            XmlNode child = node.FirstChild;
+            while (child != null)
+            {
+                TagEntity tag = TagEntity.ImportFromXmlNode(sgroup, child);
+                if (tag != null)
+                {
+                    sgroup.Tags.Add(tag);
+                }
+
+                child = child.NextSibling;
+            }
+
+            return sgroup;
+        }
     }
 
     internal class SubGroupEntityCollection : IEnumerable

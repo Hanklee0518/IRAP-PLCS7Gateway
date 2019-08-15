@@ -107,6 +107,50 @@ namespace IRAP.MESGateway.Tools.Entities
                 SubGroups.Remove(SubGroups[i]);
             }
         }
+
+        public static GroupEntity ImportFromXmlNode(
+            DeviceEntity parent,
+            XmlNode node)
+        {
+            GroupEntity rlt = null;
+            if (node.Name.ToUpper() != "TAGGROUP")
+            {
+                return rlt;
+            }
+
+            rlt = new GroupEntity(parent)
+            {
+                Name = XMLHelper.GetAttributeStringValue(node, "Name", "Unknown"),
+            };
+
+            XmlNode child = node.FirstChild;
+            while (child != null)
+            {
+                switch (child.Name.ToUpper())
+                {
+                    case "TAG":
+                        TagEntity tag =
+                            TagEntity.ImportFromXmlNode(rlt, child);
+                        if (tag != null)
+                        {
+                            rlt.Tags.Add(tag);
+                        }
+                        break;
+                    case "SUBTAGGROUP":
+                        SubGroupEntity sgroup =
+                            SubGroupEntity.ImportFromXmlNode(rlt, child);
+                        if (sgroup != null)
+                        {
+                            rlt.SubGroups.Add(sgroup);
+                        }
+                        break;
+                }
+
+                child = child.NextSibling;
+            }
+
+            return rlt;
+        }
     }
 
     internal class GroupEntityCollection : IEnumerable

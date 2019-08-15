@@ -224,6 +224,71 @@ namespace IRAP.MESGateway.Tools.Entities
 
             return node;
         }
+
+        public static TagEntity ImportFromXmlNode(GroupEntity parent, XmlNode node)
+        {
+            if (node.Name.ToUpper() != "TAG")
+            {
+                return null;
+            }
+
+            try
+            {
+                TagEntity rlt = new TagEntity(parent)
+                {
+                    Name = XMLHelper.GetAttributeStringValue(node, "Name", "Unknown"),
+                    Offset = XMLHelper.GetAttributeStringValue(node, "Offset", "0"),
+                };
+                Enum.TryParse(
+                    XMLHelper.GetAttributeStringValue(node, "Datatype", "Bool"),
+                    true,
+                    out TagDataType dataType);
+                rlt.DataType = dataType;
+
+                if (rlt.DataType == TagDataType.ArrayChar)
+                {
+                    rlt.Length = XMLHelper.GetAttributeStringValue(node, "Length", "0.1");
+                }
+
+                return rlt;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static TagEntity ImportFromXmlNode(SubGroupEntity parent, XmlNode node)
+        {
+            if (node.Name.ToUpper() != "TAG")
+            {
+                return null;
+            }
+
+            try
+            {
+                TagEntity rlt = new TagEntity(parent)
+                {
+                    Name = XMLHelper.GetAttributeStringValue(node, "Name", "Unknown"),
+                    Offset = XMLHelper.GetAttributeStringValue(node, "Offset", "0"),
+                };
+                Enum.TryParse(
+                    XMLHelper.GetAttributeStringValue(node, "Datatype", "Bool"),
+                    true,
+                    out TagDataType dataType);
+                rlt.DataType = dataType;
+                if (rlt.DataType == TagDataType.ArrayChar)
+                {
+                    rlt.Length = XMLHelper.GetAttributeStringValue(node, "Length", "0.1");
+                }
+
+                return rlt;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 
     internal class TagEntityCollection : IEnumerable

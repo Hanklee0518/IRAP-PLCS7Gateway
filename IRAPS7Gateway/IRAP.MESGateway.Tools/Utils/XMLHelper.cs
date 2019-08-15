@@ -15,5 +15,31 @@ namespace IRAP.MESGateway.Tools.Utils
             attr.Value = value;
             return attr;
         }
+
+        public static string GetAttributeStringValue(XmlNode node, string name, string defaultValue)
+        {
+            if (node.Attributes[name] == null)
+            {
+                return defaultValue;
+            }
+            else
+            {
+                return node.Attributes[name].Value;
+            }
+        }
+
+        public static int GetAttributeIntValue(XmlNode node, string name, int defaultValue)
+        {
+            if (node.Attributes[name] == null)
+            {
+                return defaultValue;
+            }
+            else
+            {
+                int rlt = defaultValue;
+                int.TryParse(node.Attributes[name].Value, out rlt);
+                return rlt;
+            }
+        }
     }
 }

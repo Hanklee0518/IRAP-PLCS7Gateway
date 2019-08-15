@@ -13,6 +13,9 @@ using IRAP.MESGateway.Tools.Entities;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraNavBar;
 using DevExpress.XtraTreeList.Nodes;
+using System.Xml;
+using System.IO;
+using IRAP.MESGateway.Tools.Utils;
 
 namespace IRAP.MESGateway.Tools
 {
@@ -55,6 +58,9 @@ namespace IRAP.MESGateway.Tools
                 case "bbiRemoveDevice":
                     RemoveDevice();
                     break;
+                case "bbiImportDeviceConfigParams":
+                    ImportDeviceParams();
+                    break;
                 case "bbiNewTagGroup":
                     NewTagGroup();
                     break;
@@ -73,6 +79,47 @@ namespace IRAP.MESGateway.Tools
                 case "bbiRemoveTag":
                     RemoveTag();
                     break;
+            }
+        }
+
+        private void ImportDeviceParams()
+        {
+            #region 获取设备导入的文件名
+            OpenFileDialog dialogOpenFile = new OpenFileDialog()
+            {
+                Title = "选择导入设备PLC的配置文件",
+                Filter = "设备PLC配置文件(*.xml)|*.xml|所有文件(*.*)|*.*",
+                CheckFileExists = true,
+            };
+            string importPath = "";
+            if (dialogOpenFile.ShowDialog(FindForm()) == DialogResult.OK)
+            {
+                importPath = dialogOpenFile.FileName;
+            }
+            #endregion
+
+            if (File.Exists(importPath))
+            {
+                TreeListNode node = trees.CurrentNode();
+                ProductionLineEntity parent = null;
+
+                if (node.Tag is Guid id)
+                {
+                    BaseEntity entity = DataHelper.Instance.AllEntities[id];
+                    if (entity is ProductionLineEntity line)
+                    {
+                        parent = line;
+                    }
+                }
+
+                if (parent != null)
+                {
+                    List<DeviceEntity> devices = parent.ImportDevice(importPath);
+                    foreach (DeviceEntity device in devices)
+                    {
+                        device.Node = trees.AppendNode(device.Name, device.ID, node);
+                    }
+                }
             }
         }
 
@@ -347,7 +394,7 @@ namespace IRAP.MESGateway.Tools
                         "提问",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button2)== DialogResult.Yes)
+                        MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                     {
                         if (tag.GroupParent != null)
                         {

@@ -233,6 +233,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icons\AppIcon.ico" />
+    <None Include="Resources\projectdirectory_16x16.png" />
     <None Include="Resources\deletegroupfooter_16x16.png" />
     <None Include="Resources\addgroupfooter_16x16.png" />
     <None Include="Resources\deletedatasource_16x16.png" />

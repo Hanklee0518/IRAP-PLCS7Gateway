@@ -228,6 +228,56 @@ namespace IRAP.MESGateway.Tools.Entities
                 Groups.Remove(Groups[i]);
             }
         }
+
+        public static DeviceEntity ImportFromXmlNode(
+            ProductionLineEntity line,
+            XmlNode node,
+            PLCType plcType,
+            PLCEntity plcEntity)
+        {
+            DeviceEntity rlt = null;
+            if (node.Name.ToUpper() != "DEVICE")
+            {
+                return rlt;
+            }
+
+            rlt = new DeviceEntity(line)
+            {
+                Name = XMLHelper.GetAttributeStringValue(node, "Name", ""),
+                PLCType = plcType,
+                DBType =
+                    (SiemensRegisterType)Enum.Parse(
+                        typeof(SiemensRegisterType),
+                        XMLHelper.GetAttributeStringValue(node, "DBType", "DB")),
+                DBNumber = XMLHelper.GetAttributeIntValue(node, "DBNumber", 0),
+                CycleReadMode =
+                    (CycleReadMode)Enum.Parse(
+                        typeof(CycleReadMode),
+                        XMLHelper.GetAttributeStringValue(node, "CycleReadBlock", "ControlBlock")),
+                T133LeafID = XMLHelper.GetAttributeIntValue(node, "T133LeafID", 0),
+                SplitterTime = XMLHelper.GetAttributeIntValue(node, "SplitterTime", 100),
+            };
+            rlt.BelongPLC.IPAddress = plcEntity.IPAddress;
+            rlt.BelongPLC.Rack = plcEntity.Rack;
+            rlt.BelongPLC.Slot = plcEntity.Slot;
+
+            XmlNode xmlGroup = node.FirstChild;
+            while (xmlGroup != null)
+            {
+                GroupEntity group =
+                    GroupEntity.ImportFromXmlNode(
+                        rlt,
+                        xmlGroup);
+                if (group != null)
+                {
+                    rlt.Groups.Add(group);
+                }
+
+                xmlGroup = xmlGroup.NextSibling;
+            }
+
+            return rlt;
+        }
     }
 
     internal class DeviceEntityCollection : IEnumerable

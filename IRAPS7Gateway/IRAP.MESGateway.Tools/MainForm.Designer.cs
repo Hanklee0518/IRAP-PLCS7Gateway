@@ -29,8 +29,27 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            DevExpress.XtraEditors.Controls.EditorButtonImageOptions editorButtonImageOptions1 = new DevExpress.XtraEditors.Controls.EditorButtonImageOptions();
+            DevExpress.Utils.SerializableAppearanceObject serializableAppearanceObject1 = new DevExpress.Utils.SerializableAppearanceObject();
+            DevExpress.Utils.SerializableAppearanceObject serializableAppearanceObject2 = new DevExpress.Utils.SerializableAppearanceObject();
+            DevExpress.Utils.SerializableAppearanceObject serializableAppearanceObject3 = new DevExpress.Utils.SerializableAppearanceObject();
+            DevExpress.Utils.SerializableAppearanceObject serializableAppearanceObject4 = new DevExpress.Utils.SerializableAppearanceObject();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.ribbon = new DevExpress.XtraBars.Ribbon.RibbonControl();
+            this.bvControl = new DevExpress.XtraBars.Ribbon.BackstageViewControl();
+            this.bvccOptions = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
+            this.buttonEdit1 = new DevExpress.XtraEditors.ButtonEdit();
+            this.labelControl5 = new DevExpress.XtraEditors.LabelControl();
+            this.labelControl2 = new DevExpress.XtraEditors.LabelControl();
+            this.bvccAbout = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
+            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
+            this.labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
+            this.bvtiOptions = new DevExpress.XtraBars.Ribbon.BackstageViewTabItem();
+            this.bvtiAbout = new DevExpress.XtraBars.Ribbon.BackstageViewTabItem();
+            this.backstageViewItemSeparator1 = new DevExpress.XtraBars.Ribbon.BackstageViewItemSeparator();
+            this.bvbiQuit = new DevExpress.XtraBars.Ribbon.BackstageViewButtonItem();
             this.icSmall = new DevExpress.Utils.ImageCollection(this.components);
             this.skinDropDownButtonItem1 = new DevExpress.XtraBars.SkinDropDownButtonItem();
             this.bbiRefreshServiceList = new DevExpress.XtraBars.BarButtonItem();
@@ -69,17 +88,27 @@
             this.nbgServices = new DevExpress.XtraNavBar.NavBarGroup();
             this.splitterControl1 = new DevExpress.XtraEditors.SplitterControl();
             this.pcMain = new DevExpress.XtraEditors.PanelControl();
+            this.btnSaveOptionsChanged = new DevExpress.XtraEditors.SimpleButton();
+            this.btnCancelOptionsChanged = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bvControl)).BeginInit();
+            this.bvControl.SuspendLayout();
+            this.bvccOptions.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).BeginInit();
+            this.bvccAbout.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.icSmall)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.icLarge)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.navBarControl1)).BeginInit();
             this.navBarControl1.SuspendLayout();
             this.navBarGroupControlContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pcMain)).BeginInit();
+            this.pcMain.SuspendLayout();
             this.SuspendLayout();
             // 
             // ribbon
             // 
+            this.ribbon.ApplicationButtonDropDownControl = this.bvControl;
             this.ribbon.ExpandCollapseItem.Id = 0;
             this.ribbon.Images = this.icSmall;
             this.ribbon.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
@@ -103,15 +132,166 @@
             this.bbiImportDeviceConfigParams});
             this.ribbon.LargeImages = this.icLarge;
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 22;
+            this.ribbon.MaxItemId = 1;
             this.ribbon.Name = "ribbon";
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1,
             this.rpServices,
             this.rpView});
             this.ribbon.QuickToolbarItemLinks.Add(this.skinDropDownButtonItem1);
-            this.ribbon.Size = new System.Drawing.Size(976, 158);
+            this.ribbon.Size = new System.Drawing.Size(1109, 158);
             this.ribbon.StatusBar = this.ribbonStatusBar;
+            // 
+            // bvControl
+            // 
+            this.bvControl.Controls.Add(this.bvccOptions);
+            this.bvControl.Controls.Add(this.bvccAbout);
+            this.bvControl.Items.Add(this.bvtiOptions);
+            this.bvControl.Items.Add(this.bvtiAbout);
+            this.bvControl.Items.Add(this.backstageViewItemSeparator1);
+            this.bvControl.Items.Add(this.bvbiQuit);
+            this.bvControl.Location = new System.Drawing.Point(24, 32);
+            this.bvControl.Name = "bvControl";
+            this.bvControl.OwnerControl = this.ribbon;
+            this.bvControl.SelectedTab = this.bvtiAbout;
+            this.bvControl.SelectedTabIndex = 1;
+            this.bvControl.Size = new System.Drawing.Size(743, 374);
+            this.bvControl.TabIndex = 14;
+            // 
+            // bvccOptions
+            // 
+            this.bvccOptions.AutoScroll = true;
+            this.bvccOptions.Controls.Add(this.btnCancelOptionsChanged);
+            this.bvccOptions.Controls.Add(this.btnSaveOptionsChanged);
+            this.bvccOptions.Controls.Add(this.buttonEdit1);
+            this.bvccOptions.Controls.Add(this.labelControl5);
+            this.bvccOptions.Controls.Add(this.labelControl2);
+            this.bvccOptions.Location = new System.Drawing.Point(134, 63);
+            this.bvccOptions.Name = "bvccOptions";
+            this.bvccOptions.Padding = new System.Windows.Forms.Padding(30);
+            this.bvccOptions.Size = new System.Drawing.Size(608, 310);
+            this.bvccOptions.TabIndex = 1;
+            // 
+            // buttonEdit1
+            // 
+            this.buttonEdit1.Location = new System.Drawing.Point(30, 115);
+            this.buttonEdit1.MaximumSize = new System.Drawing.Size(480, 0);
+            this.buttonEdit1.MenuManager = this.ribbon;
+            this.buttonEdit1.MinimumSize = new System.Drawing.Size(120, 0);
+            this.buttonEdit1.Name = "buttonEdit1";
+            editorButtonImageOptions1.Image = global::IRAP.MESGateway.Tools.Properties.Resources.projectdirectory_16x16;
+            this.buttonEdit1.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph, "", -1, true, true, false, editorButtonImageOptions1, new DevExpress.Utils.KeyShortcut(System.Windows.Forms.Keys.None), serializableAppearanceObject1, serializableAppearanceObject2, serializableAppearanceObject3, serializableAppearanceObject4, "", null, null, DevExpress.Utils.ToolTipAnchor.Default)});
+            this.buttonEdit1.Size = new System.Drawing.Size(480, 22);
+            this.buttonEdit1.TabIndex = 2;
+            // 
+            // labelControl5
+            // 
+            this.labelControl5.Location = new System.Drawing.Point(30, 93);
+            this.labelControl5.Name = "labelControl5";
+            this.labelControl5.Size = new System.Drawing.Size(200, 16);
+            this.labelControl5.TabIndex = 1;
+            this.labelControl5.Text = "DCSGateway 服务安装目录：";
+            // 
+            // labelControl2
+            // 
+            this.labelControl2.Appearance.Font = new System.Drawing.Font("新宋体", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl2.Appearance.Options.UseFont = true;
+            this.labelControl2.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.labelControl2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelControl2.Location = new System.Drawing.Point(30, 30);
+            this.labelControl2.Name = "labelControl2";
+            this.labelControl2.Size = new System.Drawing.Size(548, 48);
+            this.labelControl2.TabIndex = 0;
+            this.labelControl2.Text = "选项";
+            // 
+            // bvccAbout
+            // 
+            this.bvccAbout.AutoScroll = true;
+            this.bvccAbout.Controls.Add(this.labelControl4);
+            this.bvccAbout.Controls.Add(this.labelControl1);
+            this.bvccAbout.Controls.Add(this.pictureEdit1);
+            this.bvccAbout.Controls.Add(this.labelControl3);
+            this.bvccAbout.Location = new System.Drawing.Point(134, 63);
+            this.bvccAbout.Name = "bvccAbout";
+            this.bvccAbout.Padding = new System.Windows.Forms.Padding(30);
+            this.bvccAbout.Size = new System.Drawing.Size(608, 310);
+            this.bvccAbout.TabIndex = 2;
+            // 
+            // labelControl4
+            // 
+            this.labelControl4.Appearance.Font = new System.Drawing.Font("新宋体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl4.Appearance.Options.UseFont = true;
+            this.labelControl4.Appearance.Options.UseTextOptions = true;
+            this.labelControl4.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.labelControl4.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+            this.labelControl4.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.labelControl4.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.labelControl4.Location = new System.Drawing.Point(30, 233);
+            this.labelControl4.Name = "labelControl4";
+            this.labelControl4.Size = new System.Drawing.Size(553, 30);
+            this.labelControl4.TabIndex = 3;
+            this.labelControl4.Text = "© 2019 Jiangsu Softland Science & Technology All Rights Reserved\r\n江苏芍园科技有限责任公司 版权" +
+    "所有";
+            // 
+            // labelControl1
+            // 
+            this.labelControl1.Appearance.Font = new System.Drawing.Font("新宋体", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl1.Appearance.Options.UseFont = true;
+            this.labelControl1.Appearance.Options.UseTextOptions = true;
+            this.labelControl1.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Top;
+            this.labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.labelControl1.Location = new System.Drawing.Point(219, 115);
+            this.labelControl1.Name = "labelControl1";
+            this.labelControl1.Size = new System.Drawing.Size(394, 38);
+            this.labelControl1.TabIndex = 1;
+            this.labelControl1.Text = "IRAP DCSGateway for PLC 维护管理工具";
+            // 
+            // pictureEdit1
+            // 
+            this.pictureEdit1.EditValue = ((object)(resources.GetObject("pictureEdit1.EditValue")));
+            this.pictureEdit1.Location = new System.Drawing.Point(61, 115);
+            this.pictureEdit1.MenuManager = this.ribbon;
+            this.pictureEdit1.Name = "pictureEdit1";
+            this.pictureEdit1.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
+            this.pictureEdit1.Properties.ZoomPercent = 20D;
+            this.pictureEdit1.Size = new System.Drawing.Size(131, 89);
+            this.pictureEdit1.TabIndex = 0;
+            // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("新宋体", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.labelControl3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.labelControl3.Location = new System.Drawing.Point(30, 30);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(553, 48);
+            this.labelControl3.TabIndex = 2;
+            this.labelControl3.Text = "关于";
+            // 
+            // bvtiOptions
+            // 
+            this.bvtiOptions.Caption = "选项...";
+            this.bvtiOptions.ContentControl = this.bvccOptions;
+            this.bvtiOptions.Name = "bvtiOptions";
+            // 
+            // bvtiAbout
+            // 
+            this.bvtiAbout.Caption = "关于";
+            this.bvtiAbout.ContentControl = this.bvccAbout;
+            this.bvtiAbout.Name = "bvtiAbout";
+            this.bvtiAbout.Selected = true;
+            // 
+            // backstageViewItemSeparator1
+            // 
+            this.backstageViewItemSeparator1.Name = "backstageViewItemSeparator1";
+            // 
+            // bvbiQuit
+            // 
+            this.bvbiQuit.Caption = "退出";
+            this.bvbiQuit.Name = "bvbiQuit";
             // 
             // icSmall
             // 
@@ -392,10 +572,10 @@
             // 
             // ribbonStatusBar
             // 
-            this.ribbonStatusBar.Location = new System.Drawing.Point(0, 767);
+            this.ribbonStatusBar.Location = new System.Drawing.Point(0, 624);
             this.ribbonStatusBar.Name = "ribbonStatusBar";
             this.ribbonStatusBar.Ribbon = this.ribbon;
-            this.ribbonStatusBar.Size = new System.Drawing.Size(976, 21);
+            this.ribbonStatusBar.Size = new System.Drawing.Size(1109, 21);
             // 
             // navBarControl1
             // 
@@ -409,7 +589,7 @@
             this.navBarControl1.MenuManager = this.ribbon;
             this.navBarControl1.Name = "navBarControl1";
             this.navBarControl1.OptionsNavPane.ExpandedWidth = 298;
-            this.navBarControl1.Size = new System.Drawing.Size(298, 609);
+            this.navBarControl1.Size = new System.Drawing.Size(298, 466);
             this.navBarControl1.TabIndex = 3;
             this.navBarControl1.Text = "navBarControl1";
             this.navBarControl1.View = new DevExpress.XtraNavBar.ViewInfo.SkinNavigationPaneViewInfoRegistrator();
@@ -422,7 +602,7 @@
             this.nbgDevices.DragDropFlags = DevExpress.XtraNavBar.NavBarDragDrop.None;
             this.nbgDevices.Expanded = true;
             this.nbgDevices.GroupCaptionUseImage = DevExpress.XtraNavBar.NavBarImage.Large;
-            this.nbgDevices.GroupClientHeight = 463;
+            this.nbgDevices.GroupClientHeight = 387;
             this.nbgDevices.GroupStyle = DevExpress.XtraNavBar.NavBarGroupStyle.ControlContainer;
             this.nbgDevices.Name = "nbgDevices";
             // 
@@ -432,7 +612,7 @@
             this.navBarGroupControlContainer1.Appearance.Options.UseBackColor = true;
             this.navBarGroupControlContainer1.Controls.Add(this.ucDevices);
             this.navBarGroupControlContainer1.Name = "navBarGroupControlContainer1";
-            this.navBarGroupControlContainer1.Size = new System.Drawing.Size(298, 490);
+            this.navBarGroupControlContainer1.Size = new System.Drawing.Size(298, 385);
             this.navBarGroupControlContainer1.TabIndex = 0;
             // 
             // ucDevices
@@ -440,7 +620,7 @@
             this.ucDevices.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ucDevices.Location = new System.Drawing.Point(0, 0);
             this.ucDevices.Name = "ucDevices";
-            this.ucDevices.Size = new System.Drawing.Size(298, 490);
+            this.ucDevices.Size = new System.Drawing.Size(298, 385);
             this.ucDevices.TabIndex = 0;
             this.ucDevices.OnDataSourceChanged += new IRAP.MESGateway.Tools.DataSourceChangedEventHandler(this.ucDevices_OnDataSourceChanged);
             // 
@@ -453,7 +633,7 @@
             // 
             this.splitterControl1.Location = new System.Drawing.Point(298, 158);
             this.splitterControl1.Name = "splitterControl1";
-            this.splitterControl1.Size = new System.Drawing.Size(12, 609);
+            this.splitterControl1.Size = new System.Drawing.Size(12, 466);
             this.splitterControl1.TabIndex = 6;
             this.splitterControl1.TabStop = false;
             this.splitterControl1.Tag = "";
@@ -461,17 +641,34 @@
             // pcMain
             // 
             this.pcMain.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.pcMain.Controls.Add(this.bvControl);
             this.pcMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pcMain.Location = new System.Drawing.Point(310, 158);
             this.pcMain.Name = "pcMain";
-            this.pcMain.Size = new System.Drawing.Size(666, 609);
+            this.pcMain.Size = new System.Drawing.Size(799, 466);
             this.pcMain.TabIndex = 9;
+            // 
+            // btnSaveOptionsChanged
+            // 
+            this.btnSaveOptionsChanged.Location = new System.Drawing.Point(30, 263);
+            this.btnSaveOptionsChanged.Name = "btnSaveOptionsChanged";
+            this.btnSaveOptionsChanged.Size = new System.Drawing.Size(93, 30);
+            this.btnSaveOptionsChanged.TabIndex = 3;
+            this.btnSaveOptionsChanged.Text = "保存";
+            // 
+            // btnCancelOptionsChanged
+            // 
+            this.btnCancelOptionsChanged.Location = new System.Drawing.Point(144, 263);
+            this.btnCancelOptionsChanged.Name = "btnCancelOptionsChanged";
+            this.btnCancelOptionsChanged.Size = new System.Drawing.Size(93, 30);
+            this.btnCancelOptionsChanged.TabIndex = 4;
+            this.btnCancelOptionsChanged.Text = "取消";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(976, 788);
+            this.ClientSize = new System.Drawing.Size(1109, 645);
             this.Controls.Add(this.pcMain);
             this.Controls.Add(this.splitterControl1);
             this.Controls.Add(this.navBarControl1);
@@ -486,12 +683,20 @@
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bvControl)).EndInit();
+            this.bvControl.ResumeLayout(false);
+            this.bvccOptions.ResumeLayout(false);
+            this.bvccOptions.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.buttonEdit1.Properties)).EndInit();
+            this.bvccAbout.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.icSmall)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.icLarge)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.navBarControl1)).EndInit();
             this.navBarControl1.ResumeLayout(false);
             this.navBarGroupControlContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pcMain)).EndInit();
+            this.pcMain.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -538,5 +743,21 @@
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup rpgTag;
         private DevExpress.Utils.ImageCollection icSmall;
         private DevExpress.XtraBars.BarButtonItem bbiImportDeviceConfigParams;
+        private DevExpress.XtraBars.Ribbon.BackstageViewControl bvControl;
+        private DevExpress.XtraBars.Ribbon.BackstageViewClientControl bvccOptions;
+        private DevExpress.XtraBars.Ribbon.BackstageViewTabItem bvtiOptions;
+        private DevExpress.XtraBars.Ribbon.BackstageViewItemSeparator backstageViewItemSeparator1;
+        private DevExpress.XtraBars.Ribbon.BackstageViewButtonItem bvbiQuit;
+        private DevExpress.XtraBars.Ribbon.BackstageViewClientControl bvccAbout;
+        private DevExpress.XtraBars.Ribbon.BackstageViewTabItem bvtiAbout;
+        private DevExpress.XtraEditors.LabelControl labelControl1;
+        private DevExpress.XtraEditors.PictureEdit pictureEdit1;
+        private DevExpress.XtraEditors.LabelControl labelControl2;
+        private DevExpress.XtraEditors.LabelControl labelControl4;
+        private DevExpress.XtraEditors.LabelControl labelControl3;
+        private DevExpress.XtraEditors.ButtonEdit buttonEdit1;
+        private DevExpress.XtraEditors.LabelControl labelControl5;
+        private DevExpress.XtraEditors.SimpleButton btnCancelOptionsChanged;
+        private DevExpress.XtraEditors.SimpleButton btnSaveOptionsChanged;
     }
 }

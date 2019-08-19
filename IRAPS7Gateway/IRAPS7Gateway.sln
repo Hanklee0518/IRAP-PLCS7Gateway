@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAPS7GatewayService", "IRA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAP.MESGateway.Tools", "IRAP.MESGateway.Tools\IRAP.MESGateway.Tools.csproj", "{1090776C-75EF-4A31-B3D4-16C92FE0BB5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAP.DCSGateway.Service", "IRAP.DCSGateway.Service\IRAP.DCSGateway.Service.csproj", "{364AD655-4A47-4A79-B438-0E45C45FE1C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,14 @@ Global
 		{1090776C-75EF-4A31-B3D4-16C92FE0BB5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1090776C-75EF-4A31-B3D4-16C92FE0BB5A}.Release|x64.ActiveCfg = Release|Any CPU
 		{1090776C-75EF-4A31-B3D4-16C92FE0BB5A}.Release|x64.Build.0 = Release|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Debug|x64.Build.0 = Debug|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|x64.ActiveCfg = Release|Any CPU
+		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

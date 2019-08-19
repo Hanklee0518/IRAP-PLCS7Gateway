@@ -33,8 +33,8 @@ namespace IRAP.MESGateway.Tools.Controls
 
         public void InitOptionItems()
         {
-            edtProjectPath.Text = ParamHelper.ProjectBasePath;
-            edtCommunityID.Text = ParamHelper.CommunityID.ToString();
+            edtProjectPath.Text = ParamHelper.Instance.ProjectBasePath;
+            edtCommunityID.Text = ParamHelper.Instance.CommunityID.ToString();
         }
 
         private void edtProjectPath_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -70,10 +70,10 @@ namespace IRAP.MESGateway.Tools.Controls
 
         private void btnSaveOptionsChanged_Click(object sender, EventArgs e)
         {
-            ParamHelper.ProjectBasePath = edtProjectPath.Text;
+            ParamHelper.Instance.ProjectBasePath = edtProjectPath.Text;
             if (int.TryParse(edtCommunityID.Text, out int value))
             {
-                ParamHelper.CommunityID = value;
+                ParamHelper.Instance.CommunityID = value;
             }
 
             CloseParent();

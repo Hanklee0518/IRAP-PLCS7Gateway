@@ -28,6 +28,8 @@ namespace IRAP.MESGateway.Tools.Entities
                     "设备对象不能单独存在，必须要依赖于ProductLineEntity对象");
 
             name = $"KnownDevice[{Guid.NewGuid().ToString("N")}]";
+
+            Service = new DCSGatewayServiceController(this);
         }
         public DeviceEntity(
             XmlNode node,
@@ -171,9 +173,6 @@ namespace IRAP.MESGateway.Tools.Entities
         }
 
         private string name = "";
-
-        [Browsable(false)]
-        public ProductionLineEntity Parent { get; set; } = null;
         /// <summary>
         /// 设备名称
         /// </summary>
@@ -184,6 +183,7 @@ namespace IRAP.MESGateway.Tools.Entities
             set
             {
                 name = value;
+                Service.ResetServName();
                 if (Node != null)
                 {
                     Node.SetValue(0, value);
@@ -211,10 +211,15 @@ namespace IRAP.MESGateway.Tools.Entities
         [TypeConverter(typeof(ExpandableObjectConverter))]
         [EditorBrowsable(EditorBrowsableState.Always)]
         public PLCEntity BelongPLC { get; } = new PLCEntity();
+
+        [Browsable(false)]
+        public ProductionLineEntity Parent { get; set; } = null;
         [Browsable(false)]
         public GroupEntityCollection Groups { get; } = new GroupEntityCollection();
         [Browsable(false)]
         public TreeListNode Node { get; set; } = null;
+        [Browsable(false)]
+        public DCSGatewayServiceController Service { get; private set; } = null;
 
         public XmlNode GenerateXmlNode()
         {
@@ -297,6 +302,83 @@ namespace IRAP.MESGateway.Tools.Entities
             }
 
             return rlt;
+        }
+
+        public void ExportToXml(string filePath)
+        {
+            XmlDocument xml = new XmlDocument();
+            xml.AppendChild(xml.CreateXmlDeclaration("1.0", "utf-8", "no"));
+
+            XmlNode root = xml.CreateElement("root");
+            xml.AppendChild(root);
+
+            XmlNode plcNode = null;
+            if (PLCType == PLCType.SIEMENS)
+            {
+                plcNode = xml.CreateElement("SiemensPLC");
+                plcNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "IPAddress", BelongPLC.IPAddress));
+                plcNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Rack", BelongPLC.Rack));
+                plcNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Slot", BelongPLC.Slot));
+            }
+            root.AppendChild(plcNode);
+
+            XmlNode deviceNode = xml.CreateElement("Device");
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Name", Name));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "T133LeafID", T133LeafID));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "T216LeafID", T216LeafID));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "T107LeafID", T107LeafID));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "DBType", DBType.ToString()));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "DBNumber", DBNumber));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "CycleReadMode", CycleReadMode.ToString()));
+            deviceNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "SplitterTime", SplitterTime));
+
+            foreach (GroupEntity group in Groups)
+            {
+                XmlNode groupNode = xml.CreateElement("TagGroup");
+                groupNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Name", group.Name));
+
+                foreach (TagEntity tag in group.Tags)
+                {
+                    XmlNode tagNode = xml.CreateElement("Tag");
+                    tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Name", tag.Name));
+                    tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Datatype", tag.DataType.ToString()));
+                    if (tag.DataType == TagDataType.ArrayChar)
+                    {
+                        tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Length", tag.Length));
+                    }
+                    tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Offset", tag.Offset));
+                    tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Type", tag.Type.ToString()));
+                    groupNode.AppendChild(tagNode);
+                }
+
+                foreach (SubGroupEntity sgroup in group.SubGroups)
+                {
+                    XmlNode sgroupNode = xml.CreateElement("SubTagGroup");
+                    sgroupNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Prefix", sgroup.Prefix));
+                    
+                    foreach (TagEntity tag in sgroup.Tags)
+                    {
+                        XmlNode tagNode = xml.CreateElement("Tag");
+                        tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Name", tag.Name));
+                        tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Datatype", tag.DataType.ToString()));
+                        if (tag.DataType == TagDataType.ArrayChar)
+                        {
+                            tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Length", tag.Length));
+                        }
+                        tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Offset", tag.Offset));
+                        tagNode.Attributes.Append(XMLHelper.CreateAttribute(xml, "Type", tag.Type.ToString()));
+                        sgroupNode.AppendChild(tagNode);
+                    }
+
+                    groupNode.AppendChild(sgroupNode);
+                }
+
+                deviceNode.AppendChild(groupNode);
+            }
+
+            plcNode.AppendChild(deviceNode);
+
+            xml.Save(filePath);
         }
     }
 

@@ -22,8 +22,9 @@ namespace IRAP.MESGateway.Tools
         static void Main(string[] arguments)
         {
             AppDomain.CurrentDomain.AssemblyResolve += OnCurrentDomainAssemblyResolve;
-            ParamHelper.ApplicationArguments = arguments;
-            LocalizationHelper.SetCurrentCulture(ParamHelper.ApplicationArguments);
+            ParamHelper.Instance.ApplicationArguments = arguments;
+            LocalizationHelper.SetCurrentCulture(
+                ParamHelper.Instance.ApplicationArguments);
             BonusSkins.Register();
             UserLookAndFeel.Default.SetSkinStyle("McSkin");
             AppearanceObject.DefaultFont = new Font("新宋体", 12);

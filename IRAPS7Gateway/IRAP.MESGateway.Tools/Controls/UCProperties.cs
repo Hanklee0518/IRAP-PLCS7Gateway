@@ -35,6 +35,9 @@ namespace IRAP.MESGateway.Tools.Controls
             MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
             MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
             MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
+            MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
+            MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
+            MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
 
             if (obj is ProductionLineEntity)
             {

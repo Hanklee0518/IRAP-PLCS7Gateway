@@ -11,6 +11,7 @@ using DevExpress.XtraBars;
 using IRAP.MESGateway.Tools.Forms;
 using IRAP.MESGateway.Tools.Entities;
 using System.IO;
+using System.Reflection;
 
 namespace IRAP.MESGateway.Tools
 {
@@ -26,8 +27,10 @@ namespace IRAP.MESGateway.Tools
 
             InitializeComponent();
 
-            Text = ParamHelper.AppTitle;
-            lblAboutAppTitle.Text = $"{ParamHelper.AppTitle}\n\nVersion:1.0.0.0";
+            Text = ParamHelper.Instance.AppTitle;
+            lblAboutAppTitle.Text = 
+                $"{ParamHelper.Instance.AppTitle}\n\n" +
+                $"Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
 
             InitNavBarGroups();
             RibbonButtonsInitialize();
@@ -41,25 +44,28 @@ namespace IRAP.MESGateway.Tools
 
         private void RibbonButtonsInitialize()
         {
-            InitBarButtonItem(bbiNewProductionLine, null, "");
-            InitBarButtonItem(bbiNewDevice, null, "");
-            InitBarButtonItem(bbiNewTagGroup, null, "");
-            InitBarButtonItem(bbiNewTagSubGroup, null, "");
-            InitBarButtonItem(bbiNewTag, null, "");
-            InitBarButtonItem(bbiRemoveProductionLine, null, "");
-            InitBarButtonItem(bbiRemoveDevice, null, "");
-            InitBarButtonItem(bbiRemoveTagGroup, null, "");
-            InitBarButtonItem(bbiRemoveTagSubGroup, null, "");
-            InitBarButtonItem(bbiRemoveTag, null, "");
-            InitBarButtonItem(bbiImportDeviceConfigParams, null, "");
+            InitBarButtonItem(bbiNewProductionLine, MenuItem.NewProductionLine, "");
+            InitBarButtonItem(bbiNewDevice, MenuItem.NewDevice, "");
+            InitBarButtonItem(bbiNewTagGroup, MenuItem.NewTagGroup, "");
+            InitBarButtonItem(bbiNewTagSubGroup, MenuItem.NewSubTagGroup, "");
+            InitBarButtonItem(bbiNewTag, MenuItem.NewTag, "");
+            InitBarButtonItem(bbiRemoveProductionLine, MenuItem.RemoveProductionLine, "");
+            InitBarButtonItem(bbiRemoveDevice, MenuItem.RemoveDevice, "");
+            InitBarButtonItem(bbiRemoveTagGroup, MenuItem.RemoveTagGroup, "");
+            InitBarButtonItem(bbiRemoveTagSubGroup, MenuItem.RemoveSubTagGroup, "");
+            InitBarButtonItem(bbiRemoveTag, MenuItem.RemoveTag, "");
+            InitBarButtonItem(bbiImportDeviceConfigParams, MenuItem.ImportDeviceConfigParams, "");
+            InitBarButtonItem(bbiDeployGatewayService, MenuItem.GatewayServiceDeploy, "");
+            InitBarButtonItem(bbiUpdateDeviceTags, MenuItem.UpdateDeviceTagsToService, "");
+            InitBarButtonItem(bbiUninstallGatewayService, MenuItem.GatewayServiceUninstall, "");
         }
 
         private void InitBarButtonItem(BarButtonItem item, object tag, string description)
         {
-            MenuItemHelper.Instance.Buttons.Add(item);
             item.ItemClick += new ItemClickEventHandler(bbiGeneralItemClick);
             item.Hint = description;
             item.Tag = tag;
+            MenuItemHelper.Instance.Buttons.Add(item);
         }
 
         private void bbiGeneralItemClick(object sender, ItemClickEventArgs e)

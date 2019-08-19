@@ -90,6 +90,24 @@ public enum TagDataType
     ArrayChar
 }
 
+public enum MenuItem
+{
+    NewProductionLine,
+    RemoveProductionLine,
+    NewDevice,
+    RemoveDevice,
+    NewTagGroup,
+    RemoveTagGroup,
+    NewSubTagGroup,
+    RemoveSubTagGroup,
+    NewTag,
+    RemoveTag,
+    ImportDeviceConfigParams,
+    GatewayServiceDeploy,
+    GatewayServiceUninstall,
+    UpdateDeviceTagsToService,
+}
+
 public class EnumHelper
 {
     public static string GetEnumDescription(Enum enumValue)

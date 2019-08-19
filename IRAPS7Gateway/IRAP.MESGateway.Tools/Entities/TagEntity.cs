@@ -250,6 +250,12 @@ namespace IRAP.MESGateway.Tools.Entities
                     rlt.Length = XMLHelper.GetAttributeStringValue(node, "Length", "0.1");
                 }
 
+                Enum.TryParse(
+                    XMLHelper.GetAttributeStringValue(node, "Type", "A"),
+                    true,
+                    out TagType type);
+                rlt.Type = type;
+
                 return rlt;
             }
             catch
@@ -281,6 +287,11 @@ namespace IRAP.MESGateway.Tools.Entities
                 {
                     rlt.Length = XMLHelper.GetAttributeStringValue(node, "Length", "0.1");
                 }
+                Enum.TryParse(
+                    XMLHelper.GetAttributeStringValue(node, "Type", "A"),
+                    true,
+                    out TagType type);
+                rlt.Type = type;
 
                 return rlt;
             }

@@ -17,11 +17,26 @@ namespace IRAP.MESGateway.Tools
 {
     public class ParamHelper
     {
-        internal static string[] ApplicationArguments;
-        internal static readonly string AppTitle =
+        private static ParamHelper _instance = null;
+        public static ParamHelper Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ParamHelper();
+                }
+                return _instance;
+            }
+        }
+
+        private ParamHelper() { }
+
+        internal string[] ApplicationArguments;
+        internal readonly string AppTitle =
             "IRAP DCSGateway for PLC 维护管理工具";
 
-        internal static string ProjectBasePath
+        internal string ProjectBasePath
         {
             get
             {
@@ -33,13 +48,20 @@ namespace IRAP.MESGateway.Tools
             }
         }
 
-        internal static int CommunityID
+        internal int CommunityID
         {
             get { return GetInt("CommunityID", 57280); }
             set { SaveParam("CommunityID", value.ToString()); }
         }
 
-        private static void SaveParam(string key, string value)
+        internal string ServiceExecuteName
+        {
+            get { return "IRAP.DCSGateway.Service.exe"; }
+        }
+
+        internal string WebAPIUrl { get => "http://192.168.57.14:55559"; }
+
+        private void SaveParam(string key, string value)
         {
             Configuration config =
                 ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -53,7 +75,7 @@ namespace IRAP.MESGateway.Tools
             ConfigurationManager.RefreshSection("appSettings");
         }
 
-        private static string GetString(string key)
+        private string GetString(string key)
         {
             string rlt = "";
             if (ConfigurationManager.AppSettings[key] != null)
@@ -63,7 +85,7 @@ namespace IRAP.MESGateway.Tools
             return rlt;
         }
 
-        private static int GetInt(string key, int defaultValue)
+        private int GetInt(string key, int defaultValue)
         {
             int rlt = defaultValue;
             if (ConfigurationManager.AppSettings[key] != null)
@@ -76,7 +98,7 @@ namespace IRAP.MESGateway.Tools
             return rlt;
         }
 
-        private static bool GetBoolean(string key)
+        private bool GetBoolean(string key)
         {
             bool rlt = false;
             if (ConfigurationManager.AppSettings[key] != null)
@@ -85,6 +107,11 @@ namespace IRAP.MESGateway.Tools
                 catch { rlt = false; }
             }
             return rlt;
+        }
+
+        public string GenerateSerivcePath(string lineName, string deviceName)
+        {
+            return $@"{ProjectBasePath}\{lineName}\{deviceName}\{ServiceExecuteName}";
         }
     }
 
@@ -222,7 +249,7 @@ namespace IRAP.MESGateway.Tools
         {
             get
             {
-                if (index >=0&&index < buttons.Count)
+                if (index >= 0 && index < buttons.Count)
                 {
                     return buttons.ElementAt(index).Value;
                 }

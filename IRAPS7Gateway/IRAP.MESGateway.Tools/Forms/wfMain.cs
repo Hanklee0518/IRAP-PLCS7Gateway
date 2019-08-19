@@ -16,7 +16,8 @@ namespace IRAP.MESGateway.Tools.Forms
     {
         public wfMain()
         {
-            LocalizationHelper.SetCurrentCulture(ParamHelper.ApplicationArguments);
+            LocalizationHelper.SetCurrentCulture(
+                ParamHelper.Instance.ApplicationArguments);
 
             InitializeComponent();
 

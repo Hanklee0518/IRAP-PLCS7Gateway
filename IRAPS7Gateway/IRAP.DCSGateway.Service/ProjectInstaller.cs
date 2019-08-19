@@ -1,6 +1,4 @@
-﻿using Logrila.Logging;
-using Logrila.Logging.NLogIntegration;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,20 +8,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace IRAPS7GatewayService
+namespace IRAP.DCSGateway.Service
 {
     [RunInstaller(true)]
     public partial class ProjectInstaller : Installer
     {
-        private ILog _log = Logger.Get<ProjectInstaller>();
-
         public ProjectInstaller()
         {
             InitializeComponent();
 
-            //_log.Debug("获取服务名称");
-            //serviceInstaller.ServiceName += GetDeviceName();
-            //serviceInstaller.DisplayName = serviceInstaller.ServiceName;
+            serviceInstaller.ServiceName += GetDeviceName();
+            serviceInstaller.DisplayName = serviceInstaller.ServiceName;
         }
 
         private string GetDeviceName()
@@ -34,8 +29,6 @@ namespace IRAPS7GatewayService
                 Path.GetDirectoryName(GetType().Assembly.Location);
             string serviceCFGFileName =
                 GetType().Assembly.Location + ".config";
-
-            _log.Debug($"ServiceCFGFileName:{serviceCFGFileName}");
 
             rlt = Get_ConfigValue(serviceCFGFileName, "DeviceName");
             if (rlt != "")

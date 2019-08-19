@@ -37,6 +37,9 @@ namespace IRAP.MESGateway.Tools.Controls
             MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = false;
             MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = false;
             MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = true;
+            MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
+            MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
+            MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
             if (entity == null)
             {
                 MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;

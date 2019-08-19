@@ -79,6 +79,12 @@ namespace IRAP.MESGateway.Tools
                 case "bbiRemoveTag":
                     RemoveTag();
                     break;
+                case "bbiDeployGatewayService":
+                    RegisterService();
+                    break;
+                case "bbiUninstallGatewayService":
+                    UnregisterService();
+                    break;
             }
         }
 
@@ -406,6 +412,70 @@ namespace IRAP.MESGateway.Tools
                         }
 
                         deviceProp.RemoveCurrentNode();
+                    }
+                }
+            }
+        }
+
+        private void RegisterService()
+        {
+            if (trees.CurrentNode().Tag is Guid id)
+            {
+                BaseEntity entity = DataHelper.Instance.AllEntities[id];
+                if (entity is DeviceEntity device)
+                {
+                    if (device.Service != null)
+                    {
+                        try
+                        {
+                            device.Service.Deploy();
+                            XtraMessageBox.Show(
+                                $"设备[{device.Name}]的DCS网关部署成功",
+                                "提示",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                            trees.ResetMenuItemEnable();
+                        }
+                        catch (Exception error)
+                        {
+                            XtraMessageBox.Show(
+                                $"部署网关的时候发生错误：{error.Message}",
+                                "出错啦",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UnregisterService()
+        {
+            if (trees.CurrentNode().Tag is Guid id)
+            {
+                BaseEntity entity = DataHelper.Instance.AllEntities[id];
+                if (entity is DeviceEntity device)
+                {
+                    if (device.Service != null)
+                    {
+                        try
+                        {
+                            device.Service.Unregist();
+                            XtraMessageBox.Show(
+                                $"设备[{device.Name}]的DCS网关卸载成功",
+                                "提示",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                            trees.ResetMenuItemEnable();
+                        }
+                        catch (Exception error)
+                        {
+                            XtraMessageBox.Show(
+                                $"卸载网关的时候发生错误：{error.Message}",
+                                "出错啦",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
+                        }
                     }
                 }
             }

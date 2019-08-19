@@ -16,6 +16,11 @@ namespace IRAP.MESGateway.Tools.Utils
             return attr;
         }
 
+        public static XmlAttribute CreateAttribute(XmlDocument xml, string name, int value)
+        {
+            return CreateAttribute(xml, name, value.ToString());
+        }
+
         public static string GetAttributeStringValue(XmlNode node, string name, string defaultValue)
         {
             if (node.Attributes[name] == null)

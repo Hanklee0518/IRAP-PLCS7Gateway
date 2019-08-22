@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAP.MESGateway.Tools", "IR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IRAP.DCSGateway.Service", "IRAP.DCSGateway.Service\IRAP.DCSGateway.Service.csproj", "{364AD655-4A47-4A79-B438-0E45C45FE1C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SiemensPLCMonitor", "SiemensPLCMonitor\SiemensPLCMonitor.csproj", "{156CC5B9-85EE-40DA-B765-B8BA28771900}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,14 @@ Global
 		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|x64.ActiveCfg = Release|Any CPU
 		{364AD655-4A47-4A79-B438-0E45C45FE1C3}.Release|x64.Build.0 = Release|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Debug|x64.Build.0 = Debug|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Release|Any CPU.Build.0 = Release|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Release|x64.ActiveCfg = Release|Any CPU
+		{156CC5B9-85EE-40DA-B765-B8BA28771900}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

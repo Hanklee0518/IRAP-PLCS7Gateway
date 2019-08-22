@@ -88,7 +88,7 @@ namespace IRAP.BL.S7Gateway
                     _log.Error(
                         $"连接到[{IPAddress}:{siemensTcpNet.Port}][" +
                         $"Rack={Rack}|Slot={Slot}失败，原因：[({connect.ErrorCode})" +
-                        $"{connect.Message}0");
+                        $"{connect.Message}");
                     return false;
                 }
             }

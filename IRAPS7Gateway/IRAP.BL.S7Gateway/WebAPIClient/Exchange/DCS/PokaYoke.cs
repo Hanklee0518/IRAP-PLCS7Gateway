@@ -79,15 +79,15 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错结果
         /// </summary>
-        public byte Poka_Yoke_Result { get; set; }
+        public byte Poka_Yoke_Result { get; set; } = 0;
         /// <summary>
         /// 产品编号
         /// </summary>
-        public string Product_Number { get; set; }
+        public string Product_Number { get; set; } = "";
         /// <summary>
         /// 产品叶标识
         /// </summary>
-        public int T102LeafID { get; set; }
+        public int T102LeafID { get; set; } = 0;
     }
 
     /// <summary>

@@ -515,7 +515,7 @@ namespace IRAP.BL.S7Gateway
 
                                 if (idBinding.Do())
                                 {
-                                    if (idBinding.Error.ErrCode == 0)
+                                    if (idBinding.Error.ErrCode >= 0)
                                     {
                                         _log.Debug(
                                             $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
@@ -619,7 +619,7 @@ namespace IRAP.BL.S7Gateway
 
                                 if (snRequest.Do())
                                 {
-                                    if (snRequest.Error.ErrCode == 0)
+                                    if (snRequest.Error.ErrCode >= 0)
                                     {
                                         _log.Debug(
                                             $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
@@ -738,7 +738,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (wipMoveIn.Do())
                             {
-                                if (wipMoveIn.Error.ErrCode == 0)
+                                if (wipMoveIn.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
@@ -902,7 +902,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (productionEnd.Do())
                             {
-                                if (productionEnd.Error.ErrCode == 0)
+                                if (productionEnd.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
@@ -1007,7 +1007,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (operationCycleEnd.Do())
                             {
-                                if (operationCycleEnd.Error.ErrCode == 0)
+                                if (operationCycleEnd.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
@@ -1102,7 +1102,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (lblElement.Do())
                             {
-                                if (lblElement.Error.ErrCode == 0)
+                                if (lblElement.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
@@ -1234,7 +1234,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (pokaYoke.Do())
                             {
-                                if (pokaYoke.Error.ErrCode == 0)
+                                if (pokaYoke.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
@@ -1382,7 +1382,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (equipFailAndonCall.Do())
                             {
-                                if (equipFailAndonCall.Error.ErrCode == 0)
+                                if (equipFailAndonCall.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
@@ -1479,7 +1479,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (pokaYokeFeeding.Do())
                             {
-                                if (pokaYokeFeeding.Error.ErrCode == 0)
+                                if (pokaYokeFeeding.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
@@ -1581,7 +1581,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (unfeeding.Do())
                             {
-                                if (unfeeding.Error.ErrCode == 0)
+                                if (unfeeding.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
@@ -1684,7 +1684,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (stagnationWarnning.Do())
                             {
-                                if (stagnationWarnning.Error.ErrCode == 0)
+                                if (stagnationWarnning.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
@@ -1781,7 +1781,7 @@ namespace IRAP.BL.S7Gateway
 
                             if (pokaYoke.Do())
                             {
-                                if (pokaYoke.Error.ErrCode == 0)
+                                if (pokaYoke.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
@@ -1956,7 +1956,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (shortageMaterialCheck.Do())
                             {
-                                if (shortageMaterialCheck.Error.ErrCode == 0)
+                                if (shortageMaterialCheck.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
@@ -2058,7 +2058,7 @@ namespace IRAP.BL.S7Gateway
                         {
                             if (containerBinding.Do())
                             {
-                                if (containerBinding.Error.ErrCode == 0)
+                                if (containerBinding.Error.ErrCode >= 0)
                                 {
                                     _log.Debug(
                                         $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +

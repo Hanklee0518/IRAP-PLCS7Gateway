@@ -40,8 +40,11 @@
             this.edtCommunityID = new DevExpress.XtraEditors.TextEdit();
             this.btnCancelOptionsChanged = new DevExpress.XtraEditors.SimpleButton();
             this.btnSaveOptionsChanged = new DevExpress.XtraEditors.SimpleButton();
+            this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
+            this.edtWebAPIUrl = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.edtProjectPath.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtCommunityID.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.edtWebAPIUrl.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // labelControl2
@@ -116,10 +119,29 @@
             this.btnSaveOptionsChanged.Text = "保存";
             this.btnSaveOptionsChanged.Click += new System.EventHandler(this.btnSaveOptionsChanged_Click);
             // 
+            // labelControl3
+            // 
+            this.labelControl3.Appearance.Font = new System.Drawing.Font("新宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl3.Appearance.Options.UseFont = true;
+            this.labelControl3.Location = new System.Drawing.Point(17, 195);
+            this.labelControl3.Name = "labelControl3";
+            this.labelControl3.Size = new System.Drawing.Size(120, 19);
+            this.labelControl3.TabIndex = 9;
+            this.labelControl3.Text = "WebAPI路径：";
+            // 
+            // edtWebAPIUrl
+            // 
+            this.edtWebAPIUrl.Location = new System.Drawing.Point(17, 220);
+            this.edtWebAPIUrl.Name = "edtWebAPIUrl";
+            this.edtWebAPIUrl.Size = new System.Drawing.Size(433, 22);
+            this.edtWebAPIUrl.TabIndex = 10;
+            // 
             // UCOptions
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoScroll = true;
+            this.Controls.Add(this.edtWebAPIUrl);
+            this.Controls.Add(this.labelControl3);
             this.Controls.Add(this.btnCancelOptionsChanged);
             this.Controls.Add(this.btnSaveOptionsChanged);
             this.Controls.Add(this.edtCommunityID);
@@ -131,6 +153,7 @@
             this.Size = new System.Drawing.Size(612, 366);
             ((System.ComponentModel.ISupportInitialize)(this.edtProjectPath.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtCommunityID.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.edtWebAPIUrl.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -145,5 +168,7 @@
         private DevExpress.XtraEditors.TextEdit edtCommunityID;
         private DevExpress.XtraEditors.SimpleButton btnCancelOptionsChanged;
         private DevExpress.XtraEditors.SimpleButton btnSaveOptionsChanged;
+        private DevExpress.XtraEditors.LabelControl labelControl3;
+        private DevExpress.XtraEditors.TextEdit edtWebAPIUrl;
     }
 }

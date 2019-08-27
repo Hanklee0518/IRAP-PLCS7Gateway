@@ -273,8 +273,9 @@ namespace IRAP.MESGateway.Tools
 
         internal virtual void FocusObject(object obj) { }
 
-        protected internal virtual void ButtonClick(string menuItemName) { }
-
-        protected internal virtual void ShowDataChanged(DataSourceChangedEventArgs args) { }
+        protected internal virtual void ButtonClick(MenuItem menuItemName) { }
+        protected internal virtual void BarListItemClick(MenuItem menuItemName, int index) { }
+        protected internal virtual void ShowDataChanged(DeviceTreeDataSourceChangedEventArgs args) { }
+        protected internal virtual void ShowDataChanged(ServiceTreeDataSourceChangedEventArgs args) { }
     }
 }

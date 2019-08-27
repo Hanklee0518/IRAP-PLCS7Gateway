@@ -26,9 +26,11 @@ namespace IRAP.MESGateway.Tools
             DataHelper.Instance.Load(dbPath);
 
             InitializeComponent();
+            ucServicesTree.OnDataSourceChanged += new ServiceTreeDataSourceChangedEventHandler(ucServicesTree_OnDataSourceChanged);
+            ucDevices.OnDataSourceChanged += new DeviceTreeDataSourceChangedEventHandler(ucDevices_OnDataSourceChanged);
 
             Text = ParamHelper.Instance.AppTitle;
-            lblAboutAppTitle.Text = 
+            lblAboutAppTitle.Text =
                 $"{ParamHelper.Instance.AppTitle}\n\n" +
                 $"Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString()}";
 
@@ -36,10 +38,17 @@ namespace IRAP.MESGateway.Tools
             RibbonButtonsInitialize();
 
             modulesNavigator = new ModulesNavigator(ribbon, pcMain);
-            modulesNavigator.ChangeGroup(
-                navBarControl1.ActiveGroup,
-                GetModuleData(
-                    (NavBarGroupTagObject)navBarControl1.ActiveGroup.Tag));
+            if (navBarControl1.ActiveGroup == nbgDevices)
+            {
+                modulesNavigator.ChangeGroup(
+                    navBarControl1.ActiveGroup,
+                    GetModuleData(
+                        (NavBarGroupTagObject)navBarControl1.ActiveGroup.Tag));
+            }
+            else
+            {
+                navBarControl1.ActiveGroup = nbgDevices;
+            }
         }
 
         private void RibbonButtonsInitialize()
@@ -57,33 +66,52 @@ namespace IRAP.MESGateway.Tools
             InitBarButtonItem(bbiImportDeviceConfigParams, MenuItem.ImportDeviceConfigParams, "");
             InitBarButtonItem(bbiDeployGatewayService, MenuItem.GatewayServiceDeploy, "");
             InitBarButtonItem(bbiUpdateDeviceTags, MenuItem.UpdateDeviceTagsToService, "");
+            InitBarButtonItem(bbiUpdateServiceFile, MenuItem.UpdateServiceFile, "");
             InitBarButtonItem(bbiUninstallGatewayService, MenuItem.GatewayServiceUninstall, "");
+            InitBarButtonItem(bbiRefreshServiceList, MenuItem.RefreshServiceList, "");
+            InitBarButtonItem(bbiStartService, MenuItem.StartService, "");
+            InitBarButtonItem(bbiStopService, MenuItem.StopService, "");
+            InitBarButtonItem(bbiServiceLogReload, MenuItem.ServiceLogReload, "");
+            InitBarButtonItem(bliHistoryLogs, MenuItem.ViewHistoryLog, "");
         }
 
-        private void InitBarButtonItem(BarButtonItem item, object tag, string description)
+        private void InitBarButtonItem(BarItem item, object tag, string description)
         {
-            item.ItemClick += new ItemClickEventHandler(bbiGeneralItemClick);
             item.Hint = description;
             item.Tag = tag;
+
+            if (item is BarButtonItem)
+            {
+                item.ItemClick += new ItemClickEventHandler(bbiGeneralItemClick);
+            }
+            else if (item is BarListItem)
+            {
+                ((BarListItem)item).ListItemClick += new ListItemClickEventHandler(bliGeneralListItemClick);
+            }
             MenuItemHelper.Instance.Buttons.Add(item);
+        }
+
+        private void bliGeneralListItemClick(object sender, ListItemClickEventArgs e)
+        {
+            modulesNavigator.CurrentModule.BarListItemClick((MenuItem)e.Item.Tag, e.Index);
         }
 
         private void bbiGeneralItemClick(object sender, ItemClickEventArgs e)
         {
-            modulesNavigator.CurrentModule.ButtonClick(e.Item.Name);
+            modulesNavigator.CurrentModule.ButtonClick((MenuItem)e.Item.Tag);
         }
 
         private void InitNavBarGroups()
         {
             nbgDevices.Tag = new NavBarGroupTagObject("Devices", typeof(DeviceTags));
-            nbgServices.Tag = new NavBarGroupTagObject("Services", typeof(GatewayServices));
+            nbgServices.Tag = new NavBarGroupTagObject("Services", typeof(ServiceInfo));
         }
 
         private object GetModuleData(NavBarGroupTagObject tag)
         {
             if (tag == null) return null;
             if (tag.ModuleType == typeof(DeviceTags)) return ucDevices;
-            if (tag.ModuleType == typeof(GatewayServices)) return nbgServices;
+            if (tag.ModuleType == typeof(ServiceInfo)) return ucServicesTree;
             return null;
         }
 
@@ -110,9 +138,19 @@ namespace IRAP.MESGateway.Tools
         {
             object data = GetModuleData((NavBarGroupTagObject)e.Group.Tag);
             modulesNavigator.ChangeGroup(e.Group, data);
+
+            switch (e.Group.Name)
+            {
+                case "nbgDevices":
+                    ucDevices.Focus();
+                    break;
+                case "nbgServices":
+                    ucServicesTree.Focus();
+                    break;
+            }
         }
 
-        private void ucDevices_OnDataSourceChanged(object sender, ref DataSourceChangedEventArgs e)
+        private void ucDevices_OnDataSourceChanged(object sender, ref DeviceTreeDataSourceChangedEventArgs e)
         {
             modulesNavigator.CurrentModule.ShowDataChanged(e);
         }
@@ -137,6 +175,11 @@ namespace IRAP.MESGateway.Tools
         private void bvtiOptions_ItemPressed(object sender, DevExpress.XtraBars.Ribbon.BackstageViewItemEventArgs e)
         {
             ucOptions.InitOptionItems();
+        }
+
+        private void ucServicesTree_OnDataSourceChanged(object sender, ServiceTreeDataSourceChangedEventArgs e)
+        {
+            modulesNavigator.CurrentModule.ShowDataChanged(e);
         }
     }
 }

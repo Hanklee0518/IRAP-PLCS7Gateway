@@ -32,13 +32,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.ribbon = new DevExpress.XtraBars.Ribbon.RibbonControl();
             this.bvControl = new DevExpress.XtraBars.Ribbon.BackstageViewControl();
-            this.bvccOptions = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
-            this.ucOptions = new IRAP.MESGateway.Tools.Controls.UCOptions();
             this.bvccAbout = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
             this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
             this.lblAboutAppTitle = new DevExpress.XtraEditors.LabelControl();
             this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
             this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
+            this.bvccOptions = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
+            this.ucOptions = new IRAP.MESGateway.Tools.Controls.UCOptions();
             this.bvtiOptions = new DevExpress.XtraBars.Ribbon.BackstageViewTabItem();
             this.bvtiAbout = new DevExpress.XtraBars.Ribbon.BackstageViewTabItem();
             this.backstageViewItemSeparator1 = new DevExpress.XtraBars.Ribbon.BackstageViewItemSeparator();
@@ -63,6 +63,10 @@
             this.bbiImportDeviceConfigParams = new DevExpress.XtraBars.BarButtonItem();
             this.bbiDeployGatewayService = new DevExpress.XtraBars.BarButtonItem();
             this.bbiUpdateDeviceTags = new DevExpress.XtraBars.BarButtonItem();
+            this.bbiUninstallGatewayService = new DevExpress.XtraBars.BarButtonItem();
+            this.bbiServiceLogReload = new DevExpress.XtraBars.BarButtonItem();
+            this.bbiUpdateServiceFile = new DevExpress.XtraBars.BarButtonItem();
+            this.bliHistoryLogs = new DevExpress.XtraBars.BarListItem();
             this.icLarge = new DevExpress.Utils.ImageCollection(this.components);
             this.ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.rgpPLine = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
@@ -74,6 +78,7 @@
             this.rpServices = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.rpgServiceList = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup3 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
+            this.rpgServiceLog = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.rpView = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.rpgAppearance = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonStatusBar = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
@@ -81,21 +86,23 @@
             this.nbgDevices = new DevExpress.XtraNavBar.NavBarGroup();
             this.navBarGroupControlContainer1 = new DevExpress.XtraNavBar.NavBarGroupControlContainer();
             this.ucDevices = new IRAP.MESGateway.Tools.Controls.UCDevicesTree();
+            this.navBarGroupControlContainer2 = new DevExpress.XtraNavBar.NavBarGroupControlContainer();
+            this.ucServicesTree = new IRAP.MESGateway.Tools.Controls.UCServicesTree();
             this.nbgServices = new DevExpress.XtraNavBar.NavBarGroup();
             this.splitterControl1 = new DevExpress.XtraEditors.SplitterControl();
             this.pcMain = new DevExpress.XtraEditors.PanelControl();
-            this.bbiUninstallGatewayService = new DevExpress.XtraBars.BarButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bvControl)).BeginInit();
             this.bvControl.SuspendLayout();
-            this.bvccOptions.SuspendLayout();
             this.bvccAbout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
+            this.bvccOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.icSmall)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.icLarge)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.navBarControl1)).BeginInit();
             this.navBarControl1.SuspendLayout();
             this.navBarGroupControlContainer1.SuspendLayout();
+            this.navBarGroupControlContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pcMain)).BeginInit();
             this.pcMain.SuspendLayout();
             this.SuspendLayout();
@@ -126,10 +133,13 @@
             this.bbiImportDeviceConfigParams,
             this.bbiDeployGatewayService,
             this.bbiUpdateDeviceTags,
-            this.bbiUninstallGatewayService});
+            this.bbiUninstallGatewayService,
+            this.bbiServiceLogReload,
+            this.bbiUpdateServiceFile,
+            this.bliHistoryLogs});
             this.ribbon.LargeImages = this.icLarge;
             this.ribbon.Location = new System.Drawing.Point(0, 0);
-            this.ribbon.MaxItemId = 4;
+            this.ribbon.MaxItemId = 9;
             this.ribbon.Name = "ribbon";
             this.ribbon.Pages.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPage[] {
             this.ribbonPage1,
@@ -155,25 +165,6 @@
             this.bvControl.Size = new System.Drawing.Size(743, 374);
             this.bvControl.TabIndex = 14;
             this.bvControl.Showing += new System.EventHandler(this.bvControl_Showing);
-            // 
-            // bvccOptions
-            // 
-            this.bvccOptions.AutoScroll = true;
-            this.bvccOptions.Controls.Add(this.ucOptions);
-            this.bvccOptions.Location = new System.Drawing.Point(134, 63);
-            this.bvccOptions.Name = "bvccOptions";
-            this.bvccOptions.Padding = new System.Windows.Forms.Padding(30);
-            this.bvccOptions.Size = new System.Drawing.Size(608, 310);
-            this.bvccOptions.TabIndex = 1;
-            // 
-            // ucOptions
-            // 
-            this.ucOptions.AutoScroll = true;
-            this.ucOptions.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ucOptions.Location = new System.Drawing.Point(30, 30);
-            this.ucOptions.Name = "ucOptions";
-            this.ucOptions.Size = new System.Drawing.Size(548, 250);
-            this.ucOptions.TabIndex = 0;
             // 
             // bvccAbout
             // 
@@ -240,6 +231,25 @@
             this.labelControl3.TabIndex = 2;
             this.labelControl3.Text = "关于";
             // 
+            // bvccOptions
+            // 
+            this.bvccOptions.AutoScroll = true;
+            this.bvccOptions.Controls.Add(this.ucOptions);
+            this.bvccOptions.Location = new System.Drawing.Point(134, 63);
+            this.bvccOptions.Name = "bvccOptions";
+            this.bvccOptions.Padding = new System.Windows.Forms.Padding(30);
+            this.bvccOptions.Size = new System.Drawing.Size(608, 310);
+            this.bvccOptions.TabIndex = 1;
+            // 
+            // ucOptions
+            // 
+            this.ucOptions.AutoScroll = true;
+            this.ucOptions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ucOptions.Location = new System.Drawing.Point(30, 30);
+            this.ucOptions.Name = "ucOptions";
+            this.ucOptions.Size = new System.Drawing.Size(548, 250);
+            this.ucOptions.TabIndex = 0;
+            // 
             // bvtiOptions
             // 
             this.bvtiOptions.Caption = "选项...";
@@ -293,6 +303,14 @@
             this.icSmall.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.refresh_16x16, "refresh_16x16", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 12);
             this.icSmall.Images.SetKeyName(12, "refresh_16x16");
             this.icSmall.Images.SetKeyName(13, "window_app_list_close_16px_1096906_easyicon.net.png");
+            this.icSmall.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.refresh2_16x16, "refresh2_16x16", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 14);
+            this.icSmall.Images.SetKeyName(14, "refresh2_16x16");
+            this.icSmall.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.columns_16x16, "columns_16x16", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 15);
+            this.icSmall.Images.SetKeyName(15, "columns_16x16");
+            this.icSmall.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.up_16x16, "up_16x16", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 16);
+            this.icSmall.Images.SetKeyName(16, "up_16x16");
+            this.icSmall.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.article_16x16, "article_16x16", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 17);
+            this.icSmall.Images.SetKeyName(17, "article_16x16");
             // 
             // skinDropDownButtonItem1
             // 
@@ -301,7 +319,7 @@
             // 
             // bbiRefreshServiceList
             // 
-            this.bbiRefreshServiceList.Caption = "刷新";
+            this.bbiRefreshServiceList.Caption = "刷新服务列表";
             this.bbiRefreshServiceList.Id = 4;
             this.bbiRefreshServiceList.ImageOptions.LargeImage = global::IRAP.MESGateway.Tools.Properties.Resources.refresh_32x32;
             this.bbiRefreshServiceList.Name = "bbiRefreshServiceList";
@@ -443,6 +461,42 @@
             this.bbiUpdateDeviceTags.ImageOptions.LargeImageIndex = 17;
             this.bbiUpdateDeviceTags.Name = "bbiUpdateDeviceTags";
             // 
+            // bbiUninstallGatewayService
+            // 
+            this.bbiUninstallGatewayService.Caption = "卸载网关";
+            this.bbiUninstallGatewayService.Enabled = false;
+            this.bbiUninstallGatewayService.Id = 3;
+            this.bbiUninstallGatewayService.ImageOptions.ImageIndex = 13;
+            this.bbiUninstallGatewayService.ImageOptions.LargeImageIndex = 18;
+            this.bbiUninstallGatewayService.Name = "bbiUninstallGatewayService";
+            // 
+            // bbiServiceLogReload
+            // 
+            this.bbiServiceLogReload.Caption = "显示/刷新当天日志";
+            this.bbiServiceLogReload.Enabled = false;
+            this.bbiServiceLogReload.Id = 4;
+            this.bbiServiceLogReload.ImageOptions.ImageIndex = 14;
+            this.bbiServiceLogReload.ImageOptions.LargeImageIndex = 19;
+            this.bbiServiceLogReload.Name = "bbiServiceLogReload";
+            // 
+            // bbiUpdateServiceFile
+            // 
+            this.bbiUpdateServiceFile.Caption = "更新服务文件";
+            this.bbiUpdateServiceFile.Enabled = false;
+            this.bbiUpdateServiceFile.Id = 6;
+            this.bbiUpdateServiceFile.ImageOptions.ImageIndex = 16;
+            this.bbiUpdateServiceFile.ImageOptions.LargeImageIndex = 21;
+            this.bbiUpdateServiceFile.Name = "bbiUpdateServiceFile";
+            // 
+            // bliHistoryLogs
+            // 
+            this.bliHistoryLogs.Caption = "历史日志";
+            this.bliHistoryLogs.Enabled = false;
+            this.bliHistoryLogs.Id = 8;
+            this.bliHistoryLogs.ImageOptions.ImageIndex = 17;
+            this.bliHistoryLogs.ImageOptions.LargeImageIndex = 22;
+            this.bliHistoryLogs.Name = "bliHistoryLogs";
+            // 
             // icLarge
             // 
             this.icLarge.ImageSize = new System.Drawing.Size(32, 32);
@@ -483,6 +537,14 @@
             this.icLarge.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.refresh_32x321, "refresh_32x321", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 17);
             this.icLarge.Images.SetKeyName(17, "refresh_32x321");
             this.icLarge.Images.SetKeyName(18, "window_app_list_close_32px_1096906_easyicon.net.png");
+            this.icLarge.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.refresh2_32x32, "refresh2_32x32", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 19);
+            this.icLarge.Images.SetKeyName(19, "refresh2_32x32");
+            this.icLarge.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.columns_32x32, "columns_32x32", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 20);
+            this.icLarge.Images.SetKeyName(20, "columns_32x32");
+            this.icLarge.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.up_32x32, "up_32x32", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 21);
+            this.icLarge.Images.SetKeyName(21, "up_32x32");
+            this.icLarge.InsertImage(global::IRAP.MESGateway.Tools.Properties.Resources.article_32x32, "article_32x32", typeof(global::IRAP.MESGateway.Tools.Properties.Resources), 22);
+            this.icLarge.Images.SetKeyName(22, "article_32x32");
             // 
             // ribbonPage1
             // 
@@ -538,6 +600,7 @@
             this.rpgDeploy.ItemLinks.Add(this.bbiDeployGatewayService);
             this.rpgDeploy.ItemLinks.Add(this.bbiUninstallGatewayService);
             this.rpgDeploy.ItemLinks.Add(this.bbiUpdateDeviceTags, true);
+            this.rpgDeploy.ItemLinks.Add(this.bbiUpdateServiceFile);
             this.rpgDeploy.Name = "rpgDeploy";
             this.rpgDeploy.Text = "部署";
             // 
@@ -545,14 +608,14 @@
             // 
             this.rpServices.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
             this.rpgServiceList,
-            this.ribbonPageGroup3});
+            this.ribbonPageGroup3,
+            this.rpgServiceLog});
             this.rpServices.Name = "rpServices";
             this.rpServices.Tag = "Services";
             this.rpServices.Text = "服务";
             // 
             // rpgServiceList
             // 
-            this.rpgServiceList.ItemLinks.Add(this.bbiServicesList);
             this.rpgServiceList.ItemLinks.Add(this.bbiRefreshServiceList);
             this.rpgServiceList.Name = "rpgServiceList";
             this.rpgServiceList.Text = "服务";
@@ -563,6 +626,13 @@
             this.ribbonPageGroup3.ItemLinks.Add(this.bbiStopService);
             this.ribbonPageGroup3.Name = "ribbonPageGroup3";
             this.ribbonPageGroup3.Text = "服务启停";
+            // 
+            // rpgServiceLog
+            // 
+            this.rpgServiceLog.ItemLinks.Add(this.bbiServiceLogReload);
+            this.rpgServiceLog.ItemLinks.Add(this.bliHistoryLogs);
+            this.rpgServiceLog.Name = "rpgServiceLog";
+            this.rpgServiceLog.Text = "服务日志";
             // 
             // rpView
             // 
@@ -589,6 +659,7 @@
             // 
             this.navBarControl1.ActiveGroup = this.nbgDevices;
             this.navBarControl1.Controls.Add(this.navBarGroupControlContainer1);
+            this.navBarControl1.Controls.Add(this.navBarGroupControlContainer2);
             this.navBarControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.navBarControl1.Groups.AddRange(new DevExpress.XtraNavBar.NavBarGroup[] {
             this.nbgDevices,
@@ -630,11 +701,31 @@
             this.ucDevices.Name = "ucDevices";
             this.ucDevices.Size = new System.Drawing.Size(298, 397);
             this.ucDevices.TabIndex = 0;
-            this.ucDevices.OnDataSourceChanged += new IRAP.MESGateway.Tools.DataSourceChangedEventHandler(this.ucDevices_OnDataSourceChanged);
+            // 
+            // navBarGroupControlContainer2
+            // 
+            this.navBarGroupControlContainer2.Appearance.BackColor = System.Drawing.SystemColors.Control;
+            this.navBarGroupControlContainer2.Appearance.Options.UseBackColor = true;
+            this.navBarGroupControlContainer2.Controls.Add(this.ucServicesTree);
+            this.navBarGroupControlContainer2.Name = "navBarGroupControlContainer2";
+            this.navBarGroupControlContainer2.Size = new System.Drawing.Size(298, 359);
+            this.navBarGroupControlContainer2.TabIndex = 1;
+            // 
+            // ucServicesTree
+            // 
+            this.ucServicesTree.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ucServicesTree.FocusedNode = null;
+            this.ucServicesTree.Location = new System.Drawing.Point(0, 0);
+            this.ucServicesTree.Name = "ucServicesTree";
+            this.ucServicesTree.Size = new System.Drawing.Size(298, 359);
+            this.ucServicesTree.TabIndex = 0;
             // 
             // nbgServices
             // 
             this.nbgServices.Caption = "服务";
+            this.nbgServices.ControlContainer = this.navBarGroupControlContainer2;
+            this.nbgServices.GroupClientHeight = 361;
+            this.nbgServices.GroupStyle = DevExpress.XtraNavBar.NavBarGroupStyle.ControlContainer;
             this.nbgServices.Name = "nbgServices";
             // 
             // splitterControl1
@@ -655,15 +746,6 @@
             this.pcMain.Name = "pcMain";
             this.pcMain.Size = new System.Drawing.Size(735, 516);
             this.pcMain.TabIndex = 9;
-            // 
-            // bbiUninstallGatewayService
-            // 
-            this.bbiUninstallGatewayService.Caption = "卸载网关";
-            this.bbiUninstallGatewayService.Enabled = false;
-            this.bbiUninstallGatewayService.Id = 3;
-            this.bbiUninstallGatewayService.ImageOptions.ImageIndex = 13;
-            this.bbiUninstallGatewayService.ImageOptions.LargeImageIndex = 18;
-            this.bbiUninstallGatewayService.Name = "bbiUninstallGatewayService";
             // 
             // MainForm
             // 
@@ -686,15 +768,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.ribbon)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bvControl)).EndInit();
             this.bvControl.ResumeLayout(false);
-            this.bvccOptions.ResumeLayout(false);
             this.bvccAbout.ResumeLayout(false);
             this.bvccAbout.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
+            this.bvccOptions.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.icSmall)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.icLarge)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.navBarControl1)).EndInit();
             this.navBarControl1.ResumeLayout(false);
             this.navBarGroupControlContainer1.ResumeLayout(false);
+            this.navBarGroupControlContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pcMain)).EndInit();
             this.pcMain.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -759,5 +842,11 @@
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup rpgDeploy;
         private DevExpress.XtraBars.BarButtonItem bbiUpdateDeviceTags;
         private DevExpress.XtraBars.BarButtonItem bbiUninstallGatewayService;
+        private DevExpress.XtraNavBar.NavBarGroupControlContainer navBarGroupControlContainer2;
+        private Controls.UCServicesTree ucServicesTree;
+        private DevExpress.XtraBars.BarButtonItem bbiServiceLogReload;
+        private DevExpress.XtraBars.Ribbon.RibbonPageGroup rpgServiceLog;
+        private DevExpress.XtraBars.BarButtonItem bbiUpdateServiceFile;
+        private DevExpress.XtraBars.BarListItem bliHistoryLogs;
     }
 }

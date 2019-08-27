@@ -1,9 +1,11 @@
 ﻿using IRAP.MESGateway.Tools.Entities;
+using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Configuration.Install;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -35,7 +37,10 @@ namespace IRAP.MESGateway.Tools.Utils
             InitDCSGatewayServices();
         }
 
-        private readonly string serviceCommName = "IRAP DCSGateway for S7PLC";
+        public string ServiceCommName
+        {
+            get { return "IRAP DCSGateway for S7PLC - "; }
+        }
 
         public ServiceEntityCollection Services { get; } =
             new ServiceEntityCollection();
@@ -47,7 +52,7 @@ namespace IRAP.MESGateway.Tools.Utils
             ServiceController[] controllers = ServiceController.GetServices();
             foreach (ServiceController controller in controllers)
             {
-                if (controller.ServiceName.ToUpper().Contains(serviceCommName.ToUpper()))
+                if (controller.ServiceName.ToUpper().Contains(ServiceCommName.ToUpper()))
                 {
                     Services.Add(
                         new ServiceEntity()
@@ -60,31 +65,63 @@ namespace IRAP.MESGateway.Tools.Utils
             }
         }
 
+        private void RunProcess(string cmd)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
+                FileName = cmd,
+                RedirectStandardInput = false,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+                UseShellExecute = true,
+                Verb = "RunAs",
+            };
+
+            Process process = new Process()
+            {
+                StartInfo = startInfo,
+            };
+            process.Start();
+            process.WaitForExit();
+            process.Close();
+        }
+
         public string GetServiceName(string DeviceName)
         {
-            return $"{serviceCommName} - {DeviceName}";
+            return $"{ServiceCommName}{DeviceName}";
         }
 
         /// <summary>
         /// 安装Windows服务
         /// </summary>
-        /// <param name="serviceInstallPath">Windows服务程序文件路径</param>
-        public void InstallDCSGatewayService(
-            string serviceInstallPath)
+        /// <param name="servInstallPath">Windows服务程序文件路径</param>
+        public void InstallDCSGatewayService(string servInstallPath)
         {
-            IDictionary dictionary = new Hashtable();
             try
             {
-                using (AssemblyInstaller assemblyInstaller = new AssemblyInstaller
+                #region 写入服务安装脚本文件
+                string directory = Path.GetDirectoryName(servInstallPath);
+                string scriptPath = Path.Combine(directory, "Install.cmd");
+                FileStream fs =
+                    new FileStream(
+                        scriptPath,
+                        FileMode.Create);
+                byte[] data =
+                    Encoding.Default.GetBytes(
+                        $@"C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe {servInstallPath}");
+                fs.Write(data, 0, data.Length);
+                fs.Flush();
+                fs.Close();
+                #endregion
+
+                if (File.Exists(scriptPath))
                 {
-                    Path = serviceInstallPath,
-                    UseNewContext = true
-                })
-                {
-                    assemblyInstaller.Install(dictionary);
-                    assemblyInstaller.Commit(dictionary);
-                    assemblyInstaller.Dispose();
+                    RunProcess(scriptPath);
                 }
+
+                #region 删除服务安装脚本文件
+                File.Delete(scriptPath);
+                #endregion
             }
             catch (Exception error)
             {
@@ -95,21 +132,34 @@ namespace IRAP.MESGateway.Tools.Utils
         /// <summary>
         /// 卸载Windows服务
         /// </summary>
-        /// <param name="serviceIntallPath">Windows服务程序文件路径</param>
-        public void UninstallDCSGatewayService(string serviceIntallPath)
+        /// <param name="servInstallPath">Windows服务程序文件路径</param>
+        public void UninstallDCSGatewayService(string servInstallPath)
         {
-            IDictionary dictionary = new Hashtable();
             try
             {
-                using (AssemblyInstaller assemblyInstaller = new AssemblyInstaller
+                #region 写入服务卸载脚本文件
+                string directory = Path.GetDirectoryName(servInstallPath);
+                string scriptPath = Path.Combine(directory, "Uninstall.cmd");
+                FileStream fs =
+                    new FileStream(
+                        scriptPath,
+                        FileMode.Create);
+                byte[] data =
+                    Encoding.Default.GetBytes(
+                        $@"C:\Windows\Microsoft.NET\Framework\v4.0.30319\InstallUtil.exe /u {servInstallPath}");
+                fs.Write(data, 0, data.Length);
+                fs.Flush();
+                fs.Close();
+                #endregion
+
+                if (File.Exists(scriptPath))
                 {
-                    UseNewContext = true,
-                    Path = serviceIntallPath,
-                })
-                {
-                    assemblyInstaller.Uninstall(dictionary);
-                    assemblyInstaller.Dispose();
+                    RunProcess(scriptPath);
                 }
+
+                #region 删除服务卸载脚本文件
+                File.Delete(scriptPath);
+                #endregion
             }
             catch (Exception error)
             {
@@ -172,7 +222,7 @@ namespace IRAP.MESGateway.Tools.Utils
                 ServiceEntity serviceEntity = Services[serviceName];
                 if (serviceEntity.Status != ServiceControllerStatus.Running)
                 {
-                    if (serviceEntity.Status == ServiceControllerStatus.StartPending)
+                    if (serviceEntity.Status == ServiceControllerStatus.Stopped)
                     {
                         serviceEntity.Service.Start();
                     }
@@ -234,13 +284,64 @@ namespace IRAP.MESGateway.Tools.Utils
                 return false;
             }
         }
+
+        public List<ServiceEntity> GetDCSGatewayServices()
+        {
+            Services.Clear();
+            ServiceController[] services = ServiceController.GetServices();
+            foreach (ServiceController service in services)
+            {
+                if (service.ServiceName.ToUpper().Contains(ServiceCommName.ToUpper()))
+                {
+                    Services.Add(
+                        new ServiceEntity()
+                        {
+                            ServiceName = service.ServiceName,
+                            Status = service.Status,
+                            Service = service,
+                        });
+                }
+            }
+
+            return Services.ExtractToList();
+        }
     }
 
-    internal class ServiceEntity
+    public class ServiceEntity
     {
+        public ServiceEntity()
+        {
+        }
+
         public string ServiceName { get; set; }
         public ServiceControllerStatus Status { get; set; }
         public ServiceController Service { get; set; }
+        public string ServiceHomePath
+        {
+            get
+            {
+                if (ServiceName == "" || Service == null)
+                {
+                    return "";
+                }
+                else
+                {
+                    string key = $@"SYSTEM\CurrentControlSet\Services\{ServiceName}";
+                    return
+                        Registry
+                            .LocalMachine
+                            .OpenSubKey(key)
+                            .GetValue("ImagePath")
+                            .ToString()
+                            .Replace("\"", string.Empty);
+                }
+            }
+        }
+
+        public static int CompareByServiceName(ServiceEntity a, ServiceEntity b)
+        {
+            return string.Compare(a.ServiceName, b.ServiceName);
+        }
     }
 
     internal class ServiceEntityCollection : IEnumerable
@@ -312,6 +413,11 @@ namespace IRAP.MESGateway.Tools.Utils
             services.Clear();
         }
 
+        public List<ServiceEntity> ExtractToList()
+        {
+            return services.Values.ToList();
+        }
+
         public IEnumerator GetEnumerator()
         {
             foreach (ServiceEntity entity in services.Values)
@@ -323,10 +429,7 @@ namespace IRAP.MESGateway.Tools.Utils
 
     internal class DCSGatewayServiceController
     {
-        private string servFilePath = "";
         private DeviceEntity device = null;
-        private readonly string servPackagePath =
-            $"{Application.StartupPath}\\BaseService";
 
         public DCSGatewayServiceController(DeviceEntity device)
         {
@@ -335,19 +438,21 @@ namespace IRAP.MESGateway.Tools.Utils
             ResetServName();
         }
 
+        /// <summary>
+        /// 服务名称
+        /// </summary>
         public string ServName { get; private set; } = "";
-        public string ServFilePath { get { return servFilePath; } }
-
+        /// <summary>
+        /// 服务文件名
+        /// </summary>
+        public string ServFilePath { get; private set; } = "";
         /// <summary>
         /// 能否部署当前服务
         /// </summary>
-        /// <returns>true: 能; false: 不能</returns>
-        public bool CanDeploy()
+        public bool CanDeploy
         {
-            string servBaseExecuteFilePath =
-                $"{servPackagePath}\\{ParamHelper.Instance.ServiceExecuteName}";
-            return
-                File.Exists(servBaseExecuteFilePath) &&
+            get =>
+                File.Exists(ParamHelper.Instance.ServPackagePath) &&
                 !ServiceHelper.Instance.ServiceExisted(ServName);
         }
 
@@ -366,56 +471,67 @@ namespace IRAP.MESGateway.Tools.Utils
         /// <returns>true: 需要升级; false: 不需要升级</returns>
         public bool NeedUpgradeServiceExecute()
         {
-            throw new NotImplementedException();
+            if (CanDeploy)
+            {
+                return false;
+            }
+            else
+            {
+                FileVersionInfo fileVersion;
+                try
+                {
+                    fileVersion = FileVersionInfo.GetVersionInfo(ServFilePath);
+                }
+                catch { return true; }
+
+                Version version =
+                    new Version(
+                        fileVersion.FileMajorPart,
+                        fileVersion.FileMinorPart,
+                        fileVersion.FileBuildPart,
+                        fileVersion.FilePrivatePart);
+
+                return
+                    version.CompareTo(ParamHelper.Instance.BaseServiceVersion) < 0;
+            }
         }
 
         public void ResetServName()
         {
             ServName = ServiceHelper.Instance.GetServiceName(device.Name);
-            servFilePath =
+            ServFilePath =
                 ParamHelper.Instance.GenerateSerivcePath(
                     device.Parent.Name,
                     device.Name);
         }
 
         /// <summary>
-        /// 部署DCSGateway服务
+        /// 复制DCSGateway服务所需的程序文件到目标文件夹
         /// </summary>
-        public void Deploy()
+        public void CopyDCSGatewayServiceFile()
         {
-            #region 创建DCSGateway服务目标文件夹
-            string path = Path.GetDirectoryName(servFilePath);
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            #endregion
-
-            #region 复制DCSGateway服务所需的程序文件到目标文件夹
+            string dstPath = Path.GetDirectoryName(ServFilePath);
             string srcFile = "";
             string dstFile = "";
             try
             {
-                string[] files = Directory.GetFiles(servPackagePath);
+                string[] files = Directory.GetFiles(ParamHelper.Instance.ServPackageDirectory);
                 for (int i = 0; i < files.Length; i++)
                 {
                     srcFile = files[i];
-                    dstFile = $"{path}\\{Path.GetFileName(srcFile)}";
+                    dstFile = $"{dstPath}\\{Path.GetFileName(srcFile)}";
                     File.Copy(srcFile, dstFile, true);
                 }
             }
             catch (Exception error)
             {
-                throw new Exception($"复制文件[{srcFile}]到[{dstFile}]时出错: {error.Message}");
+                throw new Exception(
+                    $"复制文件[{srcFile}]到[{dstFile}]时出错: {error.Message}");
             }
-            #endregion
 
-            #region 导出设备配置文件到目标文件夹
-            device.ExportToXml($"{path}\\{device.Name}.xml");
-            #endregion
 
             #region 更改服务程序配置文件中的部分特殊配置项
-            Configuration config = ConfigurationManager.OpenExeConfiguration(servFilePath);
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ServFilePath);
             foreach (string key in config.AppSettings.Settings.AllKeys)
             {
                 if (key == "CommunityID")
@@ -439,9 +555,38 @@ namespace IRAP.MESGateway.Tools.Utils
             config.AppSettings.Settings.Add("DeviceName", device.Name);
             config.Save();
             #endregion
+        }
+
+        public void UpdateDeviceTagsParam()
+        {
+            device.ExportToXml(
+                $"{Path.GetDirectoryName(ServFilePath)}\\" +
+                $"{device.Name}.xml");
+        }
+
+        /// <summary>
+        /// 部署DCSGateway服务
+        /// </summary>
+        public void Deploy()
+        {
+            #region 创建DCSGateway服务目标文件夹
+            string path = Path.GetDirectoryName(ServFilePath);
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            #endregion
+
+            #region 复制DCSGateway服务所需的程序文件到目标文件夹
+            CopyDCSGatewayServiceFile();
+            #endregion
+
+            #region 导出设备配置文件到目标文件夹
+            UpdateDeviceTagsParam();
+            #endregion
 
             #region 安装注册Windows服务
-            ServiceHelper.Instance.InstallDCSGatewayService(servFilePath);
+            ServiceHelper.Instance.InstallDCSGatewayService(ServFilePath);
             #endregion
 
             #region 将新安装注册的服务加入当面服务列表中

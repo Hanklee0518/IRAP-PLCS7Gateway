@@ -211,6 +211,25 @@ namespace IRAP.MESGateway.Tools.Entities
         [TypeConverter(typeof(ExpandableObjectConverter))]
         [EditorBrowsable(EditorBrowsableState.Always)]
         public PLCEntity BelongPLC { get; } = new PLCEntity();
+        [Category("更新状态"), Description("服务程序更新状态"), DisplayName("服务程序更新状态")]
+        public string UpgradeStatus
+        {
+            get
+            {
+                if (Service == null || Service.CanDeploy)
+                {
+                    return "未部署";
+                }
+                else if (Service.NeedUpgradeServiceExecute())
+                {
+                    return "待更新";
+                }
+                else
+                {
+                    return "无需更新";
+                }
+            }
+        }
 
         [Browsable(false)]
         public ProductionLineEntity Parent { get; set; } = null;
@@ -380,6 +399,32 @@ namespace IRAP.MESGateway.Tools.Entities
 
             xml.Save(filePath);
         }
+
+        public static int CompareByDeviceName(DeviceEntity a, DeviceEntity b)
+        {
+            if (a == null)
+            {
+                if (b == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (b == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return string.Compare(a.Name, b.Name);
+                }
+            }
+        }
     }
 
     internal class DeviceEntityCollection : IEnumerable
@@ -457,7 +502,25 @@ namespace IRAP.MESGateway.Tools.Entities
 
         public List<DeviceEntity> ToList()
         {
-            return devices.Values.ToList();
+            List<DeviceEntity> rlt = devices.Values.ToList();
+            rlt.Sort(DeviceEntity.CompareByDeviceName);
+            return rlt;
+        }
+
+        public void Sort()
+        {
+            List<KeyValuePair<Guid, DeviceEntity>> lstDevices =
+                new List<KeyValuePair<Guid, DeviceEntity>>(devices);
+            lstDevices.Sort(
+                delegate (KeyValuePair<Guid, DeviceEntity> a, KeyValuePair<Guid, DeviceEntity> b)
+                {
+                    return a.Value.Name.CompareTo(b.Value.Name);
+                });
+            devices.Clear();
+            foreach (KeyValuePair<Guid, DeviceEntity> item in lstDevices)
+            {
+                devices.Add(item.Key, item.Value);
+            }
         }
     }
 }

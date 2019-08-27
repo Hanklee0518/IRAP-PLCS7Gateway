@@ -16,6 +16,7 @@ using DevExpress.XtraTreeList.Nodes;
 using System.Xml;
 using System.IO;
 using IRAP.MESGateway.Tools.Utils;
+using DevExpress.XtraSplashScreen;
 
 namespace IRAP.MESGateway.Tools
 {
@@ -40,51 +41,85 @@ namespace IRAP.MESGateway.Tools
             }
         }
 
-        protected internal override void ButtonClick(string menuItemName)
+        protected internal override void ButtonClick(MenuItem menuItemName)
         {
             base.ButtonClick(menuItemName);
 
-            switch (menuItemName)
+            try
             {
-                case "bbiNewProductionLine":
-                    NewProductionLine();
-                    break;
-                case "bbiRemoveProductionLine":
-                    RemoveProductionLine();
-                    break;
-                case "bbiNewDevice":
-                    NewDevice();
-                    break;
-                case "bbiRemoveDevice":
-                    RemoveDevice();
-                    break;
-                case "bbiImportDeviceConfigParams":
-                    ImportDeviceParams();
-                    break;
-                case "bbiNewTagGroup":
-                    NewTagGroup();
-                    break;
-                case "bbiRemoveTagGroup":
-                    RemoveTagGroup();
-                    break;
-                case "bbiNewTagSubGroup":
-                    NewSubTagGroup();
-                    break;
-                case "bbiRemoveTagSubGroup":
-                    RemoveSubTagGroup();
-                    break;
-                case "bbiNewTag":
-                    NewTag();
-                    break;
-                case "bbiRemoveTag":
-                    RemoveTag();
-                    break;
-                case "bbiDeployGatewayService":
-                    RegisterService();
-                    break;
-                case "bbiUninstallGatewayService":
-                    UnregisterService();
-                    break;
+                switch (menuItemName)
+                {
+                    case MenuItem.NewProductionLine:
+                        NewProductionLine();
+                        break;
+                    case MenuItem.RemoveProductionLine:
+                        RemoveProductionLine();
+                        break;
+                    case MenuItem.NewDevice:
+                        NewDevice();
+                        break;
+                    case MenuItem.RemoveDevice:
+                        RemoveDevice();
+                        break;
+                    case MenuItem.ImportDeviceConfigParams:
+                        ImportDeviceParams();
+                        break;
+                    case MenuItem.NewTagGroup:
+                        NewTagGroup();
+                        break;
+                    case MenuItem.RemoveTagGroup:
+                        RemoveTagGroup();
+                        break;
+                    case MenuItem.NewSubTagGroup:
+                        NewSubTagGroup();
+                        break;
+                    case MenuItem.RemoveSubTagGroup:
+                        RemoveSubTagGroup();
+                        break;
+                    case MenuItem.NewTag:
+                        NewTag();
+                        break;
+                    case MenuItem.RemoveTag:
+                        RemoveTag();
+                        break;
+                    case MenuItem.GatewayServiceDeploy:
+                        RegisterService();
+                        break;
+                    case MenuItem.GatewayServiceUninstall:
+                        UnregisterService();
+                        break;
+                    case MenuItem.UpdateDeviceTagsToService:
+                        if (SplashScreenManager.Default == null)
+                        {
+                            SplashScreenManager.ShowForm(
+                                ParentForm.FindForm(),
+                                typeof(Forms.wfMain),
+                                false,
+                                true);
+                        }
+
+                        UpdateDeviceTagsToService();
+                        break;
+                    case MenuItem.UpdateServiceFile:
+                        if (SplashScreenManager.Default == null)
+                        {
+                            SplashScreenManager.ShowForm(
+                                ParentForm.FindForm(),
+                                typeof(Forms.wfMain),
+                                false,
+                                true);
+                        }
+
+                        UpdateServiceFile();
+                        break;
+                }
+            }
+            finally
+            {
+                if (SplashScreenManager.Default != null)
+                {
+                    SplashScreenManager.CloseForm();
+                }
             }
         }
 
@@ -129,7 +164,7 @@ namespace IRAP.MESGateway.Tools
             }
         }
 
-        protected internal override void ShowDataChanged(DataSourceChangedEventArgs args)
+        protected internal override void ShowDataChanged(DeviceTreeDataSourceChangedEventArgs args)
         {
             base.ShowDataChanged(args);
 
@@ -419,31 +454,55 @@ namespace IRAP.MESGateway.Tools
 
         private void RegisterService()
         {
+            DeviceEntity device = null;
+            DCSGatewayServiceController service = null;
+
             if (trees.CurrentNode().Tag is Guid id)
             {
                 BaseEntity entity = DataHelper.Instance.AllEntities[id];
-                if (entity is DeviceEntity device)
+                if (entity is DeviceEntity deviceEntity)
                 {
-                    if (device.Service != null)
+                    device = deviceEntity;
+                    service = deviceEntity.Service;
+                }
+                else if (entity is ProductionLineEntity line)
+                {
+                    if (lineProp == null)
                     {
-                        try
-                        {
-                            device.Service.Deploy();
-                            XtraMessageBox.Show(
-                                $"设备[{device.Name}]的DCS网关部署成功",
-                                "提示",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-                            trees.ResetMenuItemEnable();
-                        }
-                        catch (Exception error)
-                        {
-                            XtraMessageBox.Show(
-                                $"部署网关的时候发生错误：{error.Message}",
-                                "出错啦",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Error);
-                        }
+                        return;
+                    }
+
+                    if (lineProp.FocusedDevice == null)
+                    {
+                        return;
+                    }
+
+                    device = lineProp.FocusedDevice;
+                    service = lineProp.FocusedDevice.Service;
+                }
+
+                if (service != null)
+                {
+                    try
+                    {
+                        service.Deploy();
+
+                        trees.RefreshTreeNodeStatue();
+
+                        XtraMessageBox.Show(
+                            $"设备[{device.Name}]的DCS网关部署成功",
+                            "提示",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        trees.ResetMenuItemEnable();
+                    }
+                    catch (Exception error)
+                    {
+                        XtraMessageBox.Show(
+                            $"部署网关的时候发生错误：{error.Message}",
+                            "出错啦",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                     }
                 }
             }
@@ -451,34 +510,182 @@ namespace IRAP.MESGateway.Tools
 
         private void UnregisterService()
         {
+            DeviceEntity device = null;
+            DCSGatewayServiceController service = null;
+
             if (trees.CurrentNode().Tag is Guid id)
             {
                 BaseEntity entity = DataHelper.Instance.AllEntities[id];
-                if (entity is DeviceEntity device)
+                if (entity is DeviceEntity deviceEntity)
                 {
-                    if (device.Service != null)
+                    device = deviceEntity;
+                    service = device.Service;
+                }
+                else if (entity is ProductionLineEntity line)
+                {
+                    if (lineProp == null)
                     {
-                        try
+                        return;
+                    }
+
+                    if (lineProp.FocusedDevice == null)
+                    {
+                        return;
+                    }
+
+                    device = lineProp.FocusedDevice;
+                    service = lineProp.FocusedDevice.Service;
+                }
+
+                if (service != null)
+                {
+                    try
+                    {
+                        service.Unregist();
+                        trees.RefreshTreeNodeStatue();
+
+                        XtraMessageBox.Show(
+                            $"设备[{device.Name}]的DCS网关卸载成功",
+                            "提示",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        trees.ResetMenuItemEnable();
+                    }
+                    catch (Exception error)
+                    {
+                        XtraMessageBox.Show(
+                            $"卸载网关的时候发生错误：{error.Message}",
+                            "出错啦",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void UpdateDeviceTagsToService()
+        {
+            DeviceEntity device = null;
+            DCSGatewayServiceController service = null;
+
+            if (trees.CurrentNode().Tag is Guid id)
+            {
+                BaseEntity entity = DataHelper.Instance.AllEntities[id];
+                if (entity is DeviceEntity deviceEntity)
+                {
+                    device = deviceEntity;
+                    service = deviceEntity.Service;
+                }
+                else if (entity is ProductionLineEntity line)
+                {
+                    if (lineProp == null)
+                    {
+                        return;
+                    }
+
+                    if (lineProp.FocusedDevice == null)
+                    {
+                        return;
+                    }
+
+                    device = lineProp.FocusedDevice;
+                    service = lineProp.FocusedDevice.Service;
+                }
+
+                if (service != null)
+                {
+                    try
+                    {
+                        if (ServiceHelper.Instance.StopService(service.ServName))
                         {
-                            device.Service.Unregist();
+                            service.UpdateDeviceTagsParam();
+                        }
+                        else
+                        {
                             XtraMessageBox.Show(
-                                $"设备[{device.Name}]的DCS网关卸载成功",
+                                $"无法停止DCS网关服务[{service.ServName}]运行",
                                 "提示",
                                 MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
+                                MessageBoxIcon.Error);
                             trees.ResetMenuItemEnable();
                         }
-                        catch (Exception error)
+
+                        ServiceHelper.Instance.StartService(service.ServName);
+                    }
+                    catch (Exception error)
+                    {
+                        XtraMessageBox.Show(
+                            $"更新设备标签配置文件的时候发生错误：{error.Message}",
+                            "出错啦",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        private void UpdateServiceFile()
+        {
+            DeviceEntity device = null;
+            DCSGatewayServiceController service = null;
+
+            if (trees.CurrentNode().Tag is Guid id)
+            {
+                BaseEntity entity = DataHelper.Instance.AllEntities[id];
+                if (entity is DeviceEntity deviceEntity)
+                {
+                    device = deviceEntity;
+                    service = deviceEntity.Service;
+                }
+                else if (entity is ProductionLineEntity line)
+                {
+                    if (lineProp == null)
+                    {
+                        return;
+                    }
+
+                    if (lineProp.FocusedDevice == null)
+                    {
+                        return;
+                    }
+
+                    device = lineProp.FocusedDevice;
+                    service = lineProp.FocusedDevice.Service;
+                }
+
+                if (service != null)
+                {
+                    try
+                    {
+                        if (ServiceHelper.Instance.StopService(service.ServName))
+                        {
+                            service.CopyDCSGatewayServiceFile();
+                        }
+                        else
                         {
                             XtraMessageBox.Show(
-                                $"卸载网关的时候发生错误：{error.Message}",
-                                "出错啦",
+                                $"无法停止DCS网关服务[{service.ServName}]运行",
+                                "提示",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
+                            trees.ResetMenuItemEnable();
                         }
+
+                        ServiceHelper.Instance.StartService(service.ServName);
+
+                        trees.RefreshTreeNodeStatue();
+                    }
+                    catch (Exception error)
+                    {
+                        XtraMessageBox.Show(
+                            $"更新DCS网关服务程序文件的时候发生错误：{error.Message}",
+                            "出错啦",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
                     }
                 }
             }
         }
     }
 }
+

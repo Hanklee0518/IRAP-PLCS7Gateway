@@ -179,6 +179,32 @@ namespace IRAP.MESGateway.Tools.Entities
 
             return rlt;
         }
+
+        public static int CompareByLineName(ProductionLineEntity a, ProductionLineEntity b)
+        {
+            if (a == null)
+            {
+                if (b == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            else
+            {
+                if (b == null)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return string.Compare(a.Name, b.Name);
+                }
+            }
+        }
     }
 
     internal class ProductionLineEntityCollection : IEnumerable
@@ -246,6 +272,11 @@ namespace IRAP.MESGateway.Tools.Entities
             {
                 yield return lines.ElementAt(i).Value;
             }
+        }
+
+        public void Sort()
+        {
+            lines = lines.OrderBy(o => o.Key).ToDictionary(o => o.Key, p => p.Value);
         }
     }
 }

@@ -52,5 +52,10 @@ namespace IRAP.MESGateway.Tools.Entities
             root.Attributes.Append(XMLHelper.CreateAttribute(xml, "Slot", Slot.ToString()));
             return root;
         }
+
+        public override string ToString()
+        {
+            return $"Address:{IPAddress}, Slot:{Slot}, Rack:{Rack}";
+        }
     }
 }

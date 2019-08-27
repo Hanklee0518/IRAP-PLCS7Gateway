@@ -32,11 +32,12 @@
             this.grdvDevices = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.grdclmnName = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grdclmnPLCType = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.grdclmnIPAddress = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grclmnDBType = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grdclmnDBNumber = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grdclmnCycleReadMode = new DevExpress.XtraGrid.Columns.GridColumn();
             this.grdclmnSplitterTime = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.grdclmnIPAddress = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.grdclmnUpgrade = new DevExpress.XtraGrid.Columns.GridColumn();
             ((System.ComponentModel.ISupportInitialize)(this.grdDevices)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.grdvDevices)).BeginInit();
             this.SuspendLayout();
@@ -54,6 +55,9 @@
             // 
             // grdvDevices
             // 
+            this.grdvDevices.Appearance.HeaderPanel.Options.UseTextOptions = true;
+            this.grdvDevices.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.grdvDevices.Appearance.HeaderPanel.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
             this.grdvDevices.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
             this.grdclmnName,
             this.grdclmnPLCType,
@@ -61,7 +65,8 @@
             this.grclmnDBType,
             this.grdclmnDBNumber,
             this.grdclmnCycleReadMode,
-            this.grdclmnSplitterTime});
+            this.grdclmnSplitterTime,
+            this.grdclmnUpgrade});
             this.grdvDevices.GridControl = this.grdDevices;
             this.grdvDevices.Name = "grdvDevices";
             this.grdvDevices.OptionsBehavior.Editable = false;
@@ -84,6 +89,14 @@
             this.grdclmnPLCType.Name = "grdclmnPLCType";
             this.grdclmnPLCType.Visible = true;
             this.grdclmnPLCType.VisibleIndex = 1;
+            // 
+            // grdclmnIPAddress
+            // 
+            this.grdclmnIPAddress.Caption = "IP地址";
+            this.grdclmnIPAddress.FieldName = "BelongPLC.IPAddress";
+            this.grdclmnIPAddress.Name = "grdclmnIPAddress";
+            this.grdclmnIPAddress.Visible = true;
+            this.grdclmnIPAddress.VisibleIndex = 2;
             // 
             // grclmnDBType
             // 
@@ -117,13 +130,13 @@
             this.grdclmnSplitterTime.Visible = true;
             this.grdclmnSplitterTime.VisibleIndex = 6;
             // 
-            // grdclmnIPAddress
+            // grdclmnUpgrade
             // 
-            this.grdclmnIPAddress.Caption = "IP地址";
-            this.grdclmnIPAddress.FieldName = "BelongPLC.IPAddress";
-            this.grdclmnIPAddress.Name = "grdclmnIPAddress";
-            this.grdclmnIPAddress.Visible = true;
-            this.grdclmnIPAddress.VisibleIndex = 2;
+            this.grdclmnUpgrade.Caption = "版本更新状态";
+            this.grdclmnUpgrade.FieldName = "UpgradeStatus";
+            this.grdclmnUpgrade.Name = "grdclmnUpgrade";
+            this.grdclmnUpgrade.Visible = true;
+            this.grdclmnUpgrade.VisibleIndex = 7;
             // 
             // UCProductionLinePropertiesPage
             // 
@@ -148,5 +161,6 @@
         private DevExpress.XtraGrid.Columns.GridColumn grdclmnCycleReadMode;
         private DevExpress.XtraGrid.Columns.GridColumn grdclmnSplitterTime;
         private DevExpress.XtraGrid.Columns.GridColumn grdclmnIPAddress;
+        private DevExpress.XtraGrid.Columns.GridColumn grdclmnUpgrade;
     }
 }

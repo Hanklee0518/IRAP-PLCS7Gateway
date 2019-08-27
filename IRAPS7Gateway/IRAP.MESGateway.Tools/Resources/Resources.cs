@@ -1,4 +1,5 @@
 ﻿using IRAP.MESGateway.Tools.Entities;
+using IRAP.MESGateway.Tools.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace IRAP.MESGateway.Tools
 {
-    public class DataSourceChangedEventArgs : EventArgs
+    public class DeviceTreeDataSourceChangedEventArgs : EventArgs
     {
-        public DataSourceChangedEventArgs(object objectID)
+        public DeviceTreeDataSourceChangedEventArgs(object objectID)
         {
             if (objectID is Guid)
             {
@@ -20,5 +21,21 @@ namespace IRAP.MESGateway.Tools
         internal Guid EntityID { get; private set; }
     }
 
-    public delegate void DataSourceChangedEventHandler(object sender, ref DataSourceChangedEventArgs e);
+    public delegate void DeviceTreeDataSourceChangedEventHandler(
+        object sender, 
+        ref DeviceTreeDataSourceChangedEventArgs e);
+
+    public class ServiceTreeDataSourceChangedEventArgs : EventArgs
+    {
+        public ServiceTreeDataSourceChangedEventArgs(ServiceEntity service)
+        {
+            Service = service;
+        }
+
+        internal ServiceEntity Service { get; private set; }
+    }
+
+    public delegate void ServiceTreeDataSourceChangedEventHandler(
+        object sender, 
+        ServiceTreeDataSourceChangedEventArgs e);
 }

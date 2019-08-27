@@ -34,11 +34,12 @@ namespace IRAP.MESGateway.Tools.Controls
                     imageCollection.ImageSize.Height) + 4;
         }
 
-        public event DataSourceChangedEventHandler OnDataSourceChanged;
+        public event DeviceTreeDataSourceChangedEventHandler OnDataSourceChanged;
 
         private void InitData()
         {
             tlTrees.Nodes.Clear();
+            DataHelper.Instance.Lines.Sort();
             foreach (ProductionLineEntity pline in DataHelper.Instance.Lines)
             {
                 TreeListNode tlnLine =
@@ -49,10 +50,11 @@ namespace IRAP.MESGateway.Tools.Controls
                         },
                         null);
                 tlnLine.Tag = pline.ID;
-                tlnLine.ImageIndex = 0;
-                tlnLine.SelectImageIndex = 0;
+                tlnLine.ImageIndex = (int)DeviceTreeNodeImage.ProductionLine;
+                tlnLine.SelectImageIndex = (int)DeviceTreeNodeImage.ProductionLine;
                 pline.Node = tlnLine;
 
+                pline.Devices.Sort();
                 foreach (DeviceEntity device in pline.Devices)
                 {
                     TreeListNode tlnDevice =
@@ -63,8 +65,8 @@ namespace IRAP.MESGateway.Tools.Controls
                             },
                             tlnLine);
                     tlnDevice.Tag = device.ID;
-                    tlnDevice.ImageIndex = 1;
-                    tlnDevice.SelectImageIndex = 1;
+                    tlnDevice.ImageIndex = (int)DeviceTreeNodeImage.Device;
+                    tlnDevice.SelectImageIndex = (int)DeviceTreeNodeImage.Device;
                     device.Node = tlnDevice;
                 }
             }
@@ -91,69 +93,74 @@ namespace IRAP.MESGateway.Tools.Controls
             }
         }
 
-        private void RefreshMenuItem(TreeListNode node, DataSourceChangedEventArgs args)
+        private void RefreshMenuItem(TreeListNode node, DeviceTreeDataSourceChangedEventArgs args)
         {
             if (node == null)
             {
-                MenuItemHelper.Instance.Buttons["bbiNewProductionLine"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveProductionLine"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewDevice"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewProductionLine].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveProductionLine].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewDevice].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveDevice].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.ImportDeviceConfigParams].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateServiceFile].Enabled = false;
             }
             else
             {
                 if (DataHelper.Instance.AllEntities[args.EntityID] is ProductionLineEntity)
                 {
-                    MenuItemHelper.Instance.Buttons["bbiNewProductionLine"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveProductionLine"].Enabled = !node.HasChildren;
-                    MenuItemHelper.Instance.Buttons["bbiNewDevice"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewProductionLine].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveProductionLine].Enabled = !node.HasChildren;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewDevice].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveDevice].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.ImportDeviceConfigParams].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.UpdateServiceFile].Enabled = false;
                 }
                 else if (DataHelper.Instance.AllEntities[args.EntityID] is DeviceEntity entity)
                 {
-                    MenuItemHelper.Instance.Buttons["bbiNewProductionLine"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveProductionLine"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewDevice"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = entity.Service.CanDeploy();
-                    MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = true;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
-                    MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = entity.Service.CanDeploy();
-                    MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = entity.Service.CanUpdateParams();
-                    MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = !entity.Service.CanDeploy();
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewProductionLine].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveProductionLine].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewDevice].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveDevice].Enabled = entity.Service.CanDeploy;
+                    MenuItemHelper.Instance.Buttons[MenuItem.ImportDeviceConfigParams].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewTagGroup].Enabled = true;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
+                    MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = entity.Service.CanDeploy;
+                    MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = entity.Service.CanUpdateParams();
+                    MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = !entity.Service.CanDeploy;
+                    MenuItemHelper.Instance.Buttons[MenuItem.UpdateServiceFile].Enabled = entity.Service.CanUpdateParams();
                 }
             }
+
+            RefreshTreeNodeStatue();
         }
 
         private void RaiseDataSourceChanged(TreeListNode node)
         {
             if (OnDataSourceChanged != null && allowDataSourceChanged)
             {
-                DataSourceChangedEventArgs args = new DataSourceChangedEventArgs(node.Tag);
+                DeviceTreeDataSourceChangedEventArgs args = new DeviceTreeDataSourceChangedEventArgs(node.Tag);
 
                 OnDataSourceChanged(tlTrees, ref args);
                 RefreshMenuItem(node, args);
@@ -237,12 +244,77 @@ namespace IRAP.MESGateway.Tools.Controls
         {
             RefreshMenuItem(
                 tlTrees.FocusedNode,
-                new DataSourceChangedEventArgs(tlTrees.FocusedNode.Tag));
+                new DeviceTreeDataSourceChangedEventArgs(tlTrees.FocusedNode.Tag));
+        }
+
+        public void RefreshTreeNodeStatue()
+        {
+            foreach (TreeListNode node in tlTrees.Nodes)
+            {
+                if (node.HasChildren)
+                {
+                    foreach (TreeListNode childNode in node.Nodes)
+                    {
+                        if (childNode.Tag is Guid guid)
+                        {
+                            if (DataHelper.Instance.AllEntities[guid] is DeviceEntity device)
+                            {
+                                if (device.Service.CanDeploy)
+                                {
+                                    childNode.StateImageIndex = 
+                                        (int)DeviceTreeNodeStateImage.Uninstalled;
+                                }
+                                else
+                                {
+                                    if (device.Service.NeedUpgradeServiceExecute())
+                                    {
+                                        childNode.StateImageIndex =
+                                            (int)DeviceTreeNodeStateImage.NeedUpgrade;
+                                    }
+                                    else
+                                    {
+                                        childNode.StateImageIndex = 
+                                            (int)DeviceTreeNodeStateImage.Installed;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                childNode.StateImageIndex = 
+                                    (int)DeviceTreeNodeStateImage.Uninstalled;
+                            }
+                        }
+                        else
+                        {
+                            childNode.StateImageIndex = 
+                                (int)DeviceTreeNodeStateImage.Uninstalled;
+                        }
+                    }
+                }
+            }
         }
 
         private void UCDevicesTree_Enter(object sender, EventArgs e)
         {
             RaiseDataSourceChanged(tlTrees.FocusedNode);
         }
+
+        private void tlTrees_Enter(object sender, EventArgs e)
+        {
+            RefreshTreeNodeStatue();
+        }
+    }
+
+    enum DeviceTreeNodeImage
+    {
+        ProductionLine = 0,
+        Device,
+    }
+
+    enum DeviceTreeNodeStateImage
+    {
+        Uninstalled = 2,
+        Installed = 3,
+        NeedUpgrade = 4,
     }
 }

@@ -24,11 +24,43 @@ namespace IRAP.MESGateway.Tools.Controls
             _objectPropertiesView = properties;
         }
 
+        internal DeviceEntity FocusedDevice
+        {
+            get
+            {
+                int index = grdvDevices.GetFocusedDataSourceRowIndex();
+                if (index >=0 && index < datas.Count)
+                {
+                    return datas[index];
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         private void RaiseDataSourceChanged(BaseEntity entity)
         {
             if (_objectPropertiesView != null)
             {
                 _objectPropertiesView.ShowProperties(entity);
+            }
+
+            if (entity == null)
+            {
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateServiceFile].Enabled = false;
+            }
+            else
+            {
+                DeviceEntity device = entity as DeviceEntity;
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = device.Service.CanDeploy;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = device.Service.CanUpdateParams();
+                MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = !device.Service.CanDeploy;
+                MenuItemHelper.Instance.Buttons[MenuItem.UpdateServiceFile].Enabled = device.Service.CanUpdateParams();
             }
         }
 
@@ -41,20 +73,17 @@ namespace IRAP.MESGateway.Tools.Controls
 
         private void UCProductionLinePropertiesPage_Enter(object sender, EventArgs e)
         {
-            MenuItemHelper.Instance.Buttons["bbiNewProductionLine"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveProductionLine"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiNewDevice"].Enabled = true;
-            MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = true;
-            MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewProductionLine].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveProductionLine].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewDevice].Enabled = true;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveDevice].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.ImportDeviceConfigParams].Enabled = true;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewTagGroup].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
 
             int index = grdvDevices.GetFocusedDataSourceRowIndex();
             if (index >= 0)

@@ -105,7 +105,34 @@ public enum MenuItem
     ImportDeviceConfigParams,
     GatewayServiceDeploy,
     GatewayServiceUninstall,
+    /// <summary>
+    /// 更新设备Tag配置
+    /// </summary>
     UpdateDeviceTagsToService,
+    /// <summary>
+    /// 更新服务程序文件
+    /// </summary>
+    UpdateServiceFile,
+    /// <summary>
+    /// 刷新服务列表
+    /// </summary>
+    RefreshServiceList,
+    /// <summary>
+    /// 启动服务
+    /// </summary>
+    StartService,
+    /// <summary>
+    /// 停止服务
+    /// </summary>
+    StopService,
+    /// <summary>
+    /// 刷新
+    /// </summary>
+    ServiceLogReload,
+    /// <summary>
+    /// 显示历史日志
+    /// </summary>
+    ViewHistoryLog,
 }
 
 public class EnumHelper

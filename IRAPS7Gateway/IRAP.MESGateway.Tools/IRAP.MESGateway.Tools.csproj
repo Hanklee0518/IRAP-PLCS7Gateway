@@ -138,6 +138,12 @@
     <Compile Include="Controls\UCProperties.Designer.cs">
       <DependentUpon>UCProperties.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\UCServicesTree.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCServicesTree.Designer.cs">
+      <DependentUpon>UCServicesTree.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data.cs" />
     <Compile Include="Entities\BaseEntity.cs" />
     <Compile Include="Entities\DeviceEntity.cs" />
@@ -165,11 +171,11 @@
     <Compile Include="Modules\DeviceTags.Designer.cs">
       <DependentUpon>DeviceTags.cs</DependentUpon>
     </Compile>
-    <Compile Include="Modules\GatewayServices.cs">
+    <Compile Include="Modules\ServiceInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Modules\GatewayServices.Designer.cs">
-      <DependentUpon>GatewayServices.cs</DependentUpon>
+    <Compile Include="Modules\ServiceInfo.Designer.cs">
+      <DependentUpon>ServiceInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Modules\Options.cs">
       <SubType>UserControl</SubType>
@@ -204,14 +210,17 @@
     <EmbeddedResource Include="Controls\UCProperties.resx">
       <DependentUpon>UCProperties.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCServicesTree.resx">
+      <DependentUpon>UCServicesTree.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\GatewayServicesForm.resx">
       <DependentUpon>GatewayServicesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Modules\DeviceTags.resx">
       <DependentUpon>DeviceTags.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Modules\GatewayServices.resx">
-      <DependentUpon>GatewayServices.cs</DependentUpon>
+    <EmbeddedResource Include="Modules\ServiceInfo.resx">
+      <DependentUpon>ServiceInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Modules\Options.resx">
       <DependentUpon>Options.cs</DependentUpon>
@@ -249,6 +258,17 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icons\AppIcon.ico" />
+    <None Include="Resources\article_16x16.png" />
+    <None Include="Resources\article_32x32.png" />
+    <None Include="Resources\up_16x16.png" />
+    <None Include="Resources\up_32x32.png" />
+    <None Include="Resources\columns_16x16.png" />
+    <None Include="Resources\refresh2_16x16.png" />
+    <None Include="Resources\columns_32x32.png" />
+    <None Include="Resources\refresh2_32x32.png" />
+    <None Include="Resources\technology_32x32.png" />
+    <None Include="Resources\next_32x321.png" />
+    <None Include="Resources\selectall_32x321.png" />
     <None Include="Resources\refresh_16x16.png" />
     <None Include="Resources\refresh_32x321.png" />
     <None Include="Resources\publish_16x16.png" />

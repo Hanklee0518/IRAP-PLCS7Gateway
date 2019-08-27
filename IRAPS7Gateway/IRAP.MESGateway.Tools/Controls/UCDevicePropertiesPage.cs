@@ -31,46 +31,46 @@ namespace IRAP.MESGateway.Tools.Controls
                 _objectPropertiesView.ShowProperties(entity);
             }
 
-            MenuItemHelper.Instance.Buttons["bbiNewProductionLine"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveProductionLine"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiNewDevice"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiRemoveDevice"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiImportDeviceConfigParams"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiNewTagGroup"].Enabled = true;
-            MenuItemHelper.Instance.Buttons["bbiDeployGatewayService"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiUpdateDeviceTags"].Enabled = false;
-            MenuItemHelper.Instance.Buttons["bbiUninstallGatewayService"].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewProductionLine].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveProductionLine].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewDevice].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.RemoveDevice].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.ImportDeviceConfigParams].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.NewTagGroup].Enabled = true;
+            MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceDeploy].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.UpdateDeviceTagsToService].Enabled = false;
+            MenuItemHelper.Instance.Buttons[MenuItem.GatewayServiceUninstall].Enabled = false;
             if (entity == null)
             {
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
             }
             else if (entity is GroupEntity)
             {
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
             }
             else if (entity is SubGroupEntity)
             {
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = false;
             }
             else if (entity is TagEntity)
             {
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTagSubGroup"].Enabled = false;
-                MenuItemHelper.Instance.Buttons["bbiNewTag"].Enabled = true;
-                MenuItemHelper.Instance.Buttons["bbiRemoveTag"].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveSubTagGroup].Enabled = false;
+                MenuItemHelper.Instance.Buttons[MenuItem.NewTag].Enabled = true;
+                MenuItemHelper.Instance.Buttons[MenuItem.RemoveTag].Enabled = true;
             }
         }
 

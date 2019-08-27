@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,37 +31,47 @@ namespace IRAP.MESGateway.Tools
             }
         }
 
-        private ParamHelper() { }
+        private ParamHelper()
+        {
+            RefreshBaseServiceVersion();
+        }
 
+        #region 属性
         internal string[] ApplicationArguments;
         internal readonly string AppTitle =
             "IRAP DCSGateway for PLC 维护管理工具";
 
         internal string ProjectBasePath
         {
-            get
-            {
-                return GetString("ProjectPath");
-            }
-            set
-            {
-                SaveParam("ProjectPath", value);
-            }
+            get => GetString("ProjectPath");
+            set => SaveParam("ProjectPath", value);
         }
-
         internal int CommunityID
         {
-            get { return GetInt("CommunityID", 57280); }
-            set { SaveParam("CommunityID", value.ToString()); }
+            get => GetInt("CommunityID", 57280);
+            set => SaveParam("CommunityID", value.ToString());
         }
-
         internal string ServiceExecuteName
         {
-            get { return "IRAP.DCSGateway.Service.exe"; }
+            get => "IRAP.DCSGateway.Service.exe";
         }
+        internal string WebAPIUrl
+        {
+            get => GetString("WebAPIUrl");
+            set => SaveParam("WebAPIUrl", value);
+        }
+        internal Version BaseServiceVersion { get; private set; }
+        internal string ServPackagePath
+        {
+            get => Path.Combine(ServPackageDirectory, ServiceExecuteName);
+        }
+        internal string ServPackageDirectory
+        {
+            get => Path.Combine(Application.StartupPath, "BaseService");
+        }
+        #endregion
 
-        internal string WebAPIUrl { get => "http://192.168.57.14:55559"; }
-
+        #region 私有方法
         private void SaveParam(string key, string value)
         {
             Configuration config =
@@ -108,11 +119,32 @@ namespace IRAP.MESGateway.Tools
             }
             return rlt;
         }
+        #endregion
 
+        #region 公开方法
         public string GenerateSerivcePath(string lineName, string deviceName)
         {
             return $@"{ProjectBasePath}\{lineName}\{deviceName}\{ServiceExecuteName}";
         }
+
+        public void RefreshBaseServiceVersion()
+        {
+            if (File.Exists(ServPackagePath))
+            {
+                FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(ServPackagePath);
+                BaseServiceVersion =
+                    new Version(
+                        versionInfo.FileMajorPart,
+                        versionInfo.FileMinorPart,
+                        versionInfo.FileBuildPart,
+                        versionInfo.FilePrivatePart);
+            }
+            else
+            {
+                BaseServiceVersion = new Version(0, 0, 0, 0);
+            }
+        }
+        #endregion
     }
 
     internal class DataHelper
@@ -236,16 +268,16 @@ namespace IRAP.MESGateway.Tools
         }
         private MenuItemHelper() { }
 
-        public BarButtonItemCollection Buttons { get; } =
-            new BarButtonItemCollection();
+        public BarItemCollection Buttons { get; } =
+            new BarItemCollection();
     }
 
-    internal class BarButtonItemCollection
+    internal class BarItemCollection
     {
-        private Dictionary<string, BarButtonItem> buttons =
-            new Dictionary<string, BarButtonItem>();
+        private Dictionary<MenuItem, BarItem> buttons =
+            new Dictionary<MenuItem, BarItem>();
 
-        public BarButtonItem this[int index]
+        public BarItem this[int index]
         {
             get
             {
@@ -259,21 +291,22 @@ namespace IRAP.MESGateway.Tools
                 }
             }
         }
-        public BarButtonItem this[string key]
+        public BarItem this[MenuItem key]
         {
             get
             {
-                buttons.TryGetValue(key, out BarButtonItem rlt);
+                buttons.TryGetValue(key, out BarItem rlt);
                 return rlt;
             }
         }
         public int Count { get { return buttons.Count; } }
 
-        public void Add(BarButtonItem item)
+        public void Add(BarItem item)
         {
-            if (!buttons.ContainsKey(item.Name))
+            MenuItem key = (MenuItem)item.Tag;
+            if (!buttons.ContainsKey(key))
             {
-                buttons.Add(item.Name, item);
+                buttons.Add(key, item);
             }
         }
     }

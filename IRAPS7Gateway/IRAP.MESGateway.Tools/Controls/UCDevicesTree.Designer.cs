@@ -53,8 +53,10 @@
             this.tlTrees.OptionsView.ShowVertLines = false;
             this.tlTrees.SelectImageList = this.imageCollection;
             this.tlTrees.Size = new System.Drawing.Size(300, 507);
+            this.tlTrees.StateImageList = this.imageCollection;
             this.tlTrees.TabIndex = 0;
             this.tlTrees.FocusedNodeChanged += new DevExpress.XtraTreeList.FocusedNodeChangedEventHandler(this.tlTrees_FocusedNodeChanged);
+            this.tlTrees.Enter += new System.EventHandler(this.tlTrees_Enter);
             // 
             // tlcName
             // 
@@ -70,6 +72,9 @@
             this.imageCollection.ImageStream = ((DevExpress.Utils.ImageCollectionStreamer)(resources.GetObject("imageCollection.ImageStream")));
             this.imageCollection.Images.SetKeyName(0, "Line_flat_circle_24px_1113572_easyicon.net.png");
             this.imageCollection.Images.SetKeyName(1, "machine_24px_27273_easyicon.net.png");
+            this.imageCollection.Images.SetKeyName(2, "blank_27.947069943289px_1154018_easyicon.net.png");
+            this.imageCollection.Images.SetKeyName(3, "install_23.59168241966px_1153890_easyicon.net.png");
+            this.imageCollection.Images.SetKeyName(4, "NeedUpgrade.png");
             // 
             // UCDevicesTree
             // 

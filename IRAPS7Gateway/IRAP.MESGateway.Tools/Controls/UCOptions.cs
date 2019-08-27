@@ -13,7 +13,7 @@ using DevExpress.XtraBars.Ribbon;
 
 namespace IRAP.MESGateway.Tools.Controls
 {
-    public partial class UCOptions : DevExpress.XtraEditors.XtraUserControl
+    public partial class UCOptions : XtraUserControl
     {
         public UCOptions()
         {
@@ -35,6 +35,7 @@ namespace IRAP.MESGateway.Tools.Controls
         {
             edtProjectPath.Text = ParamHelper.Instance.ProjectBasePath;
             edtCommunityID.Text = ParamHelper.Instance.CommunityID.ToString();
+            edtWebAPIUrl.Text = ParamHelper.Instance.WebAPIUrl;
         }
 
         private void edtProjectPath_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -75,6 +76,7 @@ namespace IRAP.MESGateway.Tools.Controls
             {
                 ParamHelper.Instance.CommunityID = value;
             }
+            ParamHelper.Instance.WebAPIUrl = edtWebAPIUrl.Text;
 
             CloseParent();
         }

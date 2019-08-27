@@ -143,7 +143,19 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错校验结果
         /// </summary>
-        public byte Poka_Yoke_Result { get; set; }
+        public ProductionEndOutput Output { get; set; } =
+            new ProductionEndOutput();
+    }
+
+    /// <summary>
+    /// 生产结束响应报文输出参数
+    /// </summary>
+    public class ProductionEndOutput
+    {
+        /// <summary>
+        /// 防错校验结果
+        /// </summary>
+        public byte Poka_Yoke_Result { get; set; } = 0;
     }
 
     /// <summary>

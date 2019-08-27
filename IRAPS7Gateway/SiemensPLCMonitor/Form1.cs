@@ -411,7 +411,7 @@ namespace SiemensPLCMonitor
             try
             {
                 int.TryParse(edtLength.Text, out int length);
-                string data = edtText.Text.PadRight(length);
+                string data = edtText.Text.PadRight(length,(char)0);
                 OperateResult rlt =
                     plc.Write(
                         $"DB{edtDBNumber.Text}.{edtOffset.Text}",

@@ -1436,7 +1436,10 @@ namespace IRAP.BL.S7Gateway.Entities
         public new string Value
         {
             get { return (string)value; }
-            set { base.value = value; }
+            set
+            {
+                base.value = value.Replace((char)0, (char)32).Trim();
+            }
         }
 
         /// <summary>
@@ -1519,13 +1522,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 在制品叶标识
         /// </summary>
-        public int T102LeafID
-        {
-            get => default(int);
-            set
-            {
-            }
-        }
+        public int T102LeafID { get; set; }
 
         /// <summary>
         /// Tag对象注册事件

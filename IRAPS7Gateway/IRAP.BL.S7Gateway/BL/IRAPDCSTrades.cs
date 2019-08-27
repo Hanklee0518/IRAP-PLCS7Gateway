@@ -913,7 +913,7 @@ namespace IRAP.BL.S7Gateway
                                     {
                                         if (writeTag is SiemensByteOfTag rltTag)
                                         {
-                                            rltTag.Value = productionEnd.Response.Poka_Yoke_Result;
+                                            rltTag.Value = productionEnd.Response.Output.Poka_Yoke_Result;
                                             rlt.Add(rltTag);
                                         }
                                     }
@@ -952,7 +952,7 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 工件离站交易
     /// </summary>
-    public class IRAPDCSTradeWIPMoveout : IRAPDCSTrade, IIRAPDCSTrade
+    public class IRAPDCSTradeWIPMoveOut : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
         /// 交易执行

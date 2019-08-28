@@ -17,6 +17,7 @@ namespace IRAP.BL.S7Gateway.Entities
     /// </summary>
     public class SiemensPLC : CustomPLC
     {
+        /*
         /// <summary>
         /// 是否已建立连接
         /// </summary>
@@ -25,6 +26,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 是否终止循环读取PLC数据块
         /// </summary>
         private bool cycleReadTerminated = false;
+        */
 
         /// <summary>
         /// 构造方法
@@ -531,9 +533,21 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="tag">控制Tag对象</param>
         private void ControlTagValueChanged(CustomTag tag)
         {
+            DCSGatewayLogEntity log = new DCSGatewayLogEntity();
+            log.TriggerTag.TagName = tag.Name;
+            log.TriggerTag.Offset = tag.DB_Offset.ToString();
+            if (tag is SiemensBoolOfTag ltag)
+            {
+                log.TriggerTag.Offset += $".{ltag.Position}";
+            }
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            IIRAPDCSTrade trade = IRAPDCSTraderCreator.CreateInstance(tag.Name.Replace("_", ""));
+            IIRAPDCSTrade trade = 
+                IRAPDCSTraderCreator
+                    .CreateInstance(
+                        tag.Name.Replace("_", ""),
+                        log);
             if (trade != null)
             {
                 List<SiemensTag> writeTags = trade.Do(this, tag as SiemensTag);
@@ -544,6 +558,16 @@ namespace IRAP.BL.S7Gateway.Entities
             }
             sw.Stop();
             _log.Debug($"触发信号[{tag.Name}]的执行时长：[{sw.ElapsedMilliseconds}]毫秒");
+            log.TotalExecutionTime = sw.ElapsedMilliseconds;
+
+            try
+            {
+                Log4MongoDB.WriteLog(log);
+            }
+            catch (Exception error)
+            {
+                _log.Error(error.Message, error);
+            }
         }
 
         /// <summary>

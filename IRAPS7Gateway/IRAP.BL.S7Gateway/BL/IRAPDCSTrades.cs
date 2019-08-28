@@ -41,11 +41,21 @@ namespace IRAP.BL.S7Gateway
         /// 创建一个实现IIRAPDCSTrade接口的对象
         /// </summary>
         /// <returns>已实例化的IIRAPDCSTrade接口</returns>
-        public static IIRAPDCSTrade CreateInstance(string tradeName)
+        public static IIRAPDCSTrade CreateInstance(string tradeName, DCSGatewayLogEntity log)
         {
+            object[] parameters = new object[] { log };
             string className = $"IRAP.BL.S7Gateway.IRAPDCSTrade{tradeName}";
             IIRAPDCSTrade trade =
-                (IIRAPDCSTrade)Assembly.Load("IRAP.BL.S7Gateway").CreateInstance(className);
+                (IIRAPDCSTrade)Assembly
+                    .Load("IRAP.BL.S7Gateway")
+                    .CreateInstance(
+                        className,
+                        true,
+                        BindingFlags.Default,
+                        null,
+                        parameters,
+                        null,
+                        null);
             return trade;
         }
     }
@@ -55,15 +65,15 @@ namespace IRAP.BL.S7Gateway
     /// </summary>
     public abstract class IRAPDCSTrade : IRAPBaseObject
     {
-        internal DCSGatewayLogEntity logEntity =
-            new DCSGatewayLogEntity();
+        internal DCSGatewayLogEntity logEntity = null;
 
         /// <summary>
         /// 构造方法
         /// </summary>
-        public IRAPDCSTrade()
+        public IRAPDCSTrade(DCSGatewayLogEntity log)
         {
             _log = Logger.Get(GetType());
+            logEntity = log;
         }
 
         /// <summary>
@@ -78,7 +88,8 @@ namespace IRAP.BL.S7Gateway
                 new StartDCSInvoking(
                     GlobalParams.Instance.WebAPI.URL,
                     GlobalParams.Instance.WebAPI.ContentType,
-                    GlobalParams.Instance.WebAPI.ClientID)
+                    GlobalParams.Instance.WebAPI.ClientID,
+                    logEntity)
                 {
                     Request =
                         new StartDCSInvokingRequest()
@@ -118,6 +129,7 @@ namespace IRAP.BL.S7Gateway
             catch (Exception error)
             {
                 _log.Error(error.Message, error);
+                logEntity.Errors.Add(error);
                 return false;
             }
         }
@@ -365,6 +377,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeGetOPCStatus : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeGetOPCStatus(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -377,13 +397,17 @@ namespace IRAP.BL.S7Gateway
             if (device != null)
             {
                 _log.Info("同步设备状态处理");
+                logEntity.DeviceName = device.Name;
+                logEntity.ActionName = "同步设备状态";
+
                 if (device.Groups["COMM"] is SiemensTagGroup comm)
                 {
                     GetOPCStatus getOPCStatus =
                         new GetOPCStatus(
                             GlobalParams.Instance.WebAPI.URL,
                             GlobalParams.Instance.WebAPI.ContentType,
-                            GlobalParams.Instance.WebAPI.ClientID)
+                            GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                         {
                             Request = new GetOPCStatusRequest()
                             {
@@ -451,38 +475,100 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 设备运行模式状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentRunningMode : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentRunningMode : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentRunningMode(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备是否加电状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentPowerOn : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentPowerOn : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentPowerOn(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备是否失效状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentFail : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentFail : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentFail(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 工装是否失效状态同步
     /// </summary>
-    public class IRAPDCSTradeToolFail : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeToolFail : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeToolFail(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 工序循环是否开始状态同步
     /// </summary>
-    public class IRAPDCSTradeCycleStarted : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeCycleStarted : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeCycleStarted(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备饥饿状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentStarvation : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentStarvation : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentStarvation(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 标识部件绑定交易
     /// </summary>
     public class IRAPDCSTradeRequestForIDBinding : IRAPDCSTrade, IIRAPDCSTrade
     {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForIDBinding(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
         /// <summary>
         /// 交易执行
         /// </summary>
@@ -492,6 +578,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -499,6 +586,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("标识部件绑定");
+                    logEntity.ActionName = "标识部件绑定";
 
                     IDBinding idBinding = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -508,7 +596,8 @@ namespace IRAP.BL.S7Gateway
                             new IDBinding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new IDBindingRequest()
                                 {
@@ -603,6 +692,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeSerialNumberRequest : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeSerialNumberRequest(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -611,6 +708,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -618,6 +716,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("申请产品序列号");
+                    logEntity.ActionName = "申请产品序列号";
 
                     string key = "SNRequest";
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -631,7 +730,8 @@ namespace IRAP.BL.S7Gateway
                                     new SNRequest(
                                         GlobalParams.Instance.WebAPI.URL,
                                         GlobalParams.Instance.WebAPI.ContentType,
-                                        GlobalParams.Instance.WebAPI.ClientID)
+                                        GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                                     {
                                         Request = new SNRequestRequest()
                                         {
@@ -716,6 +816,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeWIPMoveIn : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeWIPMoveIn(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -724,6 +832,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -731,6 +840,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("工件入站交易处理");
+                    logEntity.ActionName = "工件入站";
 
                     WIPMoveIn wipMoveIn = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -740,7 +850,8 @@ namespace IRAP.BL.S7Gateway
                             new WIPMoveIn(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new WIPMoveInRequest()
                                 {
@@ -811,6 +922,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeProductionEnd : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeProductionEnd(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -819,6 +938,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -826,6 +946,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("生产结束交易处理");
+                    logEntity.ActionName = "生产结束";
 
                     ProductionEnd productionEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -835,7 +956,8 @@ namespace IRAP.BL.S7Gateway
                             new ProductionEnd(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ProductionEndRequest()
                                 {
@@ -987,6 +1109,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeWIPMoveOut : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeWIPMoveOut(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -995,6 +1125,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1002,6 +1133,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("工件离站交易处理");
+                    logEntity.ActionName = "工件离站";
 
                     OperationCycleEnd operationCycleEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1011,7 +1143,8 @@ namespace IRAP.BL.S7Gateway
                             new OperationCycleEnd(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new OperationCycleEndRequest()
                                 {
@@ -1082,6 +1215,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeLabelElementsRequest : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeLabelElementsRequest(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1090,6 +1231,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1097,6 +1239,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("请求标签元素交易处理");
+                    logEntity.ActionName = "请求标签元素";
 
                     LBLElement lblElement = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1106,7 +1249,8 @@ namespace IRAP.BL.S7Gateway
                             new LBLElement(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new LBLElementRequest()
                                 {
@@ -1199,6 +1343,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeRequestForPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForPokaYoke(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1207,6 +1359,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1214,6 +1367,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("请求防错交易处理");
+                    logEntity.ActionName = "请求防错";
 
                     PokaYoke pokaYoke = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1223,7 +1377,8 @@ namespace IRAP.BL.S7Gateway
                             new PokaYoke(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new PokaYokeRequest()
                                 {
@@ -1349,6 +1504,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeTriggerEquipmentFailAndon : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeTriggerEquipmentFailAndon(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1357,6 +1520,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1364,6 +1528,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("设备故障告警交易处理");
+                    logEntity.ActionName = "设备故障告警";
 
                     EquipFailAndonCall equipFailAndonCall = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1373,7 +1538,8 @@ namespace IRAP.BL.S7Gateway
                             new EquipFailAndonCall(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new EquipFailAndonCallRequest()
                                 {
@@ -1457,6 +1623,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeRequestForFeedingPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForFeedingPokaYoke(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1465,6 +1639,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensByteOfTag)
             {
@@ -1472,6 +1647,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value == 1)
                 {
                     _log.Info("料槽加料防错交易处理");
+                    logEntity.ActionName = "料槽加料防错";
 
                     PokaYokeFeeding pokaYokeFeeding = null;
                     SiemensTagGroup feeding = signalTag.Parent as SiemensTagGroup;
@@ -1481,7 +1657,8 @@ namespace IRAP.BL.S7Gateway
                             new PokaYokeFeeding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new PokaYokeFeedingRequest()
                                 {
@@ -1558,6 +1735,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeUnfeedingEnd : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeUnfeedingEnd(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1566,6 +1751,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensByteOfTag)
             {
@@ -1573,6 +1759,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value == 1)
                 {
                     _log.Info("料槽卸料交易处理");
+                    logEntity.ActionName = "料槽卸料";
 
                     Unfeeding unfeeding = null;
                     SiemensTagGroup unfeedingGroup = signalTag.Parent as SiemensTagGroup;
@@ -1582,7 +1769,8 @@ namespace IRAP.BL.S7Gateway
                             new Unfeeding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new UnfeedingRequest()
                                 {
@@ -1658,6 +1846,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeStagnationWarnning : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeStagnationWarnning(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1666,6 +1862,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1673,6 +1870,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("停滞告警交易处理");
+                    logEntity.ActionName = "停滞告警";
 
                     StagnationWarnning stagnationWarnning = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1682,7 +1880,8 @@ namespace IRAP.BL.S7Gateway
                             new StagnationWarnning(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new StagnationWarnningRequest()
                                 {
@@ -1760,6 +1959,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeFazitStatusCheck : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeFazitStatusCheck(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1768,6 +1975,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1775,6 +1983,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("Fazit Response状态检测交易处理");
+                    logEntity.ActionName = "Fazit Response状态检测";
 
                     if (!(signalTag.Parent is SiemensSubTagGroup wipStation))
                     {
@@ -1796,7 +2005,8 @@ namespace IRAP.BL.S7Gateway
                                 new PokaYoke(
                                     GlobalParams.Instance.WebAPI.URL,
                                     GlobalParams.Instance.WebAPI.ContentType,
-                                    GlobalParams.Instance.WebAPI.ClientID)
+                                    GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                                 {
                                     Request = new PokaYokeRequest()
                                     {
@@ -1853,7 +2063,8 @@ namespace IRAP.BL.S7Gateway
                                 new FazitStatusCheck(
                                     GlobalParams.Instance.WebAPI.URL,
                                     GlobalParams.Instance.WebAPI.ContentType,
-                                    GlobalParams.Instance.WebAPI.ClientID)
+                                    GlobalParams.Instance.WebAPI.ClientID,
+                                    logEntity)
                                 {
                                     Request = new FazitStatusCheckRequest()
                                     {
@@ -1936,6 +2147,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeShortageMaterialCheck : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeShortageMaterialCheck(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1944,6 +2163,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1951,6 +2171,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("料槽缺料检测交易处理");
+                    logEntity.ActionName = "料槽缺料检测";
 
                     ShortageMaterialCheck shortageMaterialCheck = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1960,7 +2181,8 @@ namespace IRAP.BL.S7Gateway
                             new ShortageMaterialCheck(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ShortageMaterialCheckRequest()
                                 {
@@ -2033,6 +2255,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeContainerNumberBinding : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeContainerNumberBinding(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -2041,6 +2271,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -2048,6 +2279,7 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("容器绑定交易处理");
+                    logEntity.ActionName = "容器绑定";
 
                     ContainerNumberBinding containerBinding = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -2057,7 +2289,8 @@ namespace IRAP.BL.S7Gateway
                             new ContainerNumberBinding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ContainerNumberBindingRequest()
                                 {

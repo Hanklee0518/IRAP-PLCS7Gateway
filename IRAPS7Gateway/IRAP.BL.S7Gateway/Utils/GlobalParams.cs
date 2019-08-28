@@ -27,6 +27,15 @@ namespace IRAP.BL.S7Gateway.Utils
                     CommunityID = rlt;
                 }
             }
+            if (ConfigurationManager.AppSettings["MongoDBConnectionString"] != null)
+            {
+                MongoDBConnectionString =
+                    ConfigurationManager.AppSettings["MongoDBConnectionString"];
+            }
+            else
+            {
+                MongoDBConnectionString = "http://127.0.0.1:27017";
+            }
         }
 
         /// <summary>
@@ -48,12 +57,15 @@ namespace IRAP.BL.S7Gateway.Utils
         /// 社区标识
         /// </summary>
         public int CommunityID { get; private set; } = 0;
-
         /// <summary>
         /// WebAPI配置参数
         /// </summary>
         public WebAPIClientParams WebAPI { get; private set; } =
             new WebAPIClientParams();
+        /// <summary>
+        /// MongoDB的连接字符串
+        /// </summary>
+        public string MongoDBConnectionString { get; private set; } = "";
     }
 
     /// <summary>

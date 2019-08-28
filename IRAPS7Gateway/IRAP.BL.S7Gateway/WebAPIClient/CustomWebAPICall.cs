@@ -38,19 +38,40 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
         /// 客户端标识，由于是在配置文件中定义，因此无需向派生类开放
         /// </summary>
         private string clientID = "Demo";
+        private string exCode = "";
         /// <summary>
         /// 交易代码，需要在派生类中显示指定，因此需要向派生类开放
         /// </summary>
-        protected string exCode = "";
+        protected string ExCode
+        {
+            get { return exCode; }
+            set
+            {
+                exCode = value;
+                if (logEntity != null)
+                {
+                    if (exCode == "IRAP_DCS_StartDCSInvoking")
+                    {
+                        logEntity.StartDCSInvokingLog.Excode = value;
+                    }
+                    else
+                    {
+                        logEntity.MainTradeLog.Excode = value;
+                    }
+                }
+            }
+        }
         /// <summary>
         /// 交易执行后的结果消息对象（属性：ErrCode==0时，交易成功）
         /// </summary>
         private ErrorMessage errorMessage = new ErrorMessage();
         private ILog _log = null;
+        private DCSGatewayLogEntity logEntity = null;
 
-        private CustomWebAPICall()
+        private CustomWebAPICall(DCSGatewayLogEntity logEntity)
         {
             _log = Logger.Get(GetType());
+            this.logEntity = logEntity;
 
             webAPIUrl = GetValueFromAppSettings("WebAPIUrl", "http://127.0.0.1:55552/");
 
@@ -67,10 +88,12 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public CustomWebAPICall(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : this()
+            string clientID,
+            DCSGatewayLogEntity logEntity) : this(logEntity)
         {
             this.webAPIUrl = webAPIUrl;
             this.contentType = contentType;
@@ -125,7 +148,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
                             moduleTypeString,
                             clientID,
                             contentTypeString,
-                            exCode);
+                            ExCode);
                     break;
                 default:
                     string errText = $"目前不支持模块 [{moduleTypeString}]";
@@ -173,6 +196,18 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
                 #endregion
 
                 _log.Info($"请求报文：[{content}]");
+                if (ExCode == "IRAP_DCS_StartDCSInvoking")
+                {
+                    logEntity.StartDCSInvokingLog.RequestObject = requestObject;
+                    logEntity.StartDCSInvokingLog.RequestContent = content;
+                    logEntity.StartDCSInvokingLog.RequestTime = DateTime.Now;
+                }
+                else
+                {
+                    logEntity.MainTradeLog.RequestObject = requestObject;
+                    logEntity.MainTradeLog.RequestContent = content;
+                    logEntity.MainTradeLog.RequestTime = DateTime.Now;
+                }
 
                 //byte[] requestContext = Encoding.UTF8.GetBytes(content);
                 //stream.Write(requestContext, 0, requestContext.Length);
@@ -224,8 +259,22 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
 
                 if (result == null | rtnObject == null)
                 {
-                    throw new Exception(
-                        $"[ExCode={exCode}交易的响应报文无法反序列化成响应报文对象");
+                    Exception error = new Exception(
+                        $"[ExCode={ExCode}交易的响应报文无法反序列化成响应报文对象");
+                    throw error;
+                }
+
+                if (ExCode == "IRAP_DCS_StartDCSInvoking")
+                {
+                    logEntity.StartDCSInvokingLog.ResponseObject = rtnObject;
+                    logEntity.StartDCSInvokingLog.ResponseContent = resJson;
+                    logEntity.StartDCSInvokingLog.ResponseTime = DateTime.Now;
+                }
+                else
+                {
+                    logEntity.MainTradeLog.ResponseObject = rtnObject;
+                    logEntity.MainTradeLog.ResponseContent = resJson;
+                    logEntity.MainTradeLog.ResponseTime = DateTime.Now;
                 }
 
                 result.SourceREQContent = content;
@@ -269,6 +318,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient
             catch (Exception error)
             {
                 _log.Error(error.Message, error);
+                logEntity.Errors.Add(error);
                 return false;
             }
         }

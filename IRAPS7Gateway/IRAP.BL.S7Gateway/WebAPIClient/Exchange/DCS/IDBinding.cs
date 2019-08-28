@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IRAP.BL.S7Gateway.Utils;
 using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 
@@ -85,13 +86,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity"></param>
         public IDBinding(
             string webAPIUrl, 
             ContentType contentType, 
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_IDBinding";
+            ExCode = "IRAP_DCS_IDBinding";
         }
 
         /// <summary>

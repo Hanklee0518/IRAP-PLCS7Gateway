@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -86,13 +87,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public EquipFailAndonCall(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_EquipFailAndonCall";
+            ExCode = "IRAP_DCS_EquipFailAndonCall";
         }
 
         /// <summary>

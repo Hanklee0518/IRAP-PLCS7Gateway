@@ -133,6 +133,7 @@
     <Compile Include="Enums\PLCEnums.cs" />
     <Compile Include="Utils\GlobalParams.cs" />
     <Compile Include="Utils\JSONHelper.cs" />
+    <Compile Include="Utils\Log4MongoDB.cs" />
     <Compile Include="Utils\Tools.cs" />
     <Compile Include="Utils\XMLHelper.cs" />
     <Compile Include="WebAPIClient\Contents\CustomContent.cs" />

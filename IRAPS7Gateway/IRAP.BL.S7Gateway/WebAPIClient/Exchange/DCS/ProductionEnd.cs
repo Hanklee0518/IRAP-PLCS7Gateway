@@ -30,21 +30,25 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
     public class ProductionEndParamXML
     {
         /// <summary>
+        /// 工序生产结论
+        /// </summary>
+        public byte Operation_Conclusion { get; set; }
+        /// <summary>
         /// 工艺参数集合
         /// </summary>
-        public List<RecipeRow> RECIPE = new List<RecipeRow>();
+        public List<RecipeRow> RECIPE { get; } = new List<RecipeRow>();
         /// <summary>
         /// 属性集合
         /// </summary>
-        public List<PropertyRow> PROPERTY = new List<PropertyRow>();
+        public List<PropertyRow> PROPERTY { get; } = new List<PropertyRow>();
         /// <summary>
         /// 检验结论集合
         /// </summary>
-        public List<TestResultRow> TestResult = new List<TestResultRow>();
+        public List<TestResultRow> TestResult { get; } = new List<TestResultRow>();
         /// <summary>
         /// 工装寿命集合
         /// </summary>
-        public List<ToolLifeRow> ToolLife = new List<ToolLifeRow>();
+        public List<ToolLifeRow> ToolLife { get; } = new List<ToolLifeRow>();
     }
 
     /// <summary>

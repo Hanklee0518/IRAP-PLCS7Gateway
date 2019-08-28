@@ -55,6 +55,9 @@ namespace IRAP.BL.S7Gateway
     /// </summary>
     public abstract class IRAPDCSTrade : IRAPBaseObject
     {
+        internal DCSGatewayLogEntity logEntity =
+            new DCSGatewayLogEntity();
+
         /// <summary>
         /// 构造方法
         /// </summary>
@@ -75,13 +78,14 @@ namespace IRAP.BL.S7Gateway
                 new StartDCSInvoking(
                     GlobalParams.Instance.WebAPI.URL,
                     GlobalParams.Instance.WebAPI.ContentType,
-                    GlobalParams.Instance.WebAPI.ClientID);
-
-            startDCSInvoking.Request =
-                new StartDCSInvokingRequest()
+                    GlobalParams.Instance.WebAPI.ClientID)
                 {
-                    CommunityID = GlobalParams.Instance.CommunityID,
-                    T133LeafID = device.T133LeafID,
+                    Request =
+                        new StartDCSInvokingRequest()
+                        {
+                            CommunityID = GlobalParams.Instance.CommunityID,
+                            T133LeafID = device.T133LeafID,
+                        }
                 };
 
             try
@@ -181,6 +185,32 @@ namespace IRAP.BL.S7Gateway
             else
             {
                 return "";
+            }
+        }
+
+        /// <summary>
+        /// 从标记组中查找指定标记名的标记，从PLC中实时读取并返回该标记的byte值
+        /// </summary>
+        /// <param name="device">西门子设备</param>
+        /// <param name="tags">标记组</param>
+        /// <param name="tagName">标记名称</param>
+        /// <returns>标记的byte值</returns>
+        protected byte ReadByteValue(
+            SiemensDevice device,
+            SiemensTagCollection tags,
+            string tagName)
+        {
+            var tag = tags[tagName];
+            if (tag is SiemensByteOfTag)
+            {
+                var intTag =
+                    device.ReadTagValue(
+                        tag as SiemensByteOfTag) as SiemensByteOfTag;
+                return intTag.Value;
+            }
+            else
+            {
+                return 0;
             }
         }
 
@@ -821,6 +851,8 @@ namespace IRAP.BL.S7Gateway
                             };
 
                         #region 填充 RECIPE 组
+                        productionEnd.Request.ParamXML.Operation_Conclusion =
+                            ReadByteValue(device, subTagGroup.Tags, "Operation_Conclusion");
                         if (device.Groups["RECIPE"] is SiemensTagGroup recipeGroup)
                         {
                             foreach (SiemensTag recipeTag in recipeGroup.Tags)

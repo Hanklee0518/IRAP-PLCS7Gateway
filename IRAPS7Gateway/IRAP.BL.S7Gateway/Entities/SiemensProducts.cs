@@ -553,7 +553,16 @@ namespace IRAP.BL.S7Gateway.Entities
                 List<SiemensTag> writeTags = trade.Do(this, tag as SiemensTag);
                 foreach (SiemensTag writeTag in writeTags)
                 {
-                    specialRWConnection.WriteToPLC(DBType, DBNumber, writeTag);
+                    try
+                    {
+                        specialRWConnection.WriteToPLC(DBType, DBNumber, writeTag);
+                    }
+                    catch (Exception error)
+                    {
+                        log.Errors.Add(error);
+                        _log.Error(
+                            $"写[{writeTag.Name}]的时候出错：{error.Message}", error);
+                    }
                 }
             }
             sw.Stop();

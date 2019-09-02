@@ -21,7 +21,8 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错验证请求报文体
         /// </summary>
-        public PokaYokeParamXML ParamXML { get; set; } = null;
+        public PokaYokeParamXML ParamXML { get; set; } = 
+            new PokaYokeParamXML();
     }
 
     /// <summary>

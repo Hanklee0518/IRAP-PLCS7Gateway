@@ -313,7 +313,8 @@ namespace IRAP.BL.S7Gateway
             {
                 throw new Exception(
                     $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                    $"Offset:[{tag.DB_Offset}]写入时发生错误，{error.Message}");
+                    $"Offset:[{tag.DB_Offset}]写入时发生错误，{error.Message}" +
+                    $"Value[{tag.Value.ToString()}]");
             }
 
             if (rlt.ErrorCode != 0)

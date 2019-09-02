@@ -15,7 +15,7 @@ namespace SiemensPLCMonitor
     public partial class Form1 : Form
     {
         private SiemensS7Net plc = null;
-        private SiemensPLCS plcType = SiemensPLCS.S1200;
+        private SiemensPLCS plcType = SiemensPLCS.S1500;
         private bool isConnected = false;
 
         public Form1()
@@ -29,9 +29,19 @@ namespace SiemensPLCMonitor
             try
             {
                 plc.IpAddress = edtIPAddress.Text;
+
+                if (edtIPAddress.Text == "10.230.74.11" ||
+                    edtIPAddress.Text == "10.230.74.12" ||
+                    edtIPAddress.Text == "10.230.74.13")
+                {
+                    plc.Slot = 1;
+                }
+                else
+                {
+                    plc.Slot = 0;
+                }
                 plc.Port = 102;
                 plc.Rack = 0;
-                plc.Slot = 0;
 
                 OperateResult connect = plc.ConnectServer();
                 if (connect.IsSuccess)
@@ -384,7 +394,7 @@ namespace SiemensPLCMonitor
             try
             {
                 ushort.TryParse(edtLength.Text, out ushort length);
-                OperateResult<byte[]> rlt = 
+                OperateResult<byte[]> rlt =
                     plc.Read(
                         $"DB{edtDBNumber.Text}.{edtOffset.Text}",
                         length);
@@ -411,7 +421,7 @@ namespace SiemensPLCMonitor
             try
             {
                 int.TryParse(edtLength.Text, out int length);
-                string data = edtText.Text.PadRight(length,(char)0);
+                string data = edtText.Text.PadRight(length, (char)0);
                 OperateResult rlt =
                     plc.Write(
                         $"DB{edtDBNumber.Text}.{edtOffset.Text}",

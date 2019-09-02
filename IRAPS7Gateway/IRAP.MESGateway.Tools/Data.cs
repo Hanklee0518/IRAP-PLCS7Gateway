@@ -69,6 +69,11 @@ namespace IRAP.MESGateway.Tools
         {
             get => Path.Combine(Application.StartupPath, "BaseService");
         }
+        internal string ConnectionStringWithMongoDB
+        {
+            get => GetString("MongoDBConnectionString");
+            set => SaveParam("MongoDBConnectionString", value);
+        }
         #endregion
 
         #region 私有方法

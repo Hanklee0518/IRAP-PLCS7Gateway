@@ -485,6 +485,7 @@ namespace IRAP.MESGateway.Tools
                 {
                     try
                     {
+                        service.ResetServName();
                         service.Deploy();
 
                         trees.RefreshTreeNodeStatue();
@@ -659,6 +660,7 @@ namespace IRAP.MESGateway.Tools
                     {
                         if (ServiceHelper.Instance.StopService(service.ServName))
                         {
+                            service.ResetServName();
                             service.CopyDCSGatewayServiceFile();
                         }
                         else

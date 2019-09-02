@@ -305,6 +305,37 @@ namespace IRAP.MESGateway.Tools.Utils
 
             return Services.ExtractToList();
         }
+
+        /// <summary>
+        /// 获取指定服务名的运行目录
+        /// </summary>
+        /// <param name="servName">服务名</param>
+        /// <returns></returns>
+        public string GetServiceHomePath(string servName)
+        {
+            if (servName == "")
+            {
+                return "";
+            }
+            else
+            {
+                if (ServiceExisted(servName))
+                {
+                    string key = $@"SYSTEM\CurrentControlSet\Services\{servName}";
+                    return
+                        Registry
+                            .LocalMachine
+                            .OpenSubKey(key)
+                            .GetValue("ImagePath")
+                            .ToString()
+                            .Replace("\"", string.Empty);
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
     }
 
     public class ServiceEntity
@@ -445,7 +476,23 @@ namespace IRAP.MESGateway.Tools.Utils
         /// <summary>
         /// 服务文件名
         /// </summary>
-        public string ServFilePath { get; private set; } = "";
+        public string ServFilePath
+        {
+            get
+            {
+                if (!CanDeploy)
+                {
+                    return ServiceHelper.Instance.GetServiceHomePath(ServName);
+                }
+                else
+                {
+                    return
+                        ParamHelper.Instance.GenerateSerivcePath(
+                            device.Parent.Name,
+                            device.Name);
+                }
+            }
+        }
         /// <summary>
         /// 能否部署当前服务
         /// </summary>
@@ -499,10 +546,6 @@ namespace IRAP.MESGateway.Tools.Utils
         public void ResetServName()
         {
             ServName = ServiceHelper.Instance.GetServiceName(device.Name);
-            ServFilePath =
-                ParamHelper.Instance.GenerateSerivcePath(
-                    device.Parent.Name,
-                    device.Name);
         }
 
         /// <summary>
@@ -549,10 +592,16 @@ namespace IRAP.MESGateway.Tools.Utils
                     config.AppSettings.Settings.Remove("DeviceName");
                     continue;
                 }
+                if (key == "MongoDBConnectionString")
+                {
+                    config.AppSettings.Settings.Remove("MongoDBConnectionString");
+                    continue;
+                }
             }
             config.AppSettings.Settings.Add("CommunityID", ParamHelper.Instance.CommunityID.ToString());
             config.AppSettings.Settings.Add("WebAPIUrl", ParamHelper.Instance.WebAPIUrl);
             config.AppSettings.Settings.Add("DeviceName", device.Name);
+            config.AppSettings.Settings.Add("MongoDBConnectionString", ParamHelper.Instance.ConnectionStringWithMongoDB);
             config.Save();
             #endregion
         }

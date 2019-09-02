@@ -40,12 +40,23 @@ namespace IRAP.MESGateway.Tools.Controls
             }
         }
 
+        private void RefreshServiceVersionStatus()
+        {
+            ParamHelper.Instance.RefreshBaseServiceVersion();
+
+            grdvDevices.BeginDataUpdate();
+            grdvDevices.RefreshData();
+            grdvDevices.EndDataUpdate();
+        }
+
         private void RaiseDataSourceChanged(BaseEntity entity)
         {
             if (_objectPropertiesView != null)
             {
                 _objectPropertiesView.ShowProperties(entity);
             }
+
+            RefreshServiceVersionStatus();
 
             if (entity == null)
             {

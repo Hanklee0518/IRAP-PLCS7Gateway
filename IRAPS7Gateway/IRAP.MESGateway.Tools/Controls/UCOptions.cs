@@ -36,6 +36,7 @@ namespace IRAP.MESGateway.Tools.Controls
             edtProjectPath.Text = ParamHelper.Instance.ProjectBasePath;
             edtCommunityID.Text = ParamHelper.Instance.CommunityID.ToString();
             edtWebAPIUrl.Text = ParamHelper.Instance.WebAPIUrl;
+            edtConnectionStringWithMongoDB.Text = ParamHelper.Instance.ConnectionStringWithMongoDB;
         }
 
         private void edtProjectPath_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -77,6 +78,7 @@ namespace IRAP.MESGateway.Tools.Controls
                 ParamHelper.Instance.CommunityID = value;
             }
             ParamHelper.Instance.WebAPIUrl = edtWebAPIUrl.Text;
+            ParamHelper.Instance.ConnectionStringWithMongoDB = edtConnectionStringWithMongoDB.Text;
 
             CloseParent();
         }

@@ -42,9 +42,12 @@
             this.btnSaveOptionsChanged = new DevExpress.XtraEditors.SimpleButton();
             this.labelControl3 = new DevExpress.XtraEditors.LabelControl();
             this.edtWebAPIUrl = new DevExpress.XtraEditors.TextEdit();
+            this.edtConnectionStringWithMongoDB = new DevExpress.XtraEditors.TextEdit();
+            this.labelControl4 = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.edtProjectPath.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtCommunityID.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtWebAPIUrl.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.edtConnectionStringWithMongoDB.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // labelControl2
@@ -103,7 +106,8 @@
             // 
             // btnCancelOptionsChanged
             // 
-            this.btnCancelOptionsChanged.Location = new System.Drawing.Point(131, 318);
+            this.btnCancelOptionsChanged.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCancelOptionsChanged.Location = new System.Drawing.Point(131, 710);
             this.btnCancelOptionsChanged.Name = "btnCancelOptionsChanged";
             this.btnCancelOptionsChanged.Size = new System.Drawing.Size(93, 30);
             this.btnCancelOptionsChanged.TabIndex = 8;
@@ -112,7 +116,8 @@
             // 
             // btnSaveOptionsChanged
             // 
-            this.btnSaveOptionsChanged.Location = new System.Drawing.Point(17, 318);
+            this.btnSaveOptionsChanged.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSaveOptionsChanged.Location = new System.Drawing.Point(17, 710);
             this.btnSaveOptionsChanged.Name = "btnSaveOptionsChanged";
             this.btnSaveOptionsChanged.Size = new System.Drawing.Size(93, 30);
             this.btnSaveOptionsChanged.TabIndex = 7;
@@ -136,10 +141,29 @@
             this.edtWebAPIUrl.Size = new System.Drawing.Size(433, 22);
             this.edtWebAPIUrl.TabIndex = 10;
             // 
+            // edtConnectionStringWithMongoDB
+            // 
+            this.edtConnectionStringWithMongoDB.Location = new System.Drawing.Point(17, 294);
+            this.edtConnectionStringWithMongoDB.Name = "edtConnectionStringWithMongoDB";
+            this.edtConnectionStringWithMongoDB.Size = new System.Drawing.Size(433, 22);
+            this.edtConnectionStringWithMongoDB.TabIndex = 12;
+            // 
+            // labelControl4
+            // 
+            this.labelControl4.Appearance.Font = new System.Drawing.Font("新宋体", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelControl4.Appearance.Options.UseFont = true;
+            this.labelControl4.Location = new System.Drawing.Point(17, 269);
+            this.labelControl4.Name = "labelControl4";
+            this.labelControl4.Size = new System.Drawing.Size(200, 19);
+            this.labelControl4.TabIndex = 11;
+            this.labelControl4.Text = "MongoDB 连接字符串：";
+            // 
             // UCOptions
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoScroll = true;
+            this.Controls.Add(this.edtConnectionStringWithMongoDB);
+            this.Controls.Add(this.labelControl4);
             this.Controls.Add(this.edtWebAPIUrl);
             this.Controls.Add(this.labelControl3);
             this.Controls.Add(this.btnCancelOptionsChanged);
@@ -150,10 +174,11 @@
             this.Controls.Add(this.labelControl5);
             this.Controls.Add(this.labelControl2);
             this.Name = "UCOptions";
-            this.Size = new System.Drawing.Size(612, 366);
+            this.Size = new System.Drawing.Size(612, 758);
             ((System.ComponentModel.ISupportInitialize)(this.edtProjectPath.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtCommunityID.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.edtWebAPIUrl.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.edtConnectionStringWithMongoDB.Properties)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -170,5 +195,7 @@
         private DevExpress.XtraEditors.SimpleButton btnSaveOptionsChanged;
         private DevExpress.XtraEditors.LabelControl labelControl3;
         private DevExpress.XtraEditors.TextEdit edtWebAPIUrl;
+        private DevExpress.XtraEditors.TextEdit edtConnectionStringWithMongoDB;
+        private DevExpress.XtraEditors.LabelControl labelControl4;
     }
 }

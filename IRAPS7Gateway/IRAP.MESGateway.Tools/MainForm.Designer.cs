@@ -454,7 +454,7 @@
             // 
             // bbiUpdateDeviceTags
             // 
-            this.bbiUpdateDeviceTags.Caption = "更新配置";
+            this.bbiUpdateDeviceTags.Caption = "更新PLC配置";
             this.bbiUpdateDeviceTags.Enabled = false;
             this.bbiUpdateDeviceTags.Id = 2;
             this.bbiUpdateDeviceTags.ImageOptions.ImageIndex = 12;

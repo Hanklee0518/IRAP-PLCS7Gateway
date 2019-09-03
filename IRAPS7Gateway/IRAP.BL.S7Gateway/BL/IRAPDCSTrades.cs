@@ -1701,7 +1701,7 @@ namespace IRAP.BL.S7Gateway
                                     _log.Error(
                                         $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
                                         $"{pokaYokeFeeding.Error.ErrText}");
-                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", 0xffffffff);
                                 }
                             }
                             else
@@ -1709,7 +1709,19 @@ namespace IRAP.BL.S7Gateway
                                 _log.Error(
                                     $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
                                     $"{pokaYokeFeeding.Error.ErrText}");
-                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", 0xffffffff);
+                            }
+
+                            if (device.Groups["WIPStations"] is SiemensTagGroup wipStations)
+                            {
+                                if (wipStations.SubGroups.Count > 0)
+                                {
+                                    WriteTagValueBack(
+                                        rlt,
+                                        wipStations.SubGroups[0] as SiemensSubTagGroup,
+                                        "Poka_Yoke_Feedback_Mark",
+                                        (uint)0);
+                                }
                             }
                         }
                     }

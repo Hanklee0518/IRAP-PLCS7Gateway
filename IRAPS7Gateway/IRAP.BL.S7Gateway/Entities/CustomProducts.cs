@@ -455,10 +455,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         public int Count
         {
-            get => default(int);
-            set
-            {
-            }
+            get => _groups.Count;
         }
 
         /// <summary>

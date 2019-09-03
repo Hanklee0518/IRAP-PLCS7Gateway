@@ -247,65 +247,66 @@ namespace IRAP.BL.S7Gateway
                     {
                         SiemensBoolOfTag ltag = tag as SiemensBoolOfTag;
 
-                        address += $".{ltag.Position}";
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         if (!ltag.Name.Contains("MES_Heart_Beat"))
                         {
                             _log.Debug(
                               $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                              $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                              $"Offset:[{tag.DB_Offset}]Type[Bool]，写入:[{ltag.Value}]");
                         }
+
+                        address += $".{ltag.Position}";
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensByteOfTag)
                     {
                         SiemensByteOfTag ltag = tag as SiemensByteOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]Type[Byte]，写入:[{ltag.Value}]");
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensWordOfTag)
                     {
                         SiemensWordOfTag ltag = tag as SiemensWordOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]Type[Word]，写入:[{ltag.Value}]");
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensIntOfTag)
                     {
                         SiemensIntOfTag ltag = tag as SiemensIntOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]Type[Int]，写入:[{ltag.Value}]");
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensDWordOfTag)
                     {
                         SiemensDWordOfTag ltag = tag as SiemensDWordOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]Type[DWord]，写入:[{ltag.Value}]");
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensRealOfTag)
                     {
                         SiemensRealOfTag ltag = tag as SiemensRealOfTag;
-                        rlt = siemensTcpNet.Write(address, ltag.Value);
                         _log.Debug(
                             $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
+                            $"Offset:[{tag.DB_Offset}]Type[Real]，写入:[{ltag.Value}]");
+                        rlt = siemensTcpNet.Write(address, ltag.Value);
                     }
                     else if (tag is SiemensArrayCharOfTag)
                     {
                         SiemensArrayCharOfTag ltag = tag as SiemensArrayCharOfTag;
+                        _log.Debug(
+                            $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
+                            $"Offset:[{tag.DB_Offset}]Type[ArrayChar]，写入:[{ltag.Value}]");
                         rlt =
                             siemensTcpNet.Write(
                                 address,
                                 Encoding.ASCII.GetBytes(ltag.Value));
-                        _log.Debug(
-                            $"PLC:[{IPAddress}]:数据块[{dbNumber}]:Tag[{tag.Name}]:" +
-                            $"Offset:[{tag.DB_Offset}]，写入:[{ltag.Value}]");
                     }
                 }
             }

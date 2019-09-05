@@ -543,7 +543,7 @@ namespace IRAP.BL.S7Gateway.Entities
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            IIRAPDCSTrade trade = 
+            IIRAPDCSTrade trade =
                 IRAPDCSTraderCreator
                     .CreateInstance(
                         tag.Name.Replace("_", ""),
@@ -571,7 +571,12 @@ namespace IRAP.BL.S7Gateway.Entities
 
             try
             {
-                Log4MongoDB.WriteLog(log);
+                if (log.ActionCode != "GetOPCStatus" ||
+                    GlobalParams.Instance.GetOPCStatusLogRecord ||
+                    log.Errors.Count > 0)
+                {
+                    Log4MongoDB.WriteLog(log);
+                }
             }
             catch (Exception error)
             {

@@ -399,6 +399,7 @@ namespace IRAP.BL.S7Gateway
                 _log.Info("同步设备状态处理");
                 logEntity.DeviceName = device.Name;
                 logEntity.ActionName = "同步设备状态";
+                logEntity.ActionCode = "GetOPCStatus";
 
                 if (device.Groups["COMM"] is SiemensTagGroup comm)
                 {
@@ -587,6 +588,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("标识部件绑定");
                     logEntity.ActionName = "标识部件绑定";
+                    logEntity.ActionCode = "IDBinding";
 
                     IDBinding idBinding = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -717,6 +719,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("申请产品序列号");
                     logEntity.ActionName = "申请产品序列号";
+                    logEntity.ActionCode = "SNRequest";
 
                     string key = "SNRequest";
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -841,6 +844,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("工件入站交易处理");
                     logEntity.ActionName = "工件入站";
+                    logEntity.ActionCode = "WIPMoveIn";
 
                     WIPMoveIn wipMoveIn = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -947,6 +951,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("生产结束交易处理");
                     logEntity.ActionName = "生产结束";
+                    logEntity.ActionCode = "ProductionEnd";
 
                     ProductionEnd productionEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1134,6 +1139,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("工件离站交易处理");
                     logEntity.ActionName = "工件离站";
+                    logEntity.ActionCode = "WIPMoveOut";
 
                     OperationCycleEnd operationCycleEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1240,6 +1246,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("请求标签元素交易处理");
                     logEntity.ActionName = "请求标签元素";
+                    logEntity.ActionCode = "LBLElementRequest";
 
                     LBLElement lblElement = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1368,6 +1375,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("请求防错交易处理");
                     logEntity.ActionName = "请求防错";
+                    logEntity.ActionCode = "PokaYoke";
 
                     PokaYoke pokaYoke = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1529,6 +1537,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("设备故障告警交易处理");
                     logEntity.ActionName = "设备故障告警";
+                    logEntity.ActionCode = "EquipFailAndonCall";
 
                     EquipFailAndonCall equipFailAndonCall = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1648,6 +1657,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("料槽加料防错交易处理");
                     logEntity.ActionName = "料槽加料防错";
+                    logEntity.ActionCode = "PokaYokeFeeding";
 
                     PokaYokeFeeding pokaYokeFeeding = null;
                     SiemensTagGroup feeding = signalTag.Parent as SiemensTagGroup;
@@ -1772,6 +1782,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("料槽卸料交易处理");
                     logEntity.ActionName = "料槽卸料";
+                    logEntity.ActionCode = "Unfeeding";
 
                     Unfeeding unfeeding = null;
                     SiemensTagGroup unfeedingGroup = signalTag.Parent as SiemensTagGroup;
@@ -1883,6 +1894,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("停滞告警交易处理");
                     logEntity.ActionName = "停滞告警";
+                    logEntity.ActionCode = "StagnationWarnning";
 
                     StagnationWarnning stagnationWarnning = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1996,6 +2008,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("Fazit Response状态检测交易处理");
                     logEntity.ActionName = "Fazit Response状态检测";
+                    logEntity.ActionCode = "FaiztStatusCheck";
 
                     if (!(signalTag.Parent is SiemensSubTagGroup wipStation))
                     {
@@ -2184,6 +2197,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("料槽缺料检测交易处理");
                     logEntity.ActionName = "料槽缺料检测";
+                    logEntity.ActionCode = "ShortageMaterialCheck";
 
                     ShortageMaterialCheck shortageMaterialCheck = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -2292,6 +2306,7 @@ namespace IRAP.BL.S7Gateway
                 {
                     _log.Info("容器绑定交易处理");
                     logEntity.ActionName = "容器绑定";
+                    logEntity.ActionCode = "ContainerNumberBinding";
 
                     ContainerNumberBinding containerBinding = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;

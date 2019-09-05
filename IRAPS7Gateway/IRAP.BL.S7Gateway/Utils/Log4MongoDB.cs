@@ -65,6 +65,10 @@ namespace IRAP.BL.S7Gateway.Utils
         /// </summary>
         public string ActionName { get; set; }
         /// <summary>
+        /// 操作代码
+        /// </summary>
+        public string ActionCode { get; set; }
+        /// <summary>
         /// 触发信号标签信息
         /// </summary>
         public LogTagEntity TriggerTag { get; set; } = new LogTagEntity();

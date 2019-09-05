@@ -201,6 +201,9 @@ namespace IRAP.MESGateway.Tools
                 edtLog.Text = "";
                 tpLog.Text = $"{Path.GetFileName(fileName)}[未记录]";
             }
+
+            edtLog.SelectionStart = edtLog.Text.Length;
+            edtLog.ScrollToCaret();
         }
 
         private void RefreshServiceHistoryLogFiles(ServiceEntity service)

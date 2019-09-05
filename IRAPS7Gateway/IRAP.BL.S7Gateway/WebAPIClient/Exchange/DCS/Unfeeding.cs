@@ -33,15 +33,15 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 物料追溯标识
         /// </summary>
-        public string Material_Track_ID { get; set; }
+        public string Material_Track_ID { get; set; } = "";
         /// <summary>
         /// 料槽编号
         /// </summary>
-        public string Slot_Number { get; set; }
+        public string Slot_Number { get; set; } = "";
         /// <summary>
         /// 卸料数量
         /// </summary>
-        public uint Unfeeding_Quantity { get; set; }
+        public uint Unfeeding_Quantity { get; set; } = 0;
     }
 
     /// <summary>

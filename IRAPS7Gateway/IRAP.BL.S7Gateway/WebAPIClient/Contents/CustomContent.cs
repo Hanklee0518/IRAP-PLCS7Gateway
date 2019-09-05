@@ -18,7 +18,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Contents
         /// <summary>
         /// 社区标识
         /// </summary>
-        public int CommunityID { get; set; }
+        public int CommunityID { get; set; } = 0;
     }
 
     /// <summary>
@@ -29,14 +29,14 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Contents
         /// <summary>
         /// 交易代码
         /// </summary>
-        public string ExCode { get; set; }
+        public string ExCode { get; set; } = "";
         /// <summary>
         /// 交易结果代码（0-交易成功；非0-交易失败）
         /// </summary>
-        public int ErrCode { get; set; }
+        public int ErrCode { get; set; } = 0;
         /// <summary>
         /// 交易结果消息字符串
         /// </summary>
-        public string ErrText { get; set; }
+        public string ErrText { get; set; } = "";
     }
 }

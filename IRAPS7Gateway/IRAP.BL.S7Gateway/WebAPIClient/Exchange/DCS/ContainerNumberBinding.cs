@@ -33,7 +33,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 容器编号（工装板编号）
         /// </summary>
-        public string Container_Number_pallet_code { get; set; }
+        public string Container_Number_pallet_code { get; set; } = "";
     }
 
     /// <summary>

@@ -33,15 +33,15 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 工件来源标识
         /// </summary>
-        public string WIP_Src_Code { get; set; }
+        public string WIP_Src_Code { get; set; } = "";
         /// <summary>
         /// 工件可识读标识
         /// </summary>
-        public string WIP_ID_Code { get; set; }
+        public string WIP_ID_Code { get; set; } = "";
         /// <summary>
         /// 容器编号（工装板编号）
         /// </summary>
-        public string Container_Number_pallet_code { get; set; }
+        public string Container_Number_pallet_code { get; set; } = "";
     }
 
     /// <summary>
@@ -100,7 +100,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 子在制品数量
         /// </summary>
-        public byte Number_Of_Sub_WIPs { get; set; }
+        public byte Number_Of_Sub_WIPs { get; set; } = 0;
         /// <summary>
         /// 子在制品集合
         /// </summary>

@@ -40,7 +40,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错反馈代码
         /// </summary>
-        public uint Poka_Yoke_Feedback_Mark { get; set; }
+        public uint Poka_Yoke_Feedback_Mark { get; set; } = 0;
     }
 
     /// <summary>

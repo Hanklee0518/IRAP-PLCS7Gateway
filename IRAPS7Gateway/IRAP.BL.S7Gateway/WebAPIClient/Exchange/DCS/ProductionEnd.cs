@@ -33,7 +33,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 工序生产结论
         /// </summary>
-        public byte Operation_Conclusion { get; set; }
+        public byte Operation_Conclusion { get; set; } = 0;
         /// <summary>
         /// 工艺参数集合
         /// </summary>
@@ -60,11 +60,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 标签名称
         /// </summary>
-        public string TagName { get; set; }
+        public string TagName { get; set; } = "";
         /// <summary>
         /// 标签值
         /// </summary>
-        public string Value { get; set; }
+        public string Value { get; set; } = "";
     }
 
     /// <summary>
@@ -75,11 +75,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 标签名称
         /// </summary>
-        public string TagName { get; set; }
+        public string TagName { get; set; } = "";
         /// <summary>
         /// 标签值
         /// </summary>
-        public string Value { get; set; }
+        public string Value { get; set; } = "";
     }
 
     /// <summary>
@@ -90,31 +90,31 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 测试项
         /// </summary>
-        public ushort Test_Item_Number { get; set; }
+        public ushort Test_Item_Number { get; set; } = 0;
         /// <summary>
         /// 单项结论(P/F)
         /// </summary>
-        public string Conclusion { get; set; }
+        public string Conclusion { get; set; } = "";
         /// <summary>
         /// 备注
         /// </summary>
-        public string Remark { get; set; }
+        public string Remark { get; set; } = "";
         /// <summary>
         /// 度量值
         /// </summary>
-        public uint Metric01 { get; set; }
+        public uint Metric01 { get; set; } = 0;
         /// <summary>
         /// 低限值
         /// </summary>
-        public uint Low_Limit { get; set; }
+        public uint Low_Limit { get; set; } = 0;
         /// <summary>
         /// 通过标准
         /// </summary>
-        public string Criterion { get; set; }
+        public string Criterion { get; set; } = "";
         /// <summary>
         /// 高限值
         /// </summary>
-        public uint High_Limit { get; set; }
+        public uint High_Limit { get; set; } = 0;
     }
 
     /// <summary>
@@ -125,19 +125,19 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 工装编号
         /// </summary>
-        public string Tool_Code { get; set; }
+        public string Tool_Code { get; set; } = "";
         /// <summary>
         /// 工装序列号
         /// </summary>
-        public string Tool_SN { get; set; }
+        public string Tool_SN { get; set; } = "";
         /// <summary>
         /// 剩余使用寿命
         /// </summary>
-        public uint Tool_Use_Life_In_Times { get; set; }
+        public uint Tool_Use_Life_In_Times { get; set; } = 0;
         /// <summary>
         /// 剩余保养寿命
         /// </summary>
-        public uint Tool_PM_Life_In_Times { get; set; }
+        public uint Tool_PM_Life_In_Times { get; set; } = 0;
     }
 
     /// <summary>

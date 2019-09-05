@@ -2012,61 +2012,61 @@ namespace IRAP.BL.S7Gateway
                         }
 
                         #region 首先需要进行 DMC 的校验
-                        {
-                            PokaYoke pokaYoke =
-                                new PokaYoke(
-                                    GlobalParams.Instance.WebAPI.URL,
-                                    GlobalParams.Instance.WebAPI.ContentType,
-                                    GlobalParams.Instance.WebAPI.ClientID,
-                                logEntity)
-                                {
-                                    Request = new PokaYokeRequest()
-                                    {
-                                        CommunityID = GlobalParams.Instance.CommunityID,
-                                        T133LeafID = device.T133LeafID,
-                                        T216LeafID = device.T216LeafID,
-                                        T102LeafID = wipStation.T102LeafID,
-                                        T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
-                                        WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
-                                        WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
-                                        WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
-                                    },
-                                };
+                        //{
+                        //    PokaYoke pokaYoke =
+                        //        new PokaYoke(
+                        //            GlobalParams.Instance.WebAPI.URL,
+                        //            GlobalParams.Instance.WebAPI.ContentType,
+                        //            GlobalParams.Instance.WebAPI.ClientID,
+                        //        logEntity)
+                        //        {
+                        //            Request = new PokaYokeRequest()
+                        //            {
+                        //                CommunityID = GlobalParams.Instance.CommunityID,
+                        //                T133LeafID = device.T133LeafID,
+                        //                T216LeafID = device.T216LeafID,
+                        //                T102LeafID = wipStation.T102LeafID,
+                        //                T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                        //                WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                        //                WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                        //                WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                        //            },
+                        //        };
 
-                            if (pokaYoke.Do())
-                            {
-                                if (pokaYoke.Error.ErrCode >= 0)
-                                {
-                                    _log.Debug(
-                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                        $"{pokaYoke.Error.ErrText}");
+                        //    if (pokaYoke.Do())
+                        //    {
+                        //        if (pokaYoke.Error.ErrCode >= 0)
+                        //        {
+                        //            _log.Debug(
+                        //                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //                $"{pokaYoke.Error.ErrText}");
 
-                                    WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
-                                    WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
-                                    wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
-                                }
-                                else
-                                {
-                                    _log.Error(
-                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                        $"{pokaYoke.Error.ErrText}");
-                                }
-                            }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
-                            }
+                        //            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                        //            WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                        //            wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+                        //        }
+                        //        else
+                        //        {
+                        //            _log.Error(
+                        //                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //                $"{pokaYoke.Error.ErrText}");
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        _log.Error(
+                        //            $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //            $"{pokaYoke.Error.ErrText}");
+                        //    }
 
-                            // 如果未通过 PokaYoke 校验，直接返回
-                            if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
-                            {
-                                tag.Value = false;
-                                rlt.Add(tag);
-                                return rlt;
-                            }
-                        }
+                        //    // 如果未通过 PokaYoke 校验，直接返回
+                        //    if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
+                        //    {
+                        //        tag.Value = false;
+                        //        rlt.Add(tag);
+                        //        return rlt;
+                        //    }
+                        //}
                         #endregion
 
                         #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查

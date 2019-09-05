@@ -33,39 +33,39 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 设备故障第1组
         /// </summary>
-        public uint Equipment_Failures_Group_1 { get; set; }
+        public uint Equipment_Failures_Group_1 { get; set; } = 0;
         /// <summary>
         /// 设备故障第2组
         /// </summary>
-        public uint Equipment_Failures_Group_2 { get; set; }
+        public uint Equipment_Failures_Group_2 { get; set; } = 0;
         /// <summary>
         /// 设备故障第3组
         /// </summary>
-        public uint Equipment_Failures_Group_3 { get; set; }
+        public uint Equipment_Failures_Group_3 { get; set; } = 0;
         /// <summary>
         /// 设备故障第4组
         /// </summary>
-        public uint Equipment_Failures_Group_4 { get; set; }
+        public uint Equipment_Failures_Group_4 { get; set; } = 0;
         /// <summary>
         /// 设备故障第5组
         /// </summary>
-        public uint Equipment_Failures_Group_5 { get; set; }
+        public uint Equipment_Failures_Group_5 { get; set; } = 0;
         /// <summary>
         /// 设备故障第6组
         /// </summary>
-        public uint Equipment_Failures_Group_6 { get; set; }
+        public uint Equipment_Failures_Group_6 { get; set; } = 0;
         /// <summary>
         /// 设备故障第7组
         /// </summary>
-        public uint Equipment_Failures_Group_7 { get; set; }
+        public uint Equipment_Failures_Group_7 { get; set; } = 0;
         /// <summary>
         /// 设备故障第8组
         /// </summary>
-        public uint Equipment_Failures_Group_8 { get; set; }
+        public uint Equipment_Failures_Group_8 { get; set; } = 0;
         /// <summary>
         /// 设备故障代码
         /// </summary>
-        public string Failure_Code { get; set; }
+        public string Failure_Code { get; set; } = "";
     }
 
     /// <summary>

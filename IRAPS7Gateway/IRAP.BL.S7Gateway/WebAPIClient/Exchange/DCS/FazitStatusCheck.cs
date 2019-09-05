@@ -40,11 +40,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// Fazit状态
         /// </summary>
-        public byte DMC_Fazit_Status { get; set; }
+        public byte DMC_Fazit_Status { get; set; } = 0;
         /// <summary>
         /// Fazit注册请求时间
         /// </summary>
-        public string Fazit_Request_Time { get; set; }
+        public string Fazit_Request_Time { get; set; } = "";
     }
 
     /// <summary>

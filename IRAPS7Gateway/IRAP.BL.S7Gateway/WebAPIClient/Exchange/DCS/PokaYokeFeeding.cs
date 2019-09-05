@@ -33,11 +33,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 物料追溯标识
         /// </summary>
-        public string Material_Track_ID { get; set; }
+        public string Material_Track_ID { get; set; } = "";
         /// <summary>
         /// 料槽编号
         /// </summary>
-        public string Slot_Number { get; set; }
+        public string Slot_Number { get; set; } = "";
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错结果：1-通过；2-不通过
         /// </summary>
-        public uint Poka_Yoke_Result { get; set; }
+        public uint Poka_Yoke_Result { get; set; } = 0;
     }
 
     /// <summary>

@@ -33,11 +33,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 停滞时间(s)
         /// </summary>
-        public uint Time_In_Seconds { get; set; }
+        public uint Time_In_Seconds { get; set; } = 0;
         /// <summary>
         /// 告警阀门值(s)
         /// </summary>
-        public ushort Threshold { get; set; }
+        public ushort Threshold { get; set; } = 0;
     }
 
     /// <summary>

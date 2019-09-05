@@ -33,23 +33,23 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 生产产品的产品编号
         /// </summary>
-        public string Product_Number { get; set; }
+        public string Product_Number { get; set; } = "";
         /// <summary>
         /// 标识部件编号
         /// </summary>
-        public string ID_Part_Number { get; set; }
+        public string ID_Part_Number { get; set; } = "";
         /// <summary>
         /// 标识部件主标识
         /// </summary>
-        public string ID_Part_WIP_Code { get; set; }
+        public string ID_Part_WIP_Code { get; set; } = "";
         /// <summary>
         /// 标识部件序列号
         /// </summary>
-        public string ID_Part_SN_Scanner_Code { get; set; }
+        public string ID_Part_SN_Scanner_Code { get; set; } = "";
         /// <summary>
         /// 标识部件序号
         /// </summary>
-        public int Sequence_Number { get; set; }
+        public int Sequence_Number { get; set; } = 0;
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// MES 返回的标识部件序号
         /// </summary>
-        public int Part_Number_Feedback { get; set; }
+        public int Part_Number_Feedback { get; set; } = 0;
     }
 
     /// <summary>

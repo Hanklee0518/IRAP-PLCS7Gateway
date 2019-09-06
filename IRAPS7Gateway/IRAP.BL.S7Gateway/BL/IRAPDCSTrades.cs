@@ -322,18 +322,30 @@ namespace IRAP.BL.S7Gateway
                 return;
             }
 
-            if (group.Tags[tagName] is SiemensTag writeTag)
+            try
             {
-                writeTag.Value = tagValue;
-                tags.Add(writeTag);
-                if (writeTag is SiemensArrayCharOfTag)
+                if (group.Tags[tagName] is SiemensTag writeTag)
                 {
-                    if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                    writeTag.Value = tagValue;
+                    tags.Add(writeTag);
+                    if (writeTag is SiemensArrayCharOfTag)
                     {
-                        lengthTag.Value = ((string)tagValue).Length;
-                        tags.Add(lengthTag);
+                        if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                        {
+                            lengthTag.Value = ((string)tagValue).Length;
+                            tags.Add(lengthTag);
+                        }
                     }
                 }
+                else
+                {
+                    throw new Exception($"{group.Name}中未找到[{tagName}]标记");
+                }
+            }
+            catch (Exception error)
+            {
+                logEntity.Errors.Add(error);
+                _log.Error(error.Message, error);
             }
         }
 
@@ -648,16 +660,6 @@ namespace IRAP.BL.S7Gateway
                                             $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
                                             $"{idBinding.Error.ErrText}");
                                     }
-
-                                    var fdTag = device.FindTag(key, "Part_Number_Feedback");
-                                    if (fdTag != null)
-                                    {
-                                        if (fdTag is SiemensIntOfTag rltTag)
-                                        {
-                                            rltTag.Value = (short)idBinding.Response.Output.Part_Number_Feedback;
-                                            rlt.Add(rltTag);
-                                        }
-                                    }
                                 }
                                 else
                                 {
@@ -665,6 +667,8 @@ namespace IRAP.BL.S7Gateway
                                         $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
                                         $"{idBinding.Error.ErrText}");
                                 }
+
+                                WriteTagValueBack(rlt, idbGroup, "Part_Number_Feedback", (short)idBinding.Response.Output.Part_Number_Feedback);
                             }
                         }
                         catch (Exception error)
@@ -1443,7 +1447,7 @@ namespace IRAP.BL.S7Gateway
                                     {
                                         if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
                                         {
-                                            WriteTagValueBack(rlt, group, "Number_Of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
+                                            WriteTagValueBack(rlt, group, "Number_of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
                                             int j = 0;
                                             for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
                                             {

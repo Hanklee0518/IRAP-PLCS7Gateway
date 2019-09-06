@@ -3,6 +3,7 @@ using HslCommunication.Profinet.Siemens;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -21,6 +22,37 @@ namespace SiemensPLCMonitor
         public Form1()
         {
             InitializeComponent();
+
+            edtIPAddress.Text = ReadParam("Address");
+            edtPort.Text = ReadParam("Port") == "" ? "102" : ReadParam("Port");
+            edtSlot.Text = ReadParam("Slot") == "" ? "0" : ReadParam("Slot");
+            edtRack.Text = ReadParam("Rack") == "" ? "0" : ReadParam("Rack");
+        }
+
+        private string ReadParam(string key)
+        {
+            if (ConfigurationManager.AppSettings[key] != null)
+            {
+                return ConfigurationManager.AppSettings[key];
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        private void WriteParam(string key, string value)
+        {
+            Configuration config =
+                ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+            if (config.AppSettings.Settings[key] == null)
+                config.AppSettings.Settings.Add(key, value);
+            else
+                config.AppSettings.Settings[key].Value = value;
+
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
         }
 
         private void btnConnect_Click(object sender, EventArgs e)
@@ -29,19 +61,33 @@ namespace SiemensPLCMonitor
             try
             {
                 plc.IpAddress = edtIPAddress.Text;
-
-                if (edtIPAddress.Text == "10.230.74.11" ||
-                    edtIPAddress.Text == "10.230.74.12" ||
-                    edtIPAddress.Text == "10.230.74.13")
+                if (int.TryParse(edtPort.Text, out int port))
                 {
-                    plc.Slot = 1;
+                    plc.Port = port;
+                }
+                else
+                {
+                    plc.Port = 102;
+                    edtPort.Text = "102";
+                }
+                if (byte.TryParse(edtSlot.Text, out byte slot))
+                {
+                    plc.Slot = slot;
                 }
                 else
                 {
                     plc.Slot = 0;
+                    edtSlot.Text = "0";
                 }
-                plc.Port = 102;
-                plc.Rack = 0;
+                if (byte.TryParse(edtRack.Text, out byte rack))
+                {
+                    plc.Rack = rack;
+                }
+                else
+                {
+                    plc.Rack = 0;
+                    edtRack.Text = "0";
+                }
 
                 OperateResult connect = plc.ConnectServer();
                 if (connect.IsSuccess)
@@ -49,6 +95,11 @@ namespace SiemensPLCMonitor
                     isConnected = true;
                     btnConnect.Enabled = false;
                     btnDisconnect.Enabled = true;
+
+                    edtIPAddress.Enabled = false;
+                    edtPort.Enabled = false;
+                    edtRack.Enabled = false;
+                    edtSlot.Enabled = false;
                 }
                 else
                 {
@@ -74,8 +125,13 @@ namespace SiemensPLCMonitor
                 MessageBox.Show(error.Message);
             }
             isConnected = false;
+
             btnConnect.Enabled = true;
             btnDisconnect.Enabled = false;
+            edtIPAddress.Enabled = true;
+            edtPort.Enabled = true;
+            edtRack.Enabled = true;
+            edtSlot.Enabled = true;
         }
 
         private void btnReadBool_Click(object sender, EventArgs e)
@@ -437,6 +493,14 @@ namespace SiemensPLCMonitor
                 }
             }
             catch { edtText.Text = ""; }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            WriteParam("Address", edtIPAddress.Text);
+            WriteParam("Port", edtPort.Text);
+            WriteParam("Slot", edtSlot.Text);
+            WriteParam("Rack", edtRack.Text);
         }
     }
 }

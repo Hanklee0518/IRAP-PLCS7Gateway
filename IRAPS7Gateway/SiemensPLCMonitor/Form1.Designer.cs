@@ -57,6 +57,10 @@
             this.btnReadReal = new System.Windows.Forms.Button();
             this.btnWriteChars = new System.Windows.Forms.Button();
             this.btnReadChars = new System.Windows.Forms.Button();
+            this.edtSlot = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.edtRack = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -66,6 +70,10 @@
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.edtRack);
+            this.panel1.Controls.Add(this.label7);
+            this.panel1.Controls.Add(this.edtSlot);
+            this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.btnDisconnect);
             this.panel1.Controls.Add(this.btnConnect);
             this.panel1.Controls.Add(this.edtPort);
@@ -84,7 +92,7 @@
             this.btnDisconnect.Location = new System.Drawing.Point(781, 11);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(100, 26);
-            this.btnDisconnect.TabIndex = 5;
+            this.btnDisconnect.TabIndex = 6;
             this.btnDisconnect.Text = "断开连接";
             this.btnDisconnect.UseVisualStyleBackColor = true;
             this.btnDisconnect.Click += new System.EventHandler(this.btnDisconnect_Click);
@@ -95,34 +103,33 @@
             this.btnConnect.Location = new System.Drawing.Point(691, 11);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(84, 26);
-            this.btnConnect.TabIndex = 4;
+            this.btnConnect.TabIndex = 5;
             this.btnConnect.Text = "连接";
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // edtPort
             // 
-            this.edtPort.Location = new System.Drawing.Point(403, 13);
+            this.edtPort.Location = new System.Drawing.Point(311, 13);
             this.edtPort.Name = "edtPort";
-            this.edtPort.Size = new System.Drawing.Size(73, 26);
-            this.edtPort.TabIndex = 3;
-            this.edtPort.Visible = false;
+            this.edtPort.Size = new System.Drawing.Size(37, 26);
+            this.edtPort.TabIndex = 2;
+            this.edtPort.Text = "102";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(325, 16);
+            this.label2.Location = new System.Drawing.Point(233, 16);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 16);
             this.label2.TabIndex = 2;
             this.label2.Text = "端口号：";
-            this.label2.Visible = false;
             // 
             // edtIPAddress
             // 
             this.edtIPAddress.Location = new System.Drawing.Point(94, 13);
             this.edtIPAddress.Name = "edtIPAddress";
-            this.edtIPAddress.Size = new System.Drawing.Size(225, 26);
+            this.edtIPAddress.Size = new System.Drawing.Size(133, 26);
             this.edtIPAddress.TabIndex = 1;
             this.edtIPAddress.Text = "192.168.0.3";
             // 
@@ -359,6 +366,40 @@
             this.btnReadChars.UseVisualStyleBackColor = true;
             this.btnReadChars.Click += new System.EventHandler(this.btnReadChars_Click);
             // 
+            // edtSlot
+            // 
+            this.edtSlot.Location = new System.Drawing.Point(432, 13);
+            this.edtSlot.Name = "edtSlot";
+            this.edtSlot.Size = new System.Drawing.Size(37, 26);
+            this.edtSlot.TabIndex = 3;
+            this.edtSlot.Text = "0";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(354, 16);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(72, 16);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "插槽号：";
+            // 
+            // edtRack
+            // 
+            this.edtRack.Location = new System.Drawing.Point(553, 13);
+            this.edtRack.Name = "edtRack";
+            this.edtRack.Size = new System.Drawing.Size(37, 26);
+            this.edtRack.TabIndex = 4;
+            this.edtRack.Text = "0";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(475, 16);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(72, 16);
+            this.label7.TabIndex = 8;
+            this.label7.Text = "机架号：";
+            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -390,6 +431,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
@@ -430,6 +472,10 @@
         private System.Windows.Forms.Button btnWriteChars;
         private System.Windows.Forms.Button btnReadChars;
         private System.Windows.Forms.TextBox edtText;
+        private System.Windows.Forms.TextBox edtRack;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox edtSlot;
+        private System.Windows.Forms.Label label6;
     }
 }
 

@@ -63,20 +63,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CS7Tcp.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReadBufferInThread.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IRAP.BL.PLCGateway.Siemens.Test\IRAP.BL.PLCGateway.Siemens.Test.csproj">
-      <Project>{d7bff1b6-a744-4725-8676-2e730bc5f573}</Project>
-      <Name>IRAP.BL.PLCGateway.Siemens.Test</Name>
-    </ProjectReference>
     <ProjectReference Include="..\IRAP.BL.S7Gateway\IRAP.BL.S7Gateway.csproj">
       <Project>{e51873bc-3735-4aaa-b2ec-ca7b48c49c8f}</Project>
       <Name>IRAP.BL.S7Gateway</Name>

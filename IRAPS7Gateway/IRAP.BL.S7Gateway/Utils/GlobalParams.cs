@@ -19,12 +19,31 @@ namespace IRAP.BL.S7Gateway.Utils
         {
             if (ConfigurationManager.AppSettings["CommunityID"] != null)
             {
-                int rlt = 0;
                 if (int.TryParse(
                     ConfigurationManager.AppSettings["CommunityID"],
-                    out rlt))
+                    out int rlt))
                 {
                     CommunityID = rlt;
+                }
+            }
+            if (ConfigurationManager.AppSettings["MongoDBConnectionString"] != null)
+            {
+                MongoDBConnectionString =
+                    ConfigurationManager.AppSettings["MongoDBConnectionString"];
+            }
+            else
+            {
+                MongoDBConnectionString = "http://127.0.0.1:27017";
+            }
+            if (ConfigurationManager.AppSettings["GetOPCStaus"] != null)
+            {
+
+                if (
+                    bool.TryParse(
+                        ConfigurationManager.AppSettings["GetOPCStaus"],
+                        out bool rlt))
+                {
+                    GetOPCStatusLogRecord = rlt;
                 }
             }
         }
@@ -48,12 +67,19 @@ namespace IRAP.BL.S7Gateway.Utils
         /// 社区标识
         /// </summary>
         public int CommunityID { get; private set; } = 0;
-
         /// <summary>
         /// WebAPI配置参数
         /// </summary>
         public WebAPIClientParams WebAPI { get; private set; } =
             new WebAPIClientParams();
+        /// <summary>
+        /// MongoDB的连接字符串
+        /// </summary>
+        public string MongoDBConnectionString { get; private set; } = "";
+        /// <summary>
+        /// 是否在 MongoDB 中记录 GetOPCStatus 交易的日志
+        /// </summary>
+        public bool GetOPCStatusLogRecord { get; private set; } = false;
     }
 
     /// <summary>

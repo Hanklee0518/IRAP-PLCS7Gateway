@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1090776C-75EF-4A31-B3D4-16C92FE0BB5A}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>IRAP.MESGateway.Tools</RootNamespace>
+    <AssemblyName>IRAP.MESGateway.Tools</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.BonusSkins.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Data.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Images.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Office.v18.1.Core, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Pdf.v18.1.Core, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Printing.v18.1.Core, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.RichEdit.v18.1.Core, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Tutorials.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraLayout.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraNavBar.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraRichEdit.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraTreeList.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.1, Version=18.1.4.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\Control.cs" />
+    <Compile Include="Controls\UCDevicePropertiesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCDevicePropertiesPage.Designer.cs">
+      <DependentUpon>UCDevicePropertiesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCDevicesTree.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCDevicesTree.Designer.cs">
+      <DependentUpon>UCDevicesTree.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCOptions.Designer.cs">
+      <DependentUpon>UCOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCProductionLinePropertiesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCProductionLinePropertiesPage.Designer.cs">
+      <DependentUpon>UCProductionLinePropertiesPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCProperties.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCProperties.Designer.cs">
+      <DependentUpon>UCProperties.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UCServicesTree.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\UCServicesTree.Designer.cs">
+      <DependentUpon>UCServicesTree.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data.cs" />
+    <Compile Include="Entities\BaseEntity.cs" />
+    <Compile Include="Entities\DeviceEntity.cs" />
+    <Compile Include="Entities\GroupEntity.cs" />
+    <Compile Include="Entities\PLCEntity.cs" />
+    <Compile Include="Entities\ProductionLineEntity.cs" />
+    <Compile Include="Entities\SubGroupEntity.cs" />
+    <Compile Include="Entities\TagEntity.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Forms\GatewayServicesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\GatewayServicesForm.Designer.cs">
+      <DependentUpon>GatewayServicesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\wfMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\wfMain.Designer.cs">
+      <DependentUpon>wfMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\DeviceTags.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Modules\DeviceTags.Designer.cs">
+      <DependentUpon>DeviceTags.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\ServiceInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Modules\ServiceInfo.Designer.cs">
+      <DependentUpon>ServiceInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Modules\Options.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Modules\Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\Resources.cs" />
+    <Compile Include="Utils\Delegates.cs" />
+    <Compile Include="Utils\ServiceHelper.cs" />
+    <Compile Include="Utils\XMLHelper.cs" />
+    <EmbeddedResource Include="Controls\UCDevicePropertiesPage.resx">
+      <DependentUpon>UCDevicePropertiesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCDevicesTree.resx">
+      <DependentUpon>UCDevicesTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCOptions.resx">
+      <DependentUpon>UCOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCProductionLinePropertiesPage.resx">
+      <DependentUpon>UCProductionLinePropertiesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCProperties.resx">
+      <DependentUpon>UCProperties.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\UCServicesTree.resx">
+      <DependentUpon>UCServicesTree.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\GatewayServicesForm.resx">
+      <DependentUpon>GatewayServicesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Modules\DeviceTags.resx">
+      <DependentUpon>DeviceTags.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Modules\ServiceInfo.resx">
+      <DependentUpon>ServiceInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Modules\Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.manifest" />
+    <None Include="Controls\Control.cd" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icons\AppIcon.ico" />
+    <None Include="Resources\article_16x16.png" />
+    <None Include="Resources\article_32x32.png" />
+    <None Include="Resources\up_16x16.png" />
+    <None Include="Resources\up_32x32.png" />
+    <None Include="Resources\columns_16x16.png" />
+    <None Include="Resources\refresh2_16x16.png" />
+    <None Include="Resources\columns_32x32.png" />
+    <None Include="Resources\refresh2_32x32.png" />
+    <None Include="Resources\technology_32x32.png" />
+    <None Include="Resources\next_32x321.png" />
+    <None Include="Resources\selectall_32x321.png" />
+    <None Include="Resources\refresh_16x16.png" />
+    <None Include="Resources\refresh_32x321.png" />
+    <None Include="Resources\publish_16x16.png" />
+    <None Include="Resources\publish_32x32.png" />
+    <None Include="Resources\projectdirectory_16x16.png" />
+    <None Include="Resources\deletegroupfooter_16x16.png" />
+    <None Include="Resources\addgroupfooter_16x16.png" />
+    <None Include="Resources\deletedatasource_16x16.png" />
+    <None Include="Resources\addnewdatasource_16x16.png" />
+    <None Include="Resources\removeitem_16x16.png" />
+    <None Include="Resources\insert_16x16.png" />
+    <None Include="Resources\deletelist_16x16.png" />
+    <None Include="Resources\cancel_16x16.png" />
+    <None Include="Resources\additem_16x16.png" />
+    <None Include="Resources\add_16x16.png" />
+    <None Include="Resources\deletegroupfooter_32x32.png" />
+    <None Include="Resources\addgroupfooter_32x32.png" />
+    <None Include="Resources\deletedatasource_32x32.png" />
+    <None Include="Resources\addnewdatasource_32x32.png" />
+    <None Include="Resources\removeitem_32x32.png" />
+    <None Include="Resources\insert_32x32.png" />
+    <None Include="Resources\cancel_32x32.png" />
+    <None Include="Resources\add_32x32.png" />
+    <None Include="Resources\deletelist_32x32.png" />
+    <None Include="Resources\additem_32x32.png" />
+    <None Include="Resources\version_32x32.png" />
+    <None Include="Resources\refresh_32x32.png" />
+    <None Include="Resources\convert_32x32.png" />
+    <None Include="Resources\next_32x32.png" />
+    <None Include="Resources\selectall_32x32.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

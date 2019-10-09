@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IRAP.BL.S7Gateway.Utils;
 using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 
@@ -32,23 +33,23 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 生产产品的产品编号
         /// </summary>
-        public string Product_Number { get; set; }
+        public string Product_Number { get; set; } = "";
         /// <summary>
         /// 标识部件编号
         /// </summary>
-        public string ID_Part_Number { get; set; }
+        public string ID_Part_Number { get; set; } = "";
         /// <summary>
         /// 标识部件主标识
         /// </summary>
-        public string ID_Part_WIP_Code { get; set; }
+        public string ID_Part_WIP_Code { get; set; } = "";
         /// <summary>
         /// 标识部件序列号
         /// </summary>
-        public string ID_Part_SN_Scanner_Code { get; set; }
+        public string ID_Part_SN_Scanner_Code { get; set; } = "";
         /// <summary>
         /// 标识部件序号
         /// </summary>
-        public int Sequence_Number { get; set; }
+        public int Sequence_Number { get; set; } = 0;
     }
 
     /// <summary>
@@ -57,9 +58,21 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
     public class IDBindingResponse : CustomResponse
     {
         /// <summary>
+        /// 输出参数
+        /// </summary>
+        public IDBindingOutput Output { get; set; } =
+            new IDBindingOutput();
+    }
+
+    /// <summary>
+    /// 标识部件绑定响应报文输出参数
+    /// </summary>
+    public class IDBindingOutput
+    {
+        /// <summary>
         /// MES 返回的标识部件序号
         /// </summary>
-        public int Part_Number_Feedback { get; set; }
+        public int Part_Number_Feedback { get; set; } = 0;
     }
 
     /// <summary>
@@ -73,13 +86,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity"></param>
         public IDBinding(
             string webAPIUrl, 
             ContentType contentType, 
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_IDBinding";
+            ExCode = "IRAP_DCS_IDBinding";
         }
 
         /// <summary>

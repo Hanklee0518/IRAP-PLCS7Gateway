@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,8 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错验证请求报文体
         /// </summary>
-        public PokaYokeParamXML ParamXML { get; set; } = null;
+        public PokaYokeParamXML ParamXML { get; set; } = 
+            new PokaYokeParamXML();
     }
 
     /// <summary>
@@ -31,15 +33,15 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 工件来源标识
         /// </summary>
-        public string WIP_Src_Code { get; set; }
+        public string WIP_Src_Code { get; set; } = "";
         /// <summary>
         /// 工件可识读标识
         /// </summary>
-        public string WIP_ID_Code { get; set; }
+        public string WIP_ID_Code { get; set; } = "";
         /// <summary>
         /// 容器编号（工装板编号）
         /// </summary>
-        public string Container_Number_pallet_code { get; set; }
+        public string Container_Number_pallet_code { get; set; } = "";
     }
 
     /// <summary>
@@ -79,15 +81,15 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错结果
         /// </summary>
-        public byte Poka_Yoke_Result { get; set; }
+        public byte Poka_Yoke_Result { get; set; } = 0;
         /// <summary>
         /// 产品编号
         /// </summary>
-        public string Product_Number { get; set; }
+        public string Product_Number { get; set; } = "";
         /// <summary>
         /// 产品叶标识
         /// </summary>
-        public int T102LeafID { get; set; }
+        public int T102LeafID { get; set; } = 0;
     }
 
     /// <summary>
@@ -98,7 +100,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 子在制品数量
         /// </summary>
-        public byte Number_Of_Sub_WIPs { get; set; }
+        public byte Number_Of_Sub_WIPs { get; set; } = 0;
         /// <summary>
         /// 子在制品集合
         /// </summary>
@@ -148,13 +150,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public PokaYoke(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_PokaYoke";
+            ExCode = "IRAP_DCS_PokaYoke";
         }
 
         /// <summary>

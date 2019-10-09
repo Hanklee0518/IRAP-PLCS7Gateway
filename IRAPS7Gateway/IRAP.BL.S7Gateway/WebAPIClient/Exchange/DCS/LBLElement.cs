@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -39,71 +40,71 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 客户部件编号
         /// </summary>
-        public string Customer_Part_Number { get; set; }
+        public string Customer_Part_Number { get; set; } = "";
         /// <summary>
         /// 产品序列号
         /// </summary>
-        public string Product_Serial_Number { get; set; }
+        public string Product_Serial_Number { get; set; } = "";
         /// <summary>
         /// 产品型号标识
         /// </summary>
-        public string Model_ID { get; set; }
+        public string Model_ID { get; set; } = "";
         /// <summary>
         /// 客户赋予的供应商代码
         /// </summary>
-        public string Vendor_Code_Of_Us { get; set; }
+        public string Vendor_Code_Of_Us { get; set; } = "";
         /// <summary>
         /// 代理商部件编号
         /// </summary>
-        public string Sales_Part_Number { get; set; }
+        public string Sales_Part_Number { get; set; } = "";
         /// <summary>
         /// 硬件版本号
         /// </summary>
-        public string Hardware_Version { get; set; }
+        public string Hardware_Version { get; set; } = "";
         /// <summary>
         /// 软件版本号
         /// </summary>
-        public string Software_Version { get; set; }
+        public string Software_Version { get; set; } = "";
         /// <summary>
         /// 生产批次号
         /// </summary>
-        public string Lot_Number { get; set; }
+        public string Lot_Number { get; set; } = "";
         /// <summary>
         /// 生产日期
         /// </summary>
-        public string MFG_Date { get; set; }
+        public string MFG_Date { get; set; } = "";
         /// <summary>
         /// 班次编号
         /// </summary>
-        public string Shift_Number { get; set; }
+        public string Shift_Number { get; set; } = "";
         /// <summary>
         /// 炉次号
         /// </summary>
-        public string Oven_Number { get; set; }
+        public string Oven_Number { get; set; } = "";
         /// <summary>
         /// 客户邓白氏码
         /// </summary>
-        public string Customer_Duns_Code { get; set; }
+        public string Customer_Duns_Code { get; set; } = "";
         /// <summary>
         /// OEM品牌
         /// </summary>
-        public string OEM_Brand { get; set; }
+        public string OEM_Brand { get; set; } = "";
         /// <summary>
         /// 自定义固定字串1
         /// </summary>
-        public string Fixed_String_1 { get; set; }
+        public string Fixed_String_1 { get; set; } = "";
         /// <summary>
         /// 自定义固定字串2
         /// </summary>
-        public string Fixed_String_2 { get; set; }
+        public string Fixed_String_2 { get; set; } = "";
         /// <summary>
         /// 衍生字串1
         /// </summary>
-        public string Derived_String_1 { get; set; }
+        public string Derived_String_1 { get; set; } = "";
         /// <summary>
         /// 衍生字串2
         /// </summary>
-        public string Derived_String_2 { get; set; }
+        public string Derived_String_2 { get; set; } = "";
     }
 
     /// <summary>
@@ -117,13 +118,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public LBLElement(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_LBLElement";
+            ExCode = "IRAP_DCS_LBLElement";
         }
 
         /// <summary>

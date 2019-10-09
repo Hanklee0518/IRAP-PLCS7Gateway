@@ -13,14 +13,17 @@ using System.Xml;
 namespace IRAPS7GatewayService
 {
     [RunInstaller(true)]
-    public partial class ProjectInstaller : System.Configuration.Install.Installer
+    public partial class ProjectInstaller : Installer
     {
+        private ILog _log = Logger.Get<ProjectInstaller>();
+
         public ProjectInstaller()
         {
             InitializeComponent();
 
-            serviceInstaller.ServiceName += GetDeviceName();
-            serviceInstaller.DisplayName = serviceInstaller.ServiceName;
+            //_log.Debug("获取服务名称");
+            //serviceInstaller.ServiceName += GetDeviceName();
+            //serviceInstaller.DisplayName = serviceInstaller.ServiceName;
         }
 
         private string GetDeviceName()
@@ -31,6 +34,8 @@ namespace IRAPS7GatewayService
                 Path.GetDirectoryName(GetType().Assembly.Location);
             string serviceCFGFileName =
                 GetType().Assembly.Location + ".config";
+
+            _log.Debug($"ServiceCFGFileName:{serviceCFGFileName}");
 
             rlt = Get_ConfigValue(serviceCFGFileName, "DeviceName");
             if (rlt != "")

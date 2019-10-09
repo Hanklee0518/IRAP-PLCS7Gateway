@@ -41,11 +41,21 @@ namespace IRAP.BL.S7Gateway
         /// 创建一个实现IIRAPDCSTrade接口的对象
         /// </summary>
         /// <returns>已实例化的IIRAPDCSTrade接口</returns>
-        public static IIRAPDCSTrade CreateInstance(string tradeName)
+        public static IIRAPDCSTrade CreateInstance(string tradeName, DCSGatewayLogEntity log)
         {
+            object[] parameters = new object[] { log };
             string className = $"IRAP.BL.S7Gateway.IRAPDCSTrade{tradeName}";
             IIRAPDCSTrade trade =
-                (IIRAPDCSTrade)Assembly.Load("IRAP.BL.S7Gateway").CreateInstance(className);
+                (IIRAPDCSTrade)Assembly
+                    .Load("IRAP.BL.S7Gateway")
+                    .CreateInstance(
+                        className,
+                        true,
+                        BindingFlags.Default,
+                        null,
+                        parameters,
+                        null,
+                        null);
             return trade;
         }
     }
@@ -55,12 +65,15 @@ namespace IRAP.BL.S7Gateway
     /// </summary>
     public abstract class IRAPDCSTrade : IRAPBaseObject
     {
+        internal DCSGatewayLogEntity logEntity = null;
+
         /// <summary>
         /// 构造方法
         /// </summary>
-        public IRAPDCSTrade()
+        public IRAPDCSTrade(DCSGatewayLogEntity log)
         {
             _log = Logger.Get(GetType());
+            logEntity = log;
         }
 
         /// <summary>
@@ -75,23 +88,35 @@ namespace IRAP.BL.S7Gateway
                 new StartDCSInvoking(
                     GlobalParams.Instance.WebAPI.URL,
                     GlobalParams.Instance.WebAPI.ContentType,
-                    GlobalParams.Instance.WebAPI.ClientID);
-
-            startDCSInvoking.Request =
-                new StartDCSInvokingRequest()
+                    GlobalParams.Instance.WebAPI.ClientID,
+                    logEntity)
                 {
-                    CommunityID = GlobalParams.Instance.CommunityID,
-                    T133LeafID = device.T133LeafID,
+                    Request =
+                        new StartDCSInvokingRequest()
+                        {
+                            CommunityID = GlobalParams.Instance.CommunityID,
+                            T133LeafID = device.T133LeafID,
+                        }
                 };
 
-            if (startDCSInvoking.Do())
+            try
             {
-                if (startDCSInvoking.Error.ErrCode == 0)
+                if (startDCSInvoking.Do())
                 {
-                    _log.Debug(
-                        $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
-                        $"{startDCSInvoking.Error.ErrText}");
-                    return true;
+                    if (startDCSInvoking.Error.ErrCode == 0)
+                    {
+                        _log.Debug(
+                            $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
+                            $"{startDCSInvoking.Error.ErrText}");
+                        return true;
+                    }
+                    else
+                    {
+                        _log.Error(
+                            $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
+                            $"{startDCSInvoking.Error.ErrText}");
+                        return false;
+                    }
                 }
                 else
                 {
@@ -101,11 +126,10 @@ namespace IRAP.BL.S7Gateway
                     return false;
                 }
             }
-            else
+            catch (Exception error)
             {
-                _log.Error(
-                    $"[{id.ToString()}|({startDCSInvoking.Error.ErrCode})" +
-                    $"{startDCSInvoking.Error.ErrText}");
+                _log.Error(error.Message, error);
+                logEntity.Errors.Add(error);
                 return false;
             }
         }
@@ -173,6 +197,32 @@ namespace IRAP.BL.S7Gateway
             else
             {
                 return "";
+            }
+        }
+
+        /// <summary>
+        /// 从标记组中查找指定标记名的标记，从PLC中实时读取并返回该标记的byte值
+        /// </summary>
+        /// <param name="device">西门子设备</param>
+        /// <param name="tags">标记组</param>
+        /// <param name="tagName">标记名称</param>
+        /// <returns>标记的byte值</returns>
+        protected byte ReadByteValue(
+            SiemensDevice device,
+            SiemensTagCollection tags,
+            string tagName)
+        {
+            var tag = tags[tagName];
+            if (tag is SiemensByteOfTag)
+            {
+                var intTag =
+                    device.ReadTagValue(
+                        tag as SiemensByteOfTag) as SiemensByteOfTag;
+                return intTag.Value;
+            }
+            else
+            {
+                return 0;
             }
         }
 
@@ -272,18 +322,30 @@ namespace IRAP.BL.S7Gateway
                 return;
             }
 
-            if (group.Tags[tagName] is SiemensTag writeTag)
+            try
             {
-                writeTag.Value = tagValue;
-                tags.Add(writeTag);
-                if (writeTag is SiemensArrayCharOfTag)
+                if (group.Tags[tagName] is SiemensTag writeTag)
                 {
-                    if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                    writeTag.Value = tagValue;
+                    tags.Add(writeTag);
+                    if (writeTag is SiemensArrayCharOfTag)
                     {
-                        lengthTag.Value = ((string)tagValue).Length;
-                        tags.Add(lengthTag);
+                        if (group.Tags[$"{tagName}_Length"] is SiemensTag lengthTag)
+                        {
+                            lengthTag.Value = ((string)tagValue).Length;
+                            tags.Add(lengthTag);
+                        }
                     }
                 }
+                else
+                {
+                    throw new Exception($"{group.Name}中未找到[{tagName}]标记");
+                }
+            }
+            catch (Exception error)
+            {
+                logEntity.Errors.Add(error);
+                _log.Error(error.Message, error);
             }
         }
 
@@ -327,6 +389,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeGetOPCStatus : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeGetOPCStatus(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -339,13 +409,18 @@ namespace IRAP.BL.S7Gateway
             if (device != null)
             {
                 _log.Info("同步设备状态处理");
+                logEntity.DeviceName = device.Name;
+                logEntity.ActionName = "同步设备状态";
+                logEntity.ActionCode = "GetOPCStatus";
+
                 if (device.Groups["COMM"] is SiemensTagGroup comm)
                 {
                     GetOPCStatus getOPCStatus =
                         new GetOPCStatus(
                             GlobalParams.Instance.WebAPI.URL,
                             GlobalParams.Instance.WebAPI.ContentType,
-                            GlobalParams.Instance.WebAPI.ClientID)
+                            GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                         {
                             Request = new GetOPCStatusRequest()
                             {
@@ -370,13 +445,22 @@ namespace IRAP.BL.S7Gateway
                             },
                         };
 
-                    if (getOPCStatus.Do())
+                    try
                     {
-                        if (getOPCStatus.Error.ErrCode == 0)
+                        if (getOPCStatus.Do())
                         {
-                            _log.Debug(
-                                $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
-                                $"{getOPCStatus.Error.ErrText}");
+                            if (getOPCStatus.Error.ErrCode == 0)
+                            {
+                                _log.Debug(
+                                    $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
+                                    $"{getOPCStatus.Error.ErrText}");
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
+                                    $"{getOPCStatus.Error.ErrText}");
+                            }
                         }
                         else
                         {
@@ -385,11 +469,9 @@ namespace IRAP.BL.S7Gateway
                                 $"{getOPCStatus.Error.ErrText}");
                         }
                     }
-                    else
+                    catch (Exception error)
                     {
-                        _log.Error(
-                            $"[{id.ToString()}|({getOPCStatus.Error.ErrCode})" +
-                            $"{getOPCStatus.Error.ErrText}");
+                        _log.Error(error.Message, error);
                     }
                 }
                 else
@@ -406,38 +488,100 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 设备运行模式状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentRunningMode : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentRunningMode : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentRunningMode(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备是否加电状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentPowerOn : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentPowerOn : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentPowerOn(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备是否失效状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentFail : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentFail : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentFail(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 工装是否失效状态同步
     /// </summary>
-    public class IRAPDCSTradeToolFail : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeToolFail : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeToolFail(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 工序循环是否开始状态同步
     /// </summary>
-    public class IRAPDCSTradeCycleStarted : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeCycleStarted : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeCycleStarted(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 设备饥饿状态同步
     /// </summary>
-    public class IRAPDCSTradeEquipmentStarvation : IRAPDCSTradeGetOPCStatus { }
+    public class IRAPDCSTradeEquipmentStarvation : IRAPDCSTradeGetOPCStatus
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeEquipmentStarvation(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+    }
 
     /// <summary>
     /// 标识部件绑定交易
     /// </summary>
     public class IRAPDCSTradeRequestForIDBinding : IRAPDCSTrade, IIRAPDCSTrade
     {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForIDBinding(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
         /// <summary>
         /// 交易执行
         /// </summary>
@@ -447,6 +591,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -454,6 +599,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("标识部件绑定");
+                    logEntity.ActionName = "标识部件绑定";
+                    logEntity.ActionCode = "IDBinding";
 
                     IDBinding idBinding = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -463,14 +610,16 @@ namespace IRAP.BL.S7Gateway
                             new IDBinding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new IDBindingRequest()
                                 {
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
-                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    T102LeafID = subTagGroup.T102LeafID,
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
@@ -487,21 +636,30 @@ namespace IRAP.BL.S7Gateway
                             return rlt;
                         }
 
-                        if (CallStartDCSInvoking(device, signalTag))
+                        try
                         {
-                            idBinding.Request.ParamXML.Product_Number = ReadStringValue(device, idbGroup.Tags, "Product_Number");
-                            idBinding.Request.ParamXML.ID_Part_Number = ReadStringValue(device, idbGroup.Tags, "ID_Part_Number");
-                            idBinding.Request.ParamXML.ID_Part_WIP_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_WIP_Code");
-                            idBinding.Request.ParamXML.ID_Part_SN_Scanner_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_SN_Scanner_Code");
-                            idBinding.Request.ParamXML.Sequence_Number = ReadIntValue(device, idbGroup.Tags, "Sequence_Number");
-
-                            if (idBinding.Do())
+                            if (CallStartDCSInvoking(device, signalTag))
                             {
-                                if (idBinding.Error.ErrCode == 0)
+                                idBinding.Request.ParamXML.Product_Number = ReadStringValue(device, idbGroup.Tags, "Product_Number");
+                                idBinding.Request.ParamXML.ID_Part_Number = ReadStringValue(device, idbGroup.Tags, "ID_Part_Number");
+                                idBinding.Request.ParamXML.ID_Part_WIP_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_WIP_Code");
+                                idBinding.Request.ParamXML.ID_Part_SN_Scanner_Code = ReadStringValue(device, idbGroup.Tags, "ID_Part_SN_Scanner_Code");
+                                idBinding.Request.ParamXML.Sequence_Number = ReadIntValue(device, idbGroup.Tags, "Sequence_Number");
+
+                                if (idBinding.Do())
                                 {
-                                    _log.Debug(
-                                        $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
-                                        $"{idBinding.Error.ErrText}");
+                                    if (idBinding.Error.ErrCode >= 0)
+                                    {
+                                        _log.Debug(
+                                            $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
+                                            $"{idBinding.Error.ErrText}");
+                                    }
+                                    else
+                                    {
+                                        _log.Error(
+                                            $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
+                                            $"{idBinding.Error.ErrText}");
+                                    }
                                 }
                                 else
                                 {
@@ -510,22 +668,12 @@ namespace IRAP.BL.S7Gateway
                                         $"{idBinding.Error.ErrText}");
                                 }
 
-                                var fdTag = device.FindTag(key, "Part_Number_Feedback");
-                                if (fdTag != null)
-                                {
-                                    if (fdTag is SiemensIntOfTag rltTag)
-                                    {
-                                        rltTag.Value = (short)idBinding.Response.Part_Number_Feedback;
-                                        rlt.Add(rltTag);
-                                    }
-                                }
+                                WriteTagValueBack(rlt, idbGroup, "Part_Number_Feedback", (short)idBinding.Response.Output.Part_Number_Feedback);
                             }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({idBinding.Error.ErrCode})" +
-                                    $"{idBinding.Error.ErrText}");
-                            }
+                        }
+                        catch (Exception error)
+                        {
+                            _log.Error(error.Message, error);
                         }
                     }
                     else
@@ -550,6 +698,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeSerialNumberRequest : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeSerialNumberRequest(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -558,6 +714,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -565,58 +722,70 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("申请产品序列号");
+                    logEntity.ActionName = "申请产品序列号";
+                    logEntity.ActionCode = "SNRequest";
 
                     string key = "SNRequest";
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
                     if (device.Groups[key] is SiemensTagGroup snrGroup)
                     {
-                        if (CallStartDCSInvoking(device, signalTag))
+                        try
                         {
-                            SNRequest snRequest =
-                                new SNRequest(
-                                    GlobalParams.Instance.WebAPI.URL,
-                                    GlobalParams.Instance.WebAPI.ContentType,
-                                    GlobalParams.Instance.WebAPI.ClientID)
-                                {
-                                    Request = new SNRequestRequest()
-                                    {
-                                        CommunityID = GlobalParams.Instance.CommunityID,
-                                        T133LeafID = device.T133LeafID,
-                                        T216LeafID = device.T216LeafID,
-                                        T102LeafID = subTagGroup.T102LeafID,
-                                        T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
-                                        ParamXML = new SNRequestParamXML()
-                                        {
-                                            Product_Number = ReadStringValue(device, snrGroup.Tags, "Product_Number"),
-                                        },
-                                    },
-                                };
-
-                            if (snRequest.Do())
+                            if (CallStartDCSInvoking(device, signalTag))
                             {
-                                if (snRequest.Error.ErrCode == 0)
-                                {
-                                    _log.Debug(
-                                        $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
-                                        $"{snRequest.Error.ErrText}");
-
-                                    var writeTag = device.FindTag(key, "Serial_Number");
-                                    if (writeTag != null)
+                                SNRequest snRequest =
+                                    new SNRequest(
+                                        GlobalParams.Instance.WebAPI.URL,
+                                        GlobalParams.Instance.WebAPI.ContentType,
+                                        GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                                     {
-                                        if (writeTag is SiemensArrayCharOfTag rltTag)
+                                        Request = new SNRequestRequest()
                                         {
-                                            rltTag.Value = snRequest.Response.Output.Serial_Number;
-                                            rlt.Add(rltTag);
+                                            CommunityID = GlobalParams.Instance.CommunityID,
+                                            T133LeafID = device.T133LeafID,
+                                            T216LeafID = device.T216LeafID,
+                                            T102LeafID = subTagGroup.T102LeafID,
+                                            T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                            ParamXML = new SNRequestParamXML()
+                                            {
+                                                Product_Number = ReadStringValue(device, snrGroup.Tags, "Product_Number"),
+                                            },
+                                        },
+                                    };
+
+                                if (snRequest.Do())
+                                {
+                                    if (snRequest.Error.ErrCode >= 0)
+                                    {
+                                        _log.Debug(
+                                            $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
+                                            $"{snRequest.Error.ErrText}");
+
+                                        var writeTag = device.FindTag(key, "Serial_Number");
+                                        if (writeTag != null)
+                                        {
+                                            if (writeTag is SiemensArrayCharOfTag rltTag)
+                                            {
+                                                rltTag.Value = snRequest.Response.Output.Serial_Number;
+                                                rlt.Add(rltTag);
+                                            }
+                                        }
+                                        writeTag = device.FindTag(key, "Length");
+                                        if (writeTag != null)
+                                        {
+                                            if (writeTag is SiemensIntOfTag rltTag)
+                                            {
+                                                rltTag.Value = (short)snRequest.Response.Output.Serial_Number.Length;
+                                                rlt.Add(rltTag);
+                                            }
                                         }
                                     }
-                                    writeTag = device.FindTag(key, "Length");
-                                    if (writeTag != null)
+                                    else
                                     {
-                                        if (writeTag is SiemensIntOfTag rltTag)
-                                        {
-                                            rltTag.Value = (short)snRequest.Response.Output.Serial_Number.Length;
-                                            rlt.Add(rltTag);
-                                        }
+                                        _log.Error(
+                                            $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
+                                            $"{snRequest.Error.ErrText}");
                                     }
                                 }
                                 else
@@ -626,12 +795,10 @@ namespace IRAP.BL.S7Gateway
                                         $"{snRequest.Error.ErrText}");
                                 }
                             }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({snRequest.Error.ErrCode})" +
-                                    $"{snRequest.Error.ErrText}");
-                            }
+                        }
+                        catch (Exception error)
+                        {
+                            _log.Error(error.Message, error);
                         }
                     }
                     else
@@ -656,6 +823,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeWIPMoveIn : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeWIPMoveIn(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -664,6 +839,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -671,6 +847,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("工件入站交易处理");
+                    logEntity.ActionName = "工件入站";
+                    logEntity.ActionCode = "WIPMoveIn";
 
                     WIPMoveIn wipMoveIn = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -680,7 +858,8 @@ namespace IRAP.BL.S7Gateway
                             new WIPMoveIn(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new WIPMoveInRequest()
                                 {
@@ -688,7 +867,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subTagGroup.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
@@ -702,15 +881,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (wipMoveIn.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (wipMoveIn.Error.ErrCode == 0)
+                            if (wipMoveIn.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
-                                    $"{wipMoveIn.Error.ErrText}");
+                                if (wipMoveIn.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
+                                        $"{wipMoveIn.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
+                                        $"{wipMoveIn.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -719,12 +907,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{wipMoveIn.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({wipMoveIn.Error.ErrCode})" +
-                                $"{wipMoveIn.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -744,6 +930,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeProductionEnd : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeProductionEnd(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -752,6 +946,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -759,6 +954,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("生产结束交易处理");
+                    logEntity.ActionName = "生产结束";
+                    logEntity.ActionCode = "ProductionEnd";
 
                     ProductionEnd productionEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -768,7 +965,8 @@ namespace IRAP.BL.S7Gateway
                             new ProductionEnd(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ProductionEndRequest()
                                 {
@@ -776,7 +974,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subTagGroup.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
@@ -784,6 +982,8 @@ namespace IRAP.BL.S7Gateway
                             };
 
                         #region 填充 RECIPE 组
+                        productionEnd.Request.ParamXML.Operation_Conclusion =
+                            ReadByteValue(device, subTagGroup.Tags, "Operation_Conclusion");
                         if (device.Groups["RECIPE"] is SiemensTagGroup recipeGroup)
                         {
                             foreach (SiemensTag recipeTag in recipeGroup.Tags)
@@ -859,24 +1059,33 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (productionEnd.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (productionEnd.Error.ErrCode == 0)
+                            if (productionEnd.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
-                                    $"{productionEnd.Error.ErrText}");
-
-                                var writeTag = subTagGroup.Tags["Poka_Yoke_Result"];
-                                if (writeTag != null)
+                                if (productionEnd.Error.ErrCode >= 0)
                                 {
-                                    if (writeTag is SiemensByteOfTag rltTag)
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
+                                        $"{productionEnd.Error.ErrText}");
+
+                                    var writeTag = subTagGroup.Tags["Poka_Yoke_Result"];
+                                    if (writeTag != null)
                                     {
-                                        rltTag.Value = productionEnd.Response.Poka_Yoke_Result;
-                                        rlt.Add(rltTag);
+                                        if (writeTag is SiemensByteOfTag rltTag)
+                                        {
+                                            rltTag.Value = productionEnd.Response.Output.Poka_Yoke_Result;
+                                            rlt.Add(rltTag);
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
+                                        $"{productionEnd.Error.ErrText}");
                                 }
                             }
                             else
@@ -886,12 +1095,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{productionEnd.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({productionEnd.Error.ErrCode})" +
-                                $"{productionEnd.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -908,8 +1115,16 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 工件离站交易
     /// </summary>
-    public class IRAPDCSTradeWIPMoveout : IRAPDCSTrade, IIRAPDCSTrade
+    public class IRAPDCSTradeWIPMoveOut : IRAPDCSTrade, IIRAPDCSTrade
     {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeWIPMoveOut(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
         /// <summary>
         /// 交易执行
         /// </summary>
@@ -919,6 +1134,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -926,6 +1142,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("工件离站交易处理");
+                    logEntity.ActionName = "工件离站";
+                    logEntity.ActionCode = "WIPMoveOut";
 
                     OperationCycleEnd operationCycleEnd = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -935,7 +1153,8 @@ namespace IRAP.BL.S7Gateway
                             new OperationCycleEnd(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new OperationCycleEndRequest()
                                 {
@@ -943,7 +1162,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subTagGroup.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
@@ -957,15 +1176,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (operationCycleEnd.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (operationCycleEnd.Error.ErrCode == 0)
+                            if (operationCycleEnd.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
-                                    $"{operationCycleEnd.Error.ErrText}");
+                                if (operationCycleEnd.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                        $"{operationCycleEnd.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
+                                        $"{operationCycleEnd.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -974,12 +1202,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{operationCycleEnd.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({operationCycleEnd.Error.ErrCode})" +
-                                $"{operationCycleEnd.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -999,6 +1225,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeLabelElementsRequest : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeLabelElementsRequest(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1007,6 +1241,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1014,6 +1249,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("请求标签元素交易处理");
+                    logEntity.ActionName = "请求标签元素";
+                    logEntity.ActionCode = "LBLElementRequest";
 
                     LBLElement lblElement = null;
                     SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
@@ -1023,7 +1260,8 @@ namespace IRAP.BL.S7Gateway
                             new LBLElement(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new LBLElementRequest()
                                 {
@@ -1031,7 +1269,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subTagGroup.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code"),
@@ -1045,35 +1283,44 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (lblElement.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (lblElement.Error.ErrCode == 0)
+                            if (lblElement.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
-                                    $"{lblElement.Error.ErrText}");
-
-                                if (device.Groups["LBLElement"] is SiemensTagGroup group)
+                                if (lblElement.Error.ErrCode >= 0)
                                 {
-                                    WriteTagValueBack(rlt, group, "Custom_Part_Number", lblElement.Response.Output.Customer_Part_Number);
-                                    WriteTagValueBack(rlt, group, "Product_Serial_Number", lblElement.Response.Output.Product_Serial_Number);
-                                    WriteTagValueBack(rlt, group, "Model_ID", lblElement.Response.Output.Model_ID);
-                                    WriteTagValueBack(rlt, group, "Vendor_Code_Of_Us", lblElement.Response.Output.Vendor_Code_Of_Us);
-                                    WriteTagValueBack(rlt, group, "Sales_Part_Number", lblElement.Response.Output.Sales_Part_Number);
-                                    WriteTagValueBack(rlt, group, "Hardware_Version", lblElement.Response.Output.Hardware_Version);
-                                    WriteTagValueBack(rlt, group, "Software_Version", lblElement.Response.Output.Software_Version);
-                                    WriteTagValueBack(rlt, group, "Lot_Number", lblElement.Response.Output.Lot_Number);
-                                    WriteTagValueBack(rlt, group, "MFG_Date", lblElement.Response.Output.MFG_Date);
-                                    WriteTagValueBack(rlt, group, "Shift_Number", lblElement.Response.Output.Shift_Number);
-                                    WriteTagValueBack(rlt, group, "Oven_Number", lblElement.Response.Output.Oven_Number);
-                                    WriteTagValueBack(rlt, group, "Customer_Duns_Code", lblElement.Response.Output.Customer_Duns_Code);
-                                    WriteTagValueBack(rlt, group, "OEM_Brand", lblElement.Response.Output.OEM_Brand);
-                                    WriteTagValueBack(rlt, group, "Fixed_String_1", lblElement.Response.Output.Fixed_String_1);
-                                    WriteTagValueBack(rlt, group, "Fixed_String_2", lblElement.Response.Output.Fixed_String_2);
-                                    WriteTagValueBack(rlt, group, "Derived_String_1", lblElement.Response.Output.Derived_String_1);
-                                    WriteTagValueBack(rlt, group, "Derived_String_2", lblElement.Response.Output.Derived_String_2);
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                        $"{lblElement.Error.ErrText}");
+
+                                    if (device.Groups["LBLElement"] is SiemensTagGroup group)
+                                    {
+                                        WriteTagValueBack(rlt, group, "Custom_Part_Number", lblElement.Response.Output.Customer_Part_Number);
+                                        WriteTagValueBack(rlt, group, "Product_Serial_Number", lblElement.Response.Output.Product_Serial_Number);
+                                        WriteTagValueBack(rlt, group, "Model_ID", lblElement.Response.Output.Model_ID);
+                                        WriteTagValueBack(rlt, group, "Vendor_Code_Of_Us", lblElement.Response.Output.Vendor_Code_Of_Us);
+                                        WriteTagValueBack(rlt, group, "Sales_Part_Number", lblElement.Response.Output.Sales_Part_Number);
+                                        WriteTagValueBack(rlt, group, "Hardware_Version", lblElement.Response.Output.Hardware_Version);
+                                        WriteTagValueBack(rlt, group, "Software_Version", lblElement.Response.Output.Software_Version);
+                                        WriteTagValueBack(rlt, group, "Lot_Number", lblElement.Response.Output.Lot_Number);
+                                        WriteTagValueBack(rlt, group, "MFG_Date", lblElement.Response.Output.MFG_Date);
+                                        WriteTagValueBack(rlt, group, "Shift_Number", lblElement.Response.Output.Shift_Number);
+                                        WriteTagValueBack(rlt, group, "Oven_Number", lblElement.Response.Output.Oven_Number);
+                                        WriteTagValueBack(rlt, group, "Customer_Duns_Code", lblElement.Response.Output.Customer_Duns_Code);
+                                        WriteTagValueBack(rlt, group, "OEM_Brand", lblElement.Response.Output.OEM_Brand);
+                                        WriteTagValueBack(rlt, group, "Fixed_String_1", lblElement.Response.Output.Fixed_String_1);
+                                        WriteTagValueBack(rlt, group, "Fixed_String_2", lblElement.Response.Output.Fixed_String_2);
+                                        WriteTagValueBack(rlt, group, "Derived_String_1", lblElement.Response.Output.Derived_String_1);
+                                        WriteTagValueBack(rlt, group, "Derived_String_2", lblElement.Response.Output.Derived_String_2);
+                                    }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
+                                        $"{lblElement.Error.ErrText}");
                                 }
                             }
                             else
@@ -1083,13 +1330,12 @@ namespace IRAP.BL.S7Gateway
                                     $"{lblElement.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({lblElement.Error.ErrCode})" +
-                                $"{lblElement.Error.ErrText}");
-                        }
                     }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
+                    }
+
 
                     tag.Value = false;
                     rlt.Add(tag);
@@ -1108,6 +1354,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeRequestForPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForPokaYoke(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1116,6 +1370,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1123,6 +1378,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("请求防错交易处理");
+                    logEntity.ActionName = "请求防错";
+                    logEntity.ActionCode = "PokaYoke";
 
                     PokaYoke pokaYoke = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1132,7 +1389,8 @@ namespace IRAP.BL.S7Gateway
                             new PokaYoke(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new PokaYokeRequest()
                                 {
@@ -1140,7 +1398,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subWIPStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subWIPStation.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Code"),
@@ -1169,54 +1427,63 @@ namespace IRAP.BL.S7Gateway
                         }
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (pokaYoke.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (pokaYoke.Error.ErrCode == 0)
+                            if (pokaYoke.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
-
-                                WriteTagValueBack(rlt, subWIPStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
-                                WriteTagValueBack(rlt, subWIPStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
-                                subWIPStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
-
-                                if (pokaYoke.Response.Output.WIPOntoLine != null)
+                                if (pokaYoke.Error.ErrCode >= 0)
                                 {
-                                    if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
+
+                                    WriteTagValueBack(rlt, subWIPStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                                    WriteTagValueBack(rlt, subWIPStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                                    subWIPStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+
+                                    if (pokaYoke.Response.Output.WIPOntoLine != null)
                                     {
-                                        WriteTagValueBack(rlt, group, "Number_Of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
-                                        int j = 0;
-                                        for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
+                                        if (device.Groups["WIPOntoLine"] is SiemensTagGroup group)
                                         {
-                                            j = i;
-                                            PokaYokeOutputWIPOntoLineSubWIP subWIP = pokaYoke.Response.Output.WIPOntoLine.SubWIPs[i];
-                                            if (i < group.SubGroups.Count)
+                                            WriteTagValueBack(rlt, group, "Number_of_Sub_WIPs", pokaYoke.Response.Output.WIPOntoLine.Number_Of_Sub_WIPs);
+                                            int j = 0;
+                                            for (int i = 0; i < pokaYoke.Response.Output.WIPOntoLine.SubWIPs.Count; i++)
+                                            {
+                                                j = i;
+                                                PokaYokeOutputWIPOntoLineSubWIP subWIP = pokaYoke.Response.Output.WIPOntoLine.SubWIPs[i];
+                                                if (i < group.SubGroups.Count)
+                                                {
+                                                    SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", subWIP.WIP_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", subWIP.WIP_ID_Type_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", subWIP.WIP_ID_Code);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", subWIP.PWO_Number);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", subWIP.Sub_Container_Number);
+                                                    WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", subWIP.WIP_Quantity);
+                                                    break;
+                                                }
+                                            }
+
+                                            for (int i = j + 1; i < group.SubGroups.Count; i++)
                                             {
                                                 SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", subWIP.WIP_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", subWIP.WIP_ID_Type_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", subWIP.WIP_ID_Code);
-                                                WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", subWIP.PWO_Number);
-                                                WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", subWIP.Sub_Container_Number);
-                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", subWIP.WIP_Quantity);
-                                                break;
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", "");
+                                                WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", 0);
                                             }
                                         }
-
-                                        for (int i = j + 1; i < group.SubGroups.Count; i++)
-                                        {
-                                            SiemensSubTagGroup subWIPGroup = group.SubGroups[i] as SiemensSubTagGroup;
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Type_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_ID_Code", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "PWO_Number", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "Sub_Container_Number", "");
-                                            WriteTagValueBack(rlt, subWIPGroup, "WIP_Quantity", 0);
-                                        }
                                     }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                                        $"{pokaYoke.Error.ErrText}");
                                 }
                             }
                             else
@@ -1226,12 +1493,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{pokaYoke.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                $"{pokaYoke.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1251,6 +1516,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeTriggerEquipmentFailAndon : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeTriggerEquipmentFailAndon(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1259,6 +1532,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1266,6 +1540,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("设备故障告警交易处理");
+                    logEntity.ActionName = "设备故障告警";
+                    logEntity.ActionCode = "EquipFailAndonCall";
 
                     EquipFailAndonCall equipFailAndonCall = null;
                     SiemensSubTagGroup subWIPStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1275,7 +1551,8 @@ namespace IRAP.BL.S7Gateway
                             new EquipFailAndonCall(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new EquipFailAndonCallRequest()
                                 {
@@ -1283,7 +1560,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = subWIPStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, subWIPStation.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, subWIPStation.Tags, "WIP_ID_Code"),
@@ -1310,15 +1587,24 @@ namespace IRAP.BL.S7Gateway
                         equipFailAndonCall.Request.ParamXML.Failure_Code = ReadStringValue(device, srcGroup.Tags, "Failure_Code");
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (equipFailAndonCall.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (equipFailAndonCall.Error.ErrCode == 0)
+                            if (equipFailAndonCall.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
-                                    $"{equipFailAndonCall.Error.ErrText}");
+                                if (equipFailAndonCall.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                        $"{equipFailAndonCall.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
+                                        $"{equipFailAndonCall.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1327,12 +1613,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{equipFailAndonCall.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({equipFailAndonCall.Error.ErrCode})" +
-                                $"{equipFailAndonCall.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1352,6 +1636,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeRequestForFeedingPokaYoke : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeRequestForFeedingPokaYoke(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1360,6 +1652,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensByteOfTag)
             {
@@ -1367,6 +1660,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value == 1)
                 {
                     _log.Info("料槽加料防错交易处理");
+                    logEntity.ActionName = "料槽加料防错";
+                    logEntity.ActionCode = "PokaYokeFeeding";
 
                     PokaYokeFeeding pokaYokeFeeding = null;
                     SiemensTagGroup feeding = signalTag.Parent as SiemensTagGroup;
@@ -1376,13 +1671,15 @@ namespace IRAP.BL.S7Gateway
                             new PokaYokeFeeding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new PokaYokeFeedingRequest()
                                 {
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, feeding.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, feeding.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, feeding.Tags, "WIP_ID_Code"),
@@ -1399,33 +1696,52 @@ namespace IRAP.BL.S7Gateway
                     pokaYokeFeeding.Request.ParamXML.Material_Track_ID = ReadStringValue(device, feeding.Tags, "Material_Track_ID");
                     pokaYokeFeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, feeding.Tags, "Slot_Number");
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (pokaYokeFeeding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (pokaYokeFeeding.Error.ErrCode == 0)
+                            if (pokaYokeFeeding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
-                                    $"{pokaYokeFeeding.Error.ErrText}");
+                                if (pokaYokeFeeding.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                        $"{pokaYokeFeeding.Error.ErrText}");
 
-                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", pokaYokeFeeding.Response.Output.Poka_Yoke_Result);
+                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", pokaYokeFeeding.Response.Output.Poka_Yoke_Result);
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
+                                        $"{pokaYokeFeeding.Error.ErrText}");
+                                    WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", 0xffffffff);
+                                }
                             }
                             else
                             {
                                 _log.Error(
                                     $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
                                     $"{pokaYokeFeeding.Error.ErrText}");
-                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
+                                WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", 0xffffffff);
+                            }
+
+                            if (device.Groups["WIPStations"] is SiemensTagGroup wipStations)
+                            {
+                                if (wipStations.SubGroups.Count > 0)
+                                {
+                                    WriteTagValueBack(
+                                        rlt,
+                                        wipStations.SubGroups[0] as SiemensSubTagGroup,
+                                        "Poka_Yoke_Feedback_Mark",
+                                        (uint)0);
+                                }
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYokeFeeding.Error.ErrCode})" +
-                                $"{pokaYokeFeeding.Error.ErrText}");
-                            WriteTagValueBack(rlt, feeding, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = 0;
@@ -1445,6 +1761,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeUnfeedingEnd : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeUnfeedingEnd(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1453,6 +1777,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensByteOfTag)
             {
@@ -1460,6 +1785,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value == 1)
                 {
                     _log.Info("料槽卸料交易处理");
+                    logEntity.ActionName = "料槽卸料";
+                    logEntity.ActionCode = "Unfeeding";
 
                     Unfeeding unfeeding = null;
                     SiemensTagGroup unfeedingGroup = signalTag.Parent as SiemensTagGroup;
@@ -1469,13 +1796,15 @@ namespace IRAP.BL.S7Gateway
                             new Unfeeding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new UnfeedingRequest()
                                 {
                                     CommunityID = GlobalParams.Instance.CommunityID,
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, unfeedingGroup.Tags, "WIP_ID_Code"),
@@ -1493,15 +1822,25 @@ namespace IRAP.BL.S7Gateway
                     unfeeding.Request.ParamXML.Slot_Number = ReadStringValue(device, unfeedingGroup.Tags, "Slot_Number");
                     unfeeding.Request.ParamXML.Unfeeding_Quantity = ReadDWordValue(device, unfeedingGroup.Tags, "Unfeeding_Quantity");
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (unfeeding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (unfeeding.Error.ErrCode == 0)
+                            if (unfeeding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
-                                    $"{unfeeding.Error.ErrText}");
+                                if (unfeeding.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                        $"{unfeeding.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
+                                        $"{unfeeding.Error.ErrText}");
+                                    WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
+                                }
                             }
                             else
                             {
@@ -1511,13 +1850,10 @@ namespace IRAP.BL.S7Gateway
                                 WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({unfeeding.Error.ErrCode})" +
-                                $"{unfeeding.Error.ErrText}");
-                            WriteTagValueBack(rlt, unfeedingGroup, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = 0;
@@ -1537,6 +1873,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeStagnationWarnning : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeStagnationWarnning(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1545,6 +1889,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1552,6 +1897,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("停滞告警交易处理");
+                    logEntity.ActionName = "停滞告警";
+                    logEntity.ActionCode = "StagnationWarnning";
 
                     StagnationWarnning stagnationWarnning = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1561,7 +1908,8 @@ namespace IRAP.BL.S7Gateway
                             new StagnationWarnning(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new StagnationWarnningRequest()
                                 {
@@ -1569,7 +1917,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
@@ -1589,30 +1937,37 @@ namespace IRAP.BL.S7Gateway
                         stagnationWarnning.Request.ParamXML.Threshold = ReadWordValue(device, stagnation.Tags, "Slot_Number");
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (stagnationWarnning.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (stagnationWarnning.Error.ErrCode == 0)
+                            if (stagnationWarnning.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
-                                    $"{stagnationWarnning.Error.ErrText}");
+                                if (stagnationWarnning.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                        $"{stagnationWarnning.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
+                                        $"{stagnationWarnning.Error.ErrText}");
+                                }
                             }
                             else
                             {
                                 _log.Error(
                                     $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
                                     $"{stagnationWarnning.Error.ErrText}");
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", (byte)2);
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({stagnationWarnning.Error.ErrCode})" +
-                                $"{stagnationWarnning.Error.ErrText}");
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", (byte)2);
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1632,6 +1987,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeFazitStatusCheck : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeFazitStatusCheck(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1640,6 +2003,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1647,102 +2011,108 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("Fazit Response状态检测交易处理");
+                    logEntity.ActionName = "Fazit Response状态检测";
+                    logEntity.ActionCode = "FaiztStatusCheck";
 
                     if (!(signalTag.Parent is SiemensSubTagGroup wipStation))
                     {
                         return rlt;
                     }
 
-                    if (!CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        tag.Value = false;
-                        rlt.Add(tag);
-                        return rlt;
-                    }
-
-                    #region 首先需要进行 DMC 的校验
-                    {
-                        PokaYoke pokaYoke =
-                            new PokaYoke(
-                                GlobalParams.Instance.WebAPI.URL,
-                                GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
-                            {
-                                Request = new PokaYokeRequest()
-                                {
-                                    CommunityID = GlobalParams.Instance.CommunityID,
-                                    T133LeafID = device.T133LeafID,
-                                    T216LeafID = device.T216LeafID,
-                                    T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
-                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
-                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
-                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
-                                },
-                            };
-
-                        if (pokaYoke.Do())
-                        {
-                            if (pokaYoke.Error.ErrCode == 0)
-                            {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
-
-                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
-                                WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
-                                wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
-                            }
-                            else
-                            {
-                                _log.Error(
-                                    $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                    $"{pokaYoke.Error.ErrText}");
-                            }
-                        }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
-                                $"{pokaYoke.Error.ErrText}");
-                        }
-
-                        // 如果未通过 PokaYoke 校验，直接返回
-                        if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
+                        if (!CallStartDCSInvoking(device, signalTag))
                         {
                             tag.Value = false;
                             rlt.Add(tag);
                             return rlt;
                         }
-                    }
-                    #endregion
 
-                    #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查
-                    {
-                        FazitStatusCheck fazitStatusCheck =
-                            new FazitStatusCheck(
-                                GlobalParams.Instance.WebAPI.URL,
-                                GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
-                            {
-                                Request = new FazitStatusCheckRequest()
-                                {
-                                    CommunityID = GlobalParams.Instance.CommunityID,
-                                    T133LeafID = device.T133LeafID,
-                                    T216LeafID = device.T216LeafID,
-                                    T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
-                                    WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
-                                    WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
-                                    WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
-                                }
-                            };
-
-                        //DateTime start = DateTime.Now;
-                        //TimeSpan timeSpan = start - start;
-                        byte fazitStatus = 0xff;
-                        //do
+                        #region 首先需要进行 DMC 的校验
                         //{
+                        //    PokaYoke pokaYoke =
+                        //        new PokaYoke(
+                        //            GlobalParams.Instance.WebAPI.URL,
+                        //            GlobalParams.Instance.WebAPI.ContentType,
+                        //            GlobalParams.Instance.WebAPI.ClientID,
+                        //        logEntity)
+                        //        {
+                        //            Request = new PokaYokeRequest()
+                        //            {
+                        //                CommunityID = GlobalParams.Instance.CommunityID,
+                        //                T133LeafID = device.T133LeafID,
+                        //                T216LeafID = device.T216LeafID,
+                        //                T102LeafID = wipStation.T102LeafID,
+                        //                T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                        //                WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                        //                WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                        //                WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                        //            },
+                        //        };
+
+                        //    if (pokaYoke.Do())
+                        //    {
+                        //        if (pokaYoke.Error.ErrCode >= 0)
+                        //        {
+                        //            _log.Debug(
+                        //                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //                $"{pokaYoke.Error.ErrText}");
+
+                        //            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result);
+                        //            WriteTagValueBack(rlt, wipStation, "Product_Number", pokaYoke.Response.Output.WIPStations.Product_Number);
+                        //            wipStation.T102LeafID = pokaYoke.Response.Output.WIPStations.T102LeafID;
+                        //        }
+                        //        else
+                        //        {
+                        //            _log.Error(
+                        //                $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //                $"{pokaYoke.Error.ErrText}");
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        _log.Error(
+                        //            $"[{id.ToString()}|({pokaYoke.Error.ErrCode})" +
+                        //            $"{pokaYoke.Error.ErrText}");
+                        //    }
+
+                        //    // 如果未通过 PokaYoke 校验，直接返回
+                        //    if (pokaYoke.Response.Output.WIPStations.Poka_Yoke_Result != 1)
+                        //    {
+                        //        tag.Value = false;
+                        //        rlt.Add(tag);
+                        //        return rlt;
+                        //    }
+                        //}
+                        #endregion
+
+                        #region DMC 校验通过后，进行 DMC 的 Fazit 状态检查
+                        {
+                            FazitStatusCheck fazitStatusCheck =
+                                new FazitStatusCheck(
+                                    GlobalParams.Instance.WebAPI.URL,
+                                    GlobalParams.Instance.WebAPI.ContentType,
+                                    GlobalParams.Instance.WebAPI.ClientID,
+                                    logEntity)
+                                {
+                                    Request = new FazitStatusCheckRequest()
+                                    {
+                                        CommunityID = GlobalParams.Instance.CommunityID,
+                                        T133LeafID = device.T133LeafID,
+                                        T216LeafID = device.T216LeafID,
+                                        T102LeafID = wipStation.T102LeafID,
+                                        T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                        WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
+                                        WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
+                                        WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
+                                    }
+                                };
+
+                            //DateTime start = DateTime.Now;
+                            //TimeSpan timeSpan = start - start;
+                            byte fazitStatus = 0xff;
+                            //do
+                            //{
                             if (fazitStatusCheck.Do())
                             {
                                 _log.Debug(
@@ -1769,20 +2139,25 @@ namespace IRAP.BL.S7Gateway
                                     $"{fazitStatusCheck.Error.ErrText}");
                             }
 
-                        //    Thread.Sleep(5000);
-                        //    timeSpan = DateTime.Now - start;
-                        //} while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
+                            //    Thread.Sleep(5000);
+                            //    timeSpan = DateTime.Now - start;
+                            //} while (timeSpan.TotalSeconds < 300 && fazitStatus == 0xff);  // 循环执行 300 秒，以获得FazitStatus
 
-                        if (fazitStatus == 0xff)
-                        {
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", 20);
+                            if (fazitStatus == 0xff)
+                            {
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", 20);
+                            }
+                            else
+                            {
+                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", fazitStatus);
+                            }
                         }
-                        else
-                        { 
-                            WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Result", fazitStatus);
-                        }
+                        #endregion
                     }
-                    #endregion
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
+                    }
 
                     tag.Value = false;
                     rlt.Add(tag);
@@ -1798,8 +2173,16 @@ namespace IRAP.BL.S7Gateway
     /// <summary>
     /// 料槽缺料检测请求交易
     /// </summary>
-    public class IRAPDCSTradeShortageMaterialCheck:IRAPDCSTrade, IIRAPDCSTrade
+    public class IRAPDCSTradeShortageMaterialCheck : IRAPDCSTrade, IIRAPDCSTrade
     {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeShortageMaterialCheck(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
         /// <summary>
         /// 交易执行
         /// </summary>
@@ -1809,6 +2192,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1816,6 +2200,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("料槽缺料检测交易处理");
+                    logEntity.ActionName = "料槽缺料检测";
+                    logEntity.ActionCode = "ShortageMaterialCheck";
 
                     ShortageMaterialCheck shortageMaterialCheck = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1825,7 +2211,8 @@ namespace IRAP.BL.S7Gateway
                             new ShortageMaterialCheck(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ShortageMaterialCheckRequest()
                                 {
@@ -1833,7 +2220,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
@@ -1847,17 +2234,26 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (shortageMaterialCheck.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (shortageMaterialCheck.Error.ErrCode == 0)
+                            if (shortageMaterialCheck.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
-                                    $"{shortageMaterialCheck.Error.ErrText}");
+                                if (shortageMaterialCheck.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                        $"{shortageMaterialCheck.Error.ErrText}");
 
-                                WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Feedback_Mark", shortageMaterialCheck.Response.Output.Poka_Yoke_Feedback_Mark);
+                                    WriteTagValueBack(rlt, wipStation, "Poka_Yoke_Feedback_Mark", shortageMaterialCheck.Response.Output.Poka_Yoke_Feedback_Mark);
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
+                                        $"{shortageMaterialCheck.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1866,12 +2262,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{shortageMaterialCheck.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({shortageMaterialCheck.Error.ErrCode})" +
-                                $"{shortageMaterialCheck.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;
@@ -1891,6 +2285,14 @@ namespace IRAP.BL.S7Gateway
     public class IRAPDCSTradeContainerNumberBinding : IRAPDCSTrade, IIRAPDCSTrade
     {
         /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeContainerNumberBinding(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+        /// <summary>
         /// 交易执行
         /// </summary>
         /// <param name="device">Tag对象所属Device对象</param>
@@ -1899,6 +2301,7 @@ namespace IRAP.BL.S7Gateway
         public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
         {
             List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
 
             if (signalTag is SiemensBoolOfTag)
             {
@@ -1906,6 +2309,8 @@ namespace IRAP.BL.S7Gateway
                 if (tag.Value)
                 {
                     _log.Info("容器绑定交易处理");
+                    logEntity.ActionName = "容器绑定";
+                    logEntity.ActionCode = "ContainerNumberBinding";
 
                     ContainerNumberBinding containerBinding = null;
                     SiemensSubTagGroup wipStation = signalTag.Parent as SiemensSubTagGroup;
@@ -1915,7 +2320,8 @@ namespace IRAP.BL.S7Gateway
                             new ContainerNumberBinding(
                                 GlobalParams.Instance.WebAPI.URL,
                                 GlobalParams.Instance.WebAPI.ContentType,
-                                GlobalParams.Instance.WebAPI.ClientID)
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
                             {
                                 Request = new ContainerNumberBindingRequest()
                                 {
@@ -1923,7 +2329,7 @@ namespace IRAP.BL.S7Gateway
                                     T133LeafID = device.T133LeafID,
                                     T216LeafID = device.T216LeafID,
                                     T102LeafID = wipStation.T102LeafID,
-                                    T107LeafID = ReadIntValue(device, wipStation.Tags, "WIP_Station_LeafID"),
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
                                     WIP_Code = ReadStringValue(device, wipStation.Tags, "WIP_Code"),
                                     WIP_ID_Type_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Type_Code"),
                                     WIP_ID_Code = ReadStringValue(device, wipStation.Tags, "WIP_ID_Code"),
@@ -1942,15 +2348,24 @@ namespace IRAP.BL.S7Gateway
                         return rlt;
                     }
 
-                    if (CallStartDCSInvoking(device, signalTag))
+                    try
                     {
-                        if (containerBinding.Do())
+                        if (CallStartDCSInvoking(device, signalTag))
                         {
-                            if (containerBinding.Error.ErrCode == 0)
+                            if (containerBinding.Do())
                             {
-                                _log.Debug(
-                                    $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
-                                    $"{containerBinding.Error.ErrText}");
+                                if (containerBinding.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                        $"{containerBinding.Error.ErrText}");
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
+                                        $"{containerBinding.Error.ErrText}");
+                                }
                             }
                             else
                             {
@@ -1959,12 +2374,10 @@ namespace IRAP.BL.S7Gateway
                                     $"{containerBinding.Error.ErrText}");
                             }
                         }
-                        else
-                        {
-                            _log.Error(
-                                $"[{id.ToString()}|({containerBinding.Error.ErrCode})" +
-                                $"{containerBinding.Error.ErrText}");
-                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
                     }
 
                     tag.Value = false;

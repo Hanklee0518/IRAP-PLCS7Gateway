@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,27 +33,27 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 设备运行模式
         /// </summary>
-        public bool Equipment_Running_Mode { get; set; }
+        public bool Equipment_Running_Mode { get; set; } = false;
         /// <summary>
         /// 设备是否加电
         /// </summary>
-        public bool Equipment_Power_On { get; set; }
+        public bool Equipment_Power_On { get; set; } = false;
         /// <summary>
         /// 设备是否失效
         /// </summary>
-        public bool Equipment_Fail { get; set; }
+        public bool Equipment_Fail { get; set; } = false;
         /// <summary>
         /// 工装是否失效
         /// </summary>
-        public bool Tool_Fail { get; set; }
+        public bool Tool_Fail { get; set; } = false;
         /// <summary>
         /// 工序循环是否开始
         /// </summary>
-        public bool Cycle_Started { get; set; }
+        public bool Cycle_Started { get; set; } = false;
         /// <summary>
         /// 设备饥饿状态
         /// </summary>
-        public bool Equipment_Starvation { get; set; }
+        public bool Equipment_Starvation { get; set; } = false;
     }
 
     /// <summary>
@@ -74,13 +75,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public GetOPCStatus(
             string webAPIUrl, 
             ContentType contentType, 
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_GetOPCStatus";
+            ExCode = "IRAP_DCS_GetOPCStatus";
         }
 
         /// <summary>

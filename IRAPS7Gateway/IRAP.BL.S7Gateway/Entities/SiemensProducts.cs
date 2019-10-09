@@ -17,6 +17,7 @@ namespace IRAP.BL.S7Gateway.Entities
     /// </summary>
     public class SiemensPLC : CustomPLC
     {
+        /*
         /// <summary>
         /// 是否已建立连接
         /// </summary>
@@ -25,6 +26,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// 是否终止循环读取PLC数据块
         /// </summary>
         private bool cycleReadTerminated = false;
+        */
 
         /// <summary>
         /// 构造方法
@@ -437,13 +439,13 @@ namespace IRAP.BL.S7Gateway.Entities
         private void DealPartBlockBuffer(string key, byte[] buffer)
         {
             PLCDBBlock block = ControlBlock[key];
-            if (block != null)
+            if (block != null && key != "COMM")
             {
                 _log.Debug(
                     $"[{key}.Offset={block.Start_Offset}, " +
                     $"{key}.Length={block.BufferLength}]");
+                _log.Debug($"[{key}]|[Data:{Tools.BytesToBCD(buffer)}]");
             }
-            _log.Debug($"[{key}]|[Data:{Tools.BytesToBCD(buffer)}]");
 
             // 根据key解析出TagGroup和SubTagGroup
             string[] keys = key.Split('.');
@@ -531,19 +533,55 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <param name="tag">控制Tag对象</param>
         private void ControlTagValueChanged(CustomTag tag)
         {
+            DCSGatewayLogEntity log = new DCSGatewayLogEntity();
+            log.TriggerTag.TagName = tag.Name;
+            log.TriggerTag.Offset = tag.DB_Offset.ToString();
+            if (tag is SiemensBoolOfTag ltag)
+            {
+                log.TriggerTag.Offset += $".{ltag.Position}";
+            }
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            IIRAPDCSTrade trade = IRAPDCSTraderCreator.CreateInstance(tag.Name.Replace("_", ""));
+            IIRAPDCSTrade trade =
+                IRAPDCSTraderCreator
+                    .CreateInstance(
+                        tag.Name.Replace("_", ""),
+                        log);
             if (trade != null)
             {
                 List<SiemensTag> writeTags = trade.Do(this, tag as SiemensTag);
                 foreach (SiemensTag writeTag in writeTags)
                 {
-                    specialRWConnection.WriteToPLC(DBType, DBNumber, writeTag);
+                    try
+                    {
+                        specialRWConnection.WriteToPLC(DBType, DBNumber, writeTag);
+                    }
+                    catch (Exception error)
+                    {
+                        log.Errors.Add(error);
+                        _log.Error(
+                            $"写[{writeTag.Name}]的时候出错：{error.Message}", error);
+                    }
                 }
             }
             sw.Stop();
             _log.Debug($"触发信号[{tag.Name}]的执行时长：[{sw.ElapsedMilliseconds}]毫秒");
+            log.TotalExecutionTime = sw.ElapsedMilliseconds;
+
+            try
+            {
+                if (log.ActionCode != "GetOPCStatus" ||
+                    GlobalParams.Instance.GetOPCStatusLogRecord ||
+                    log.Errors.Count > 0)
+                {
+                    Log4MongoDB.WriteLog(log);
+                }
+            }
+            catch (Exception error)
+            {
+                _log.Error(error.Message, error);
+            }
         }
 
         /// <summary>
@@ -861,7 +899,7 @@ namespace IRAP.BL.S7Gateway.Entities
                 {
                     SiemensRealOfTag ltag = tag as SiemensRealOfTag;
                     float value = 0;
-                    int resNo = 
+                    int resNo =
                         specialRWConnection.ReadFloat(
                             DBType,
                             DBNumber,
@@ -1256,7 +1294,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// </summary>
         public new byte Value
         {
-            get{ return (byte)value; }
+            get { return (byte)value; }
             set { base.value = value; }
         }
     }
@@ -1436,7 +1474,10 @@ namespace IRAP.BL.S7Gateway.Entities
         public new string Value
         {
             get { return (string)value; }
-            set { base.value = value; }
+            set
+            {
+                base.value = value.Replace((char)0, (char)32).Trim();
+            }
         }
 
         /// <summary>
@@ -1519,13 +1560,7 @@ namespace IRAP.BL.S7Gateway.Entities
         /// <summary>
         /// 在制品叶标识
         /// </summary>
-        public int T102LeafID
-        {
-            get => default(int);
-            set
-            {
-            }
-        }
+        public int T102LeafID { get; set; }
 
         /// <summary>
         /// Tag对象注册事件

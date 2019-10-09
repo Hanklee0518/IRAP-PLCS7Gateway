@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,11 +33,11 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 物料追溯标识
         /// </summary>
-        public string Material_Track_ID { get; set; }
+        public string Material_Track_ID { get; set; } = "";
         /// <summary>
         /// 料槽编号
         /// </summary>
-        public string Slot_Number { get; set; }
+        public string Slot_Number { get; set; } = "";
     }
 
     /// <summary>
@@ -59,7 +60,7 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 防错结果：1-通过；2-不通过
         /// </summary>
-        public uint Poka_Yoke_Result { get; set; }
+        public uint Poka_Yoke_Result { get; set; } = 0;
     }
 
     /// <summary>
@@ -73,13 +74,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public PokaYokeFeeding(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) :
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_PokaYokeFeeding";
+            ExCode = "IRAP_DCS_PokaYokeFeeding";
         }
 
         /// <summary>

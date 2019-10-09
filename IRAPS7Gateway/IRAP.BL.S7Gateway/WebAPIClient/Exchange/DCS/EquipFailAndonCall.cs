@@ -1,4 +1,5 @@
-﻿using IRAP.BL.S7Gateway.WebAPIClient.Contents;
+﻿using IRAP.BL.S7Gateway.Utils;
+using IRAP.BL.S7Gateway.WebAPIClient.Contents;
 using IRAP.BL.S7Gateway.WebAPIClient.Enums;
 using System;
 using System.Collections.Generic;
@@ -32,39 +33,39 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <summary>
         /// 设备故障第1组
         /// </summary>
-        public uint Equipment_Failures_Group_1 { get; set; }
+        public uint Equipment_Failures_Group_1 { get; set; } = 0;
         /// <summary>
         /// 设备故障第2组
         /// </summary>
-        public uint Equipment_Failures_Group_2 { get; set; }
+        public uint Equipment_Failures_Group_2 { get; set; } = 0;
         /// <summary>
         /// 设备故障第3组
         /// </summary>
-        public uint Equipment_Failures_Group_3 { get; set; }
+        public uint Equipment_Failures_Group_3 { get; set; } = 0;
         /// <summary>
         /// 设备故障第4组
         /// </summary>
-        public uint Equipment_Failures_Group_4 { get; set; }
+        public uint Equipment_Failures_Group_4 { get; set; } = 0;
         /// <summary>
         /// 设备故障第5组
         /// </summary>
-        public uint Equipment_Failures_Group_5 { get; set; }
+        public uint Equipment_Failures_Group_5 { get; set; } = 0;
         /// <summary>
         /// 设备故障第6组
         /// </summary>
-        public uint Equipment_Failures_Group_6 { get; set; }
+        public uint Equipment_Failures_Group_6 { get; set; } = 0;
         /// <summary>
         /// 设备故障第7组
         /// </summary>
-        public uint Equipment_Failures_Group_7 { get; set; }
+        public uint Equipment_Failures_Group_7 { get; set; } = 0;
         /// <summary>
         /// 设备故障第8组
         /// </summary>
-        public uint Equipment_Failures_Group_8 { get; set; }
+        public uint Equipment_Failures_Group_8 { get; set; } = 0;
         /// <summary>
         /// 设备故障代码
         /// </summary>
-        public string Failure_Code { get; set; }
+        public string Failure_Code { get; set; } = "";
     }
 
     /// <summary>
@@ -86,13 +87,16 @@ namespace IRAP.BL.S7Gateway.WebAPIClient.Exchange.DCS
         /// <param name="webAPIUrl">WebAPI地址</param>
         /// <param name="contentType">报文类型</param>
         /// <param name="clientID">渠道标识</param>
+        /// <param name="logEntity">交易日志实体对象</param>
         public EquipFailAndonCall(
             string webAPIUrl,
             ContentType contentType,
-            string clientID) : base(webAPIUrl, contentType, clientID)
+            string clientID,
+            DCSGatewayLogEntity logEntity) : 
+            base(webAPIUrl, contentType, clientID, logEntity)
         {
             moduleType = ModuleType.Exchange;
-            exCode = "IRAP_DCS_EquipFailAndonCall";
+            ExCode = "IRAP_DCS_EquipFailAndonCall";
         }
 
         /// <summary>

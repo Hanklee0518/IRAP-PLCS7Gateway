@@ -2395,7 +2395,7 @@ namespace IRAP.BL.S7Gateway
 	/// 命名空间：IRAP.BL.S7Gateway
 	/// 创 建 者：李智颖
 	/// 创建日期：2019/10/15, 18:27:19
-	/// 类    名：IRAPDCSTradeLabelPrint
+	/// 类    名：IRAPDCSTradeLabelPrintRequest
 	/// </summary>	
 	public class IRAPDCSTradeLabelPrintRequest : IRAPDCSTrade, IIRAPDCSTrade
     {

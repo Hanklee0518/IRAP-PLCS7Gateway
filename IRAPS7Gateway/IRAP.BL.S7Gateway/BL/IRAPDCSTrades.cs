@@ -2390,4 +2390,132 @@ namespace IRAP.BL.S7Gateway
             return rlt;
         }
     }
+
+    /// <summary>
+	/// 命名空间：IRAP.BL.S7Gateway
+	/// 创 建 者：李智颖
+	/// 创建日期：2019/10/15, 18:27:19
+	/// 类    名：IRAPDCSTradeLabelPrint
+	/// </summary>	
+	public class IRAPDCSTradeLabelPrintRequest : IRAPDCSTrade, IIRAPDCSTrade
+    {
+        /// <summary>
+        /// 构造方法
+        /// </summary>
+        /// <param name="log">交易日志实体对象</param>
+        public IRAPDCSTradeLabelPrintRequest(DCSGatewayLogEntity log) : base(log)
+        {
+        }
+
+
+        /// <summary>
+        /// 交易执行
+        /// </summary>
+        /// <param name="device">Tag对象所属Device对象</param>
+        /// <param name="signalTag">信号Tag对象</param>
+        /// <returns>待回写到PLC的标记列表</returns>
+        public List<SiemensTag> Do(SiemensDevice device, SiemensTag signalTag)
+        {
+            List<SiemensTag> rlt = new List<SiemensTag>();
+            logEntity.DeviceName = device.Name;
+
+            if (signalTag is SiemensBoolOfTag)
+            {
+                SiemensBoolOfTag tag = signalTag as SiemensBoolOfTag;
+                if (tag.Value)
+                {
+                    _log.Info("请求标签打印交易处理");
+                    logEntity.ActionName = "请求标签打印";
+                    logEntity.ActionCode = "Label_Print_Request";
+
+                    PrintLabel pntLabel = null;
+                    SiemensSubTagGroup subTagGroup = signalTag.Parent as SiemensSubTagGroup;
+                    if (subTagGroup != null)
+                    {
+                        pntLabel =
+                            new PrintLabel(
+                                GlobalParams.Instance.WebAPI.URL,
+                                GlobalParams.Instance.WebAPI.ContentType,
+                                GlobalParams.Instance.WebAPI.ClientID,
+                                logEntity)
+                            {
+                                Request = new PrintLabelRequest()
+                                {
+                                    CommunityID = GlobalParams.Instance.CommunityID,
+                                    T133LeafID = device.T133LeafID,
+                                    T216LeafID = device.T216LeafID,
+                                    T102LeafID = subTagGroup.T102LeafID,
+                                    T107LeafID = device.T107LeafID,//ReadIntValue(device, subTagGroup.Tags, "WIP_Station_LeafID"),
+                                },
+                            };
+                    }
+
+                    if (pntLabel == null)
+                    {
+                        _log.Error($"[{signalTag.Name}标记不在WIPStations的子组中，交易无法继续");
+                        return rlt;
+                    }
+
+                    string key = "LabelPrint";
+                    if (device.Groups[key] is SiemensTagGroup lpGroup)
+                    {
+                        pntLabel.Request.WIP_Code = ReadStringValue(device, lpGroup.Tags, "WIP_Code");
+                        pntLabel.Request.WIP_ID_Type_Code = ReadStringValue(device, lpGroup.Tags, "WIP_ID_Type_Code");
+                        pntLabel.Request.WIP_ID_Code = ReadStringValue(device, lpGroup.Tags, "WIP_ID_Code");
+                    }
+                    else
+                    {
+                        pntLabel.Request.WIP_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_Code");
+                        pntLabel.Request.WIP_ID_Type_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Type_Code");
+                        pntLabel.Request.WIP_ID_Code = ReadStringValue(device, subTagGroup.Tags, "WIP_ID_Code");
+                    }
+
+                    try
+                    {
+                        if (CallStartDCSInvoking(device, signalTag))
+                        {
+                            if (pntLabel.Do())
+                            {
+                                if (pntLabel.Error.ErrCode >= 0)
+                                {
+                                    _log.Debug(
+                                        $"[{id.ToString()}|({pntLabel.Error.ErrCode})" +
+                                        $"{pntLabel.Error.ErrText}");
+
+                                    if (device.Groups["LabelPrint"] is SiemensTagGroup group)
+                                    {
+                                        WriteTagValueBack(rlt, group, "Print_Status", pntLabel.Response.Output.Print_Status);
+                                    }
+                                }
+                                else
+                                {
+                                    _log.Error(
+                                        $"[{id.ToString()}|({pntLabel.Error.ErrCode})" +
+                                        $"{pntLabel.Error.ErrText}");
+                                }
+                            }
+                            else
+                            {
+                                _log.Error(
+                                    $"[{id.ToString()}|({pntLabel.Error.ErrCode})" +
+                                    $"{pntLabel.Error.ErrText}");
+                            }
+                        }
+                    }
+                    catch (Exception error)
+                    {
+                        _log.Error(error.Message, error);
+                    }
+
+
+                    tag.Value = false;
+                    rlt.Add(tag);
+
+                    _log.Info("请求标签打印处理完成");
+                }
+            }
+
+            return rlt;
+        }
+    }
 }

@@ -149,6 +149,7 @@
     <Compile Include="WebAPIClient\Exchange\DCS\OperationCycleEnd.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\PokaYoke.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\PokaYokeFeeding.cs" />
+    <Compile Include="WebAPIClient\Exchange\DCS\PrintLabel.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\ProductionEnd.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\ShortageMaterialCheck.cs" />
     <Compile Include="WebAPIClient\Exchange\DCS\SNRequest.cs" />
